@@ -9,9 +9,12 @@ const Navigation = () => {
         <Link href="/">
           <Image src="/brand.svg" width={50} height={50} alt="logo" />
         </Link>
-        <ul>
+        <ul className={styles.list}>
           <li className={styles.link}>
             <Link href="/about">About</Link>
+          </li>
+          <li className={styles.link}>
+            <Link href="/projects">Projects</Link>
           </li>
         </ul>
       </div>
