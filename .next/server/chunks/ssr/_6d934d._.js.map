@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 6, "column": 0}, "map": {"version":3,"sources":["turbopack://[project]/app/styles/#navigation.module.css [app-client] (css module)"],"sourcesContent":["__turbopack_export_value__({\n  \"container\": \"#navigation-module__dSha8a__container\",\n  \"link\": \"#navigation-module__dSha8a__link\",\n  \"nav\": \"#navigation-module__dSha8a__nav\",\n});\n"],"names":[],"mappings":"AAAA;AACA;AACA;AACA;AACA"}},
+    {"offset": {"line": 11, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}},
+    {"offset": {"line": 17, "column": 0}, "map": {"version":3,"sources":["file:///Users/amy/amy-decoded/app/components/Navigation.jsx"],"sourcesContent":["import Image from \"next/image\";\nimport styles from \"../styles/#navigation.module.css\";\nimport Link from \"next/link\";\n\nconst Navigation = () => {\n  return (\n    <nav className={styles.nav}>\n      <div className={styles.container}>\n        <Link href=\"/\">\n          <Image src=\"/brand.svg\" width={50} height={50} alt=\"logo\" />\n        </Link>\n        <ul>\n          <li className={styles.link}>\n            <Link href=\"/about\">About</Link>\n          </li>\n        </ul>\n      </div>\n    </nav>\n  );\n};\n\nexport default Navigation;\n"],"names":[],"mappings":";;;;AAAA;AACA;AACA;;;;;AAEA,MAAM,aAAa;IACjB,qBACE,8OAAC;QAAI,WAAW,4IAAA,CAAA,UAAM,CAAC,GAAG;kBACxB,cAAA,8OAAC;YAAI,WAAW,4IAAA,CAAA,UAAM,CAAC,SAAS;;8BAC9B,8OAAC,4JAAA,CAAA,UAAI;oBAAC,MAAK;8BACT,cAAA,8OAAC,6HAAA,CAAA,UAAK;wBAAC,KAAI;wBAAa,OAAO;wBAAI,QAAQ;wBAAI,KAAI;;;;;;;;;;;8BAErD,8OAAC;8BACC,cAAA,8OAAC;wBAAG,WAAW,4IAAA,CAAA,UAAM,CAAC,IAAI;kCACxB,cAAA,8OAAC,4JAAA,CAAA,UAAI;4BAAC,MAAK;sCAAS;;;;;;;;;;;;;;;;;;;;;;;;;;;AAMhC;uCAEe"}},
+    {"offset": {"line": 85, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}},
+    {"offset": {"line": 91, "column": 0}, "map": {"version":3,"sources":["file:///Users/amy/amy-decoded/app/about/page.js"],"sourcesContent":["import Navigation from \"../components/Navigation\";\n\nconst Page = () => {\n  return (\n    <div>\n      <Navigation />\n    </div>\n  );\n};\n\nexport default Page;\n"],"names":[],"mappings":";;;;AAAA;;;AAEA,MAAM,OAAO;IACX,qBACE,8OAAC;kBACC,cAAA,8OAAC,gIAAA,CAAA,UAAU;;;;;;;;;;AAGjB;uCAEe"}},
+    {"offset": {"line": 112, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}},
+    {"offset": {"line": 123, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":""}},
+    {"offset": {"line": 123, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}}]
+}

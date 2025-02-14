@@ -1,0 +1,21 @@
+/* [project]/app/styles/#navigation.module.css [app-client] (css) */
+.\#navigation-module__dSha8a__nav {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.\#navigation-module__dSha8a__container {
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.\#navigation-module__dSha8a__link {
+  font-size: 24px;
+}
+
+
+/*# sourceMappingURL=app_styles_%23navigation_module_e7d16a.css.map*/

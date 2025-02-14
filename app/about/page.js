@@ -1,5 +1,11 @@
+import Navigation from "../components/Navigation";
+
 const Page = () => {
-  return <div></div>;
+  return (
+    <div>
+      <Navigation />
+    </div>
+  );
 };
 
 export default Page;
