@@ -1,0 +1,17 @@
+.nav {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.container {
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.link {
+  font-size: 24px;
+}

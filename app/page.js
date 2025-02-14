@@ -6,7 +6,6 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <Navigation />
-      <main className={styles.main}>hello, I'm amy</main>
     </div>
   );
 }

@@ -4,10 +4,10 @@
   "sections": [
     {"offset": {"line": 6, "column": 0}, "map": {"version":3,"sources":["turbopack://[project]/app/page.module.css [app-client] (css module)"],"sourcesContent":["__turbopack_export_value__({\n});\n"],"names":[],"mappings":"AAAA;AACA"}},
     {"offset": {"line": 8, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}},
-    {"offset": {"line": 14, "column": 0}, "map": {"version":3,"sources":["file:///Users/amy/amy-decoded/app/components/Navigation.jsx"],"sourcesContent":["const Navigation = () => {\n  return <nav></nav>;\n};\n\nexport default Navigation;\n"],"names":[],"mappings":";;;;;AAAA,MAAM,aAAa;IACjB,qBAAO,8OAAC;;;;;AACV;uCAEe"}},
-    {"offset": {"line": 27, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}},
-    {"offset": {"line": 33, "column": 0}, "map": {"version":3,"sources":["file:///Users/amy/amy-decoded/app/page.js"],"sourcesContent":["import Image from \"next/image\";\nimport styles from \"./page.module.css\";\nimport Navigation from \"./components/Navigation\";\n\nexport default function Home() {\n  return (\n    <div className={styles.page}>\n      <Navigation />\n      <main className={styles.main}>hello, I'm amy</main>\n    </div>\n  );\n}\n"],"names":[],"mappings":";;;;AAAA;AACA;AACA;;;;;AAEe,SAAS;IACtB,qBACE,8OAAC;QAAI,WAAW,0HAAA,CAAA,UAAM,CAAC,IAAI;;0BACzB,8OAAC,gIAAA,CAAA,UAAU;;;;;0BACX,8OAAC;gBAAK,WAAW,0HAAA,CAAA,UAAM,CAAC,IAAI;0BAAE;;;;;;;;;;;;AAGpC"}},
-    {"offset": {"line": 68, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}},
-    {"offset": {"line": 79, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":""}},
-    {"offset": {"line": 79, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}}]
+    {"offset": {"line": 14, "column": 0}, "map": {"version":3,"sources":["file:///Users/amy/amy-decoded/app/components/Navigation.jsx"],"sourcesContent":["import styles from \"./page.module.css\";\n\nconst Navigation = () => {\n  return <nav></nav>;\n};\n\nexport default Navigation;\n"],"names":[],"mappings":";;;;;;;;;;;AAEA,MAAM,aAAa;IACjB,qBAAO,8OAAC;;;;;AACV;uCAEe"}},
+    {"offset": {"line": 33, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}},
+    {"offset": {"line": 39, "column": 0}, "map": {"version":3,"sources":["file:///Users/amy/amy-decoded/app/page.js"],"sourcesContent":["import Image from \"next/image\";\nimport styles from \"./page.module.css\";\nimport Navigation from \"./components/Navigation\";\n\nexport default function Home() {\n  return (\n    <div className={styles.page}>\n      <Navigation />\n      <main className={styles.main}>hello, I'm amy</main>\n    </div>\n  );\n}\n"],"names":[],"mappings":";;;;AAAA;AACA;AACA;;;;;AAEe,SAAS;IACtB,qBACE,8OAAC;QAAI,WAAW,0HAAA,CAAA,UAAM,CAAC,IAAI;;0BACzB,8OAAC,gIAAA,CAAA,UAAU;;;;;0BACX,8OAAC;gBAAK,WAAW,0HAAA,CAAA,UAAM,CAAC,IAAI;0BAAE;;;;;;;;;;;;AAGpC"}},
+    {"offset": {"line": 74, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}},
+    {"offset": {"line": 85, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":""}},
+    {"offset": {"line": 85, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}}]
 }
