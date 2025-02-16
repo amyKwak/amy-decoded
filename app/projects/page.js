@@ -1,5 +1,5 @@
 import Navigation from "../components/Navigation";
-import styles from "./projects.module.css";
+import styles from "../styles/#projects.module.css";
 
 const Projects = () => {
   return (

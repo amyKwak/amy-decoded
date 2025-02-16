@@ -1,6 +1,7 @@
 import Image from "next/image";
 import styles from "../styles/#navigation.module.css";
 import Link from "next/link";
+import LinkWrapper from "./LinkWrapper";
 
 const Navigation = () => {
   return (
@@ -11,10 +12,10 @@ const Navigation = () => {
         </Link>
         <ul className={styles.list}>
           <li className={styles.link}>
-            <Link href="/about">About</Link>
+            <LinkWrapper href="/about">About</LinkWrapper>
           </li>
           <li className={styles.link}>
-            <Link href="/projects">Projects</Link>
+            <LinkWrapper href="/projects">Projects</LinkWrapper>
           </li>
         </ul>
       </div>
