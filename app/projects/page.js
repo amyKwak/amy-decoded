@@ -1,10 +1,13 @@
 import Navigation from "../components/Navigation";
+import styles from "./projects.module.css";
 
 const Projects = () => {
   return (
-    <div className="projects">
+    <div className={styles.projects}>
       <Navigation />
-      Projects
+      <div className={styles.container}>
+        <h1 className={styles.heading}>Projects</h1>
+      </div>
     </div>
   );
 };
