@@ -8,7 +8,7 @@ const Navigation = () => {
     <nav className={styles.nav}>
       <div className={styles.container}>
         <Link href="/">
-          <Image src="/brand.svg" width={50} height={50} alt="logo" />
+          <Image src="/brand.svg" width={60} height={60} alt="logo" />
         </Link>
         <ul className={styles.list}>
           <li className={styles.link}>

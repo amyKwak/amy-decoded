@@ -5,9 +5,7 @@ const Projects = () => {
   return (
     <div className={styles.projects}>
       <Navigation />
-      <div className={styles.container}>
-        <h1 className={styles.heading}>Projects</h1>
-      </div>
+      <div className={styles.container}></div>
     </div>
   );
 };

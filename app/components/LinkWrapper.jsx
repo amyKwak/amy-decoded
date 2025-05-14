@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import styles from "../styles/#link.module.css"; // Ensure your path is correct
+import styles from "../styles/#link.module.css";
 
 const LinkWrapper = ({ children, href }) => {
   const [hoverClass, setHoverClass] = useState("");

@@ -17,14 +17,14 @@
       "static/chunks/_e69f0d._.js",
       "static/chunks/_d95469._.js"
     ],
-    "/projects/page": [
+    "/about/page": [
       "static/chunks/app_globals_73c377.css",
       "static/chunks/_01a0dd._.js",
       "static/chunks/app_layout_61af54.js",
       "static/chunks/node_modules_next_dist_932e9f._.js",
-      "static/chunks/app_0444a4._.js",
-      "static/chunks/app_styles_c7c086._.css",
-      "static/chunks/app_projects_page_8d1fc1.js",
+      "static/chunks/app_5c750d._.js",
+      "static/chunks/app_styles_858841._.css",
+      "static/chunks/app_about_page_8d1fc1.js",
       "static/chunks/node_modules_next_dist_compiled_react-dom_1f56dc._.js",
       "static/chunks/node_modules_next_dist_compiled_107ce8._.js",
       "static/chunks/node_modules_next_dist_client_523921._.js",
@@ -34,14 +34,27 @@
       "static/chunks/_e69f0d._.js",
       "static/chunks/_d95469._.js"
     ],
-    "/about/page": [
+    "/_not-found/page": [
+      "static/chunks/app_globals_73c377.css",
+      "static/chunks/_01a0dd._.js",
+      "static/chunks/app_layout_61af54.js",
+      "static/chunks/node_modules_next_dist_compiled_react-dom_1f56dc._.js",
+      "static/chunks/node_modules_next_dist_compiled_107ce8._.js",
+      "static/chunks/node_modules_next_dist_client_523921._.js",
+      "static/chunks/node_modules_next_dist_4bb10e._.js",
+      "static/chunks/node_modules_@swc_helpers_cjs_00636a._.js",
+      "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_d0a96d._.js",
+      "static/chunks/_e69f0d._.js",
+      "static/chunks/_d95469._.js"
+    ],
+    "/projects/page": [
       "static/chunks/app_globals_73c377.css",
       "static/chunks/_01a0dd._.js",
       "static/chunks/app_layout_61af54.js",
       "static/chunks/node_modules_next_dist_932e9f._.js",
-      "static/chunks/app_5c750d._.js",
-      "static/chunks/app_styles_858841._.css",
-      "static/chunks/app_about_page_8d1fc1.js",
+      "static/chunks/app_0444a4._.js",
+      "static/chunks/app_styles_c7c086._.css",
+      "static/chunks/app_projects_page_8d1fc1.js",
       "static/chunks/node_modules_next_dist_compiled_react-dom_1f56dc._.js",
       "static/chunks/node_modules_next_dist_compiled_107ce8._.js",
       "static/chunks/node_modules_next_dist_client_523921._.js",
