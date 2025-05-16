@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import MoodInput from "./MoodInput";
 import MoodHistory from "./MoodHistory";
-import Picker from "emoji-picker-react";
+import MoodDetails from "./MoodDetails";
 
 export default function MoodyApp() {
   const STORAGE_KEY = "moody-entries";
@@ -17,7 +17,7 @@ export default function MoodyApp() {
   const [note, setNote] = useState("");
   const [showPicker, setShowPicker] = useState(false);
 
-  // load on mount
+  // On mount, load entries and today’s key
   useEffect(() => {
     setMounted(true);
     const key = new Intl.DateTimeFormat("en-CA", {
@@ -31,7 +31,7 @@ export default function MoodyApp() {
     setHasToday(stored.some((e) => e.date === key));
   }, []);
 
-  // preload details
+  // When you click a day, preload its details
   useEffect(() => {
     if (!selectedDate) return;
     const e = entries.find((e) => e.date === selectedDate) || {};
@@ -42,7 +42,7 @@ export default function MoodyApp() {
 
   if (!mounted) return null;
 
-  // submit today's rating
+  // Submit today’s rating
   const handleSubmit = (rating) => {
     const newEntry = { date: todayKey, rating };
     const updated = [...entries.filter((e) => e.date !== todayKey), newEntry];
@@ -51,13 +51,20 @@ export default function MoodyApp() {
     setHasToday(true);
   };
 
-  // update emoji state and close picker
-  const onEmojiClick = (emojiData /*, event */) => {
-    setEmoji(emojiData.emoji);
+  // Emoji picker callback: save and close
+  const handleEmojiClick = (emojiData /*, event */) => {
+    const newEmoji = emojiData.emoji;
+    setEmoji(newEmoji);
+
+    const updated = entries.map((en) =>
+      en.date === selectedDate ? { ...en, emoji: newEmoji } : en
+    );
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    setEntries(updated);
     setShowPicker(false);
   };
 
-  // save emoji + title + note together
+  // Save title & note
   const handleSaveDetails = () => {
     const updated = entries.map((en) =>
       en.date === selectedDate ? { ...en, emoji, title, note } : en
@@ -83,48 +90,18 @@ export default function MoodyApp() {
           />
 
           {selectedDate && (
-            <div className="relative mt-4 p-4 bg-white rounded shadow max-w-lg mx-auto space-y-4">
-              <h3 className="text-lg font-semibold">
-                Details for {selectedDate}
-              </h3>
-
-              {/* emoji picker button */}
-              <button
-                className={`text-2xl p-2 rounded ${emoji ? "" : "bg-gray-200"}`}
-                onClick={() => setShowPicker((v) => !v)}
-              >
-                {emoji || "😊"}
-              </button>
-
-              {showPicker && (
-                <div className="absolute z-50 mt-2">
-                  <Picker onEmojiClick={onEmojiClick} />
-                </div>
-              )}
-
-              {/* title & note inputs */}
-              <input
-                className="w-full border rounded p-2"
-                placeholder="Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-              <textarea
-                className="w-full border rounded p-2"
-                rows={3}
-                placeholder="Note"
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-              />
-
-              {/* Save all details */}
-              <button
-                className="px-4 py-2 bg-blue-500 text-white rounded"
-                onClick={handleSaveDetails}
-              >
-                Save
-              </button>
-            </div>
+            <MoodDetails
+              selectedDate={selectedDate}
+              emoji={emoji}
+              title={title}
+              note={note}
+              showPicker={showPicker}
+              togglePicker={setShowPicker}
+              onEmojiClick={handleEmojiClick}
+              onTitleChange={(e) => setTitle(e.target.value)}
+              onNoteChange={(e) => setNote(e.target.value)}
+              onSave={handleSaveDetails}
+            />
           )}
         </>
       )}

@@ -11,12 +11,10 @@ const colorMap = {
 };
 
 export default function MoodHistory({ entries, todayKey, onDayClick }) {
-  // Compute last 30 days with Monday-based week index
+  // Compute last 30 days with Monday as first day
   const rawDays = useMemo(() => {
     const [year, month, day] = todayKey.split("-").map(Number);
     const base = new Date(year, month - 1, day);
-    const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
     return Array.from({ length: 30 }, (_, i) => {
       const date = new Date(base);
       date.setDate(base.getDate() - (29 - i));
@@ -26,12 +24,12 @@ export default function MoodHistory({ entries, todayKey, onDayClick }) {
         String(date.getDate()).padStart(2, "0"),
       ].join("-");
       const label = `${date.getMonth() + 1}/${date.getDate()}`;
-      const isoWeekdayIndex = (date.getDay() + 6) % 7; // Monday = 0
+      const isoWeekdayIndex = (date.getDay() + 6) % 7; // Monday=0
       return { iso, label, isoWeekdayIndex };
     });
   }, [todayKey]);
 
-  // Pad so first row starts on Monday
+  // Pad first week to start on Monday
   const days = useMemo(() => {
     if (!rawDays.length) return [];
     const blanks = Array.from(
@@ -41,16 +39,15 @@ export default function MoodHistory({ entries, todayKey, onDayClick }) {
     return [...blanks, ...rawDays];
   }, [rawDays]);
 
-  // Group into weeks of 7
+  // Group into weeks
   const weeks = useMemo(() => {
-    const result = [];
+    const arr = [];
     for (let i = 0; i < days.length; i += 7) {
-      result.push(days.slice(i, i + 7));
+      arr.push(days.slice(i, i + 7));
     }
-    return result;
+    return arr;
   }, [days]);
 
-  // Internal click handler
   const handleDayClickInternal = useCallback(
     (iso) => {
       console.log(`clicked ${iso}`);
@@ -59,8 +56,8 @@ export default function MoodHistory({ entries, todayKey, onDayClick }) {
     [onDayClick]
   );
 
-  const handleWeekClick = useCallback((weekIndex) => {
-    console.log(`clicked week ${weekIndex + 1}`);
+  const handleWeekClick = useCallback((wi) => {
+    console.log(`clicked week ${wi + 1}`);
   }, []);
 
   const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -69,7 +66,7 @@ export default function MoodHistory({ entries, todayKey, onDayClick }) {
     <div className="max-w-lg mx-auto">
       <h2 className="text-xl font-semibold mb-4">Last 30 Days</h2>
 
-      {/* Weekday header */}
+      {/* Weekday labels */}
       <div className="flex space-x-2 mb-2">
         {weekdays.map((d) => (
           <div
@@ -81,14 +78,14 @@ export default function MoodHistory({ entries, todayKey, onDayClick }) {
         ))}
       </div>
 
-      {/* Calendar weeks */}
+      {/* Calendar grid */}
       <div className="space-y-2">
         {weeks.map((week, wi) => (
           <div
             key={wi}
             className="flex space-x-2"
-            onClick={() => handleWeekClick(wi)}
             style={{ cursor: "pointer" }}
+            onClick={() => handleWeekClick(wi)}
             onMouseEnter={(e) => e.currentTarget.classList.add("bg-gray-200")}
             onMouseLeave={(e) =>
               e.currentTarget.classList.remove("bg-gray-200")
@@ -105,14 +102,16 @@ export default function MoodHistory({ entries, todayKey, onDayClick }) {
               return (
                 <div
                   key={day.iso}
-                  className={`w-16 aspect-square flex flex-col items-start justify-center pt-1 rounded ${bgClass} hover:bg-gray-200 cursor-pointer`}
+                  className={`w-16 aspect-square flex flex-col items-center justify-start pt-1 rounded ${bgClass} hover:bg-gray-200 cursor-pointer`}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDayClickInternal(day.iso);
                   }}
                 >
                   <div className="text-sm text-center w-full">{day.label}</div>
-                  <div className="text-lg mt-1">{entry?.emoji ?? ""}</div>
+                  <div className="text-lg mt-1 text-center w-full">
+                    {entry?.emoji ?? ""}
+                  </div>
                 </div>
               );
             })}
