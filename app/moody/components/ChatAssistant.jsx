@@ -35,7 +35,7 @@ export default function ChatAssistant({ entries }) {
   };
 
   return (
-    <div className="mt-8 p-4 bg-white rounded shadow">
+    <div className="max-w-lg mx-auto mt-8 p-4 bg-white rounded shadow">
       <h2 className="text-xl font-semibold mb-2">
         Ask ChatGPT about your entries
       </h2>
