@@ -12,6 +12,8 @@ export default function MoodyApp() {
   const [mounted, setMounted] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState(null);
+  const [details, setDetails] = useState("");
+  const [rating, setRating] = useState(null);
   const [emoji, setEmoji] = useState("");
   const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
@@ -35,6 +37,7 @@ export default function MoodyApp() {
   useEffect(() => {
     if (!selectedDate) return;
     const e = entries.find((e) => e.date === selectedDate) || {};
+    setRating(e.rating || null);
     setEmoji(e.emoji || "");
     setTitle(e.title || "");
     setNote(e.note || "");
@@ -69,6 +72,16 @@ export default function MoodyApp() {
     const updated = entries.map((en) =>
       en.date === selectedDate ? { ...en, emoji, title, note } : en
     );
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    setEntries(updated);
+  };
+
+  const handleSaveRating = (rating) => {
+    const updated = entries.map((en) =>
+      en.date === selectedDate ? { ...en, rating } : en
+    );
+
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     setEntries(updated);
   };
@@ -92,14 +105,17 @@ export default function MoodyApp() {
           {selectedDate && (
             <MoodDetails
               selectedDate={selectedDate}
-              emoji={emoji}
+              details={details}
               title={title}
+              emoji={emoji}
               note={note}
               showPicker={showPicker}
+              rating={rating}
               togglePicker={setShowPicker}
               onEmojiClick={handleEmojiClick}
               onTitleChange={(e) => setTitle(e.target.value)}
               onNoteChange={(e) => setNote(e.target.value)}
+              onRatingChange={(rating) => handleSaveRating(rating)}
               onSave={handleSaveDetails}
             />
           )}
