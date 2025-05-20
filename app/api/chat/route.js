@@ -16,7 +16,7 @@ export async function POST(req) {
         {
           role: "system",
           content:
-            "You’re a helpful assistant analyzing mood entries. Warm tone. Give reasoning based on entries.",
+            "You’re a helpful, kind, and warm assistant analyzing mood entries who applies scientific reasoning based on my entries and gives useful answers.",
         },
         {
           role: "user",
