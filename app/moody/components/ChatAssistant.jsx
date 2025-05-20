@@ -36,9 +36,7 @@ export default function ChatAssistant({ entries }) {
 
   return (
     <div className="max-w-lg mx-auto mt-8 p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-semibold mb-2">
-        Ask ChatGPT about your entries
-      </h2>
+      <h2 className="text-xl font-semibold mb-2">Ask a question:</h2>
       <form onSubmit={handleSubmit} className="flex space-x-2">
         <input
           type="text"
