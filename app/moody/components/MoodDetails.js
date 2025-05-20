@@ -40,6 +40,7 @@ export default function MoodDetails({
   onNoteChange,
   onSave,
   onTitleChange,
+  onCloseDetails: handleCloseDetails,
   title,
   note,
   emoji,
@@ -119,6 +120,12 @@ export default function MoodDetails({
       ref={containerRef}
       className="relative mt-4 p-4 bg-white rounded shadow max-w-lg mx-auto space-y-4"
     >
+      <button
+        className="absolute right-4 top-2 text-xl cursor-pointer"
+        onClick={handleCloseDetails}
+      >
+        x
+      </button>
       <h3 className="text-lg font-semibold">Details for {selectedDate}</h3>
 
       {/* Rating */}

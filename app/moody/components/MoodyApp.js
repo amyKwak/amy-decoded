@@ -86,6 +86,10 @@ export default function MoodyApp() {
     setEntries(updated);
   };
 
+  const handleCloseDetails = () => {
+    setSelectedDate(null);
+  };
+
   return (
     <div
       className={`min-h-screen bg-gray-50 ${
@@ -108,6 +112,7 @@ export default function MoodyApp() {
               details={details}
               title={title}
               emoji={emoji}
+              onCloseDetails={handleCloseDetails}
               note={note}
               showPicker={showPicker}
               rating={rating}

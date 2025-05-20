@@ -56,10 +56,6 @@ export default function MoodHistory({ entries, todayKey, onDayClick }) {
     [onDayClick]
   );
 
-  const handleWeekClick = useCallback((wi) => {
-    console.log(`clicked week ${wi + 1}`);
-  }, []);
-
   const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   return (
@@ -85,8 +81,6 @@ export default function MoodHistory({ entries, todayKey, onDayClick }) {
             key={wi}
             className="flex space-x-2"
             style={{ cursor: "pointer" }}
-            onClick={() => handleWeekClick(wi)}
-            onMouseEnter={(e) => e.currentTarget.classList.add("bg-gray-200")}
             onMouseLeave={(e) =>
               e.currentTarget.classList.remove("bg-gray-200")
             }
