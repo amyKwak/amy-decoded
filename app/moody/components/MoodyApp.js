@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import MoodInput from "./MoodInput";
 import MoodHistory from "./MoodHistory";
 import MoodDetails from "./MoodDetails";
+import ChatAssistant from "./ChatAssistant";
 
 export default function MoodyApp() {
   const STORAGE_KEY = "moody-entries";
@@ -126,6 +127,8 @@ export default function MoodyApp() {
           )}
         </>
       )}
+      {/* new ChatGPT box */}
+      + <ChatAssistant entries={entries} />
     </div>
   );
 }
