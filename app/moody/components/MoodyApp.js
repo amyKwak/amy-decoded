@@ -106,7 +106,6 @@ export default function MoodyApp() {
             todayKey={todayKey}
             onDayClick={(iso) => setSelectedDate(iso)}
           />
-
           {selectedDate && (
             <MoodDetails
               selectedDate={selectedDate}
@@ -125,10 +124,10 @@ export default function MoodyApp() {
               onSave={handleSaveDetails}
             />
           )}
+          {/* new ChatGPT box */}
+          + <ChatAssistant entries={entries} />
         </>
       )}
-      {/* new ChatGPT box */}
-      + <ChatAssistant entries={entries} />
     </div>
   );
 }

@@ -1,8 +1,4 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/chat/route": "app/api/chat/route.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/moody/page": "app/moody/page.js",
-  "/page": "app/page.js",
-  "/projects/page": "app/projects/page.js"
+  "/moody/page": "app/moody/page.js"
 }
