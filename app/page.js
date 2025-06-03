@@ -4,10 +4,12 @@ import styled from "styled-components";
 import theme from "./utils/theme";
 import { Layout, Nav, Typist, Header } from "./components";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { Analytics } from "@vercel/analytics/next";
 
 const IndexPage = () => {
   return (
     <ThemeProvider>
+      <Analytics />
       <Layout>
         <Header />
         <Section>
