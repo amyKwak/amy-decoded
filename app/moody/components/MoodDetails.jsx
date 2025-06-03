@@ -165,9 +165,9 @@ export default function MoodDetails({
           <button
             className={`
               mr-4
-              h-[48px]
-              w-[40px]
-              rounded
+              h-[50px]
+              w-[50px]
+              rounded-full
               cursor-pointer
               ${colorClass}
             `}
