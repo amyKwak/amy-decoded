@@ -92,7 +92,18 @@ export default function MoodHistory({ entries, todayKey, onDayClick }) {
                 );
               }
               const entry = entries.find((e) => e.date === day.iso);
-              const bgClass = entry ? colorMap[entry.rating] : "bg-gray-100";
+
+              const getColorKey = (rating) => {
+                if (rating <= 2) return 1;
+                if (rating <= 4) return 2;
+                if (rating <= 6) return 3;
+                if (rating <= 8) return 4;
+                return 5;
+              };
+
+              const bgClass = entry
+                ? colorMap[getColorKey(entry.rating)]
+                : "bg-gray-100";
               return (
                 <div
                   key={day.iso}
@@ -102,7 +113,10 @@ export default function MoodHistory({ entries, todayKey, onDayClick }) {
                     handleDayClickInternal(day.iso);
                   }}
                 >
-                  <div className="text-sm text-center w-full">{day.label}</div>
+                  <div className="text-sm text-center w-full text-gray-500">
+                    {day.label}
+                  </div>
+                  <h3 className="font-semibold text-lg">{entry?.rating}</h3>
                   <div className="text-lg mt-1 text-center w-full">
                     {entry?.emoji ?? ""}
                   </div>

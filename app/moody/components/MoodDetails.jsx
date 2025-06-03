@@ -115,6 +115,16 @@ export default function MoodDetails({
     }
   };
 
+  const getColorKey = (rating) => {
+    if (rating <= 2) return 1;
+    if (rating <= 4) return 2;
+    if (rating <= 6) return 3;
+    if (rating <= 8) return 4;
+    return 5;
+  };
+
+  const colorClass = BUTTON_COLORS[getColorKey(rating)] ?? "bg-gray-100";
+
   return (
     <div
       ref={containerRef}
@@ -138,7 +148,7 @@ export default function MoodDetails({
               w-[40px]
               rounded
               cursor-pointer
-              ${BUTTON_COLORS[rating] ?? "bg-gray-100"}
+              ${colorClass}
             `}
             onClick={() => setEditingRating(true)}
           />
