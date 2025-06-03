@@ -11,26 +11,47 @@ const BUTTON_COLORS = {
   5: "bg-[#E4E4FE]",
 };
 
-const MoodInput = ({ setEditingRating, onSave, onRatingChange }) => {
-  return (
-    <div className="flex justify-between max-w-xs">
-      {[1, 2, 3, 4, 5].map((n) => {
-        const submitRating = () => {
-          onRatingChange(n);
-          setEditingRating(false);
-        };
+const getColorKey = (rating) => {
+  if (rating <= 2) return 1;
+  if (rating <= 4) return 2;
+  if (rating <= 6) return 3;
+  if (rating <= 8) return 4;
+  return 5;
+};
 
-        return (
-          <button
-            key={n}
-            onClick={submitRating}
-            className={`
-      w-14 h-14 rounded-full text-lg font-medium cursor-pointer
-      ${BUTTON_COLORS[n]}
-    `}
-          ></button>
-        );
-      })}
+const MoodInput = ({ setEditingRating, onRatingChange }) => {
+  const [rating, setRating] = useState(5);
+
+  const handleChange = (e) => {
+    const rawValue = parseFloat(e.target.value);
+    const roundedValue = Math.round(rawValue * 10) / 10;
+    setRating(roundedValue);
+  };
+
+  const handleSubmit = () => {
+    onRatingChange(rating);
+    setEditingRating(false);
+  };
+
+  const colorClass = BUTTON_COLORS[getColorKey(rating)] ?? "bg-gray-100";
+
+  return (
+    <div className="flex items-center gap-4 w-full max-w-xs">
+      <input
+        type="range"
+        min="1"
+        max="10"
+        step="0.1"
+        value={rating}
+        onChange={handleChange}
+        className={`w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer custom-slider ${colorClass}`}
+      />
+      <button
+        onClick={handleSubmit}
+        className={`px-4 py-2 bg-blue-500 text-white rounded-lg ${colorClass}`}
+      >
+        Submit
+      </button>
     </div>
   );
 };

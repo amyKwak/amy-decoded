@@ -116,10 +116,12 @@ export default function MoodHistory({ entries, todayKey, onDayClick }) {
                   <div className="text-sm text-center w-full text-gray-500">
                     {day.label}
                   </div>
-                  <h3 className="font-semibold text-lg">{entry?.rating}</h3>
-                  <div className="text-lg mt-1 text-center w-full">
-                    {entry?.emoji ?? ""}
+
+                  <div className="flex gap-1">
+                    <h3 className="font-semibold text-lg">{entry?.rating}</h3>
                   </div>
+
+                  <div className="text-lg mt-1 text-center w-full"></div>
                 </div>
               );
             })}
