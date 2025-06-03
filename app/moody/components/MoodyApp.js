@@ -47,9 +47,8 @@ export default function MoodyApp() {
   if (!mounted) return null;
 
   // Submit today’s rating
-  const handleSubmit = (rating) => {
-    console.log(rating);
-    const newEntry = { date: todayKey, rating };
+  const handleSubmit = (rating, note = "") => {
+    const newEntry = { date: todayKey, rating, note };
     const updated = [...entries.filter((e) => e.date !== todayKey), newEntry];
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     setEntries(updated);

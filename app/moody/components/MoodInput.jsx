@@ -17,7 +17,7 @@ export default function MoodInput({ onSubmit: handleSubmit }) {
   };
 
   const handleSave = () => {
-    handleSubmit(rating);
+    handleSubmit(rating, "test");
   };
 
   return (

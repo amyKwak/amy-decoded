@@ -50,7 +50,6 @@ export default function MoodHistory({ entries, todayKey, onDayClick }) {
 
   const handleDayClickInternal = useCallback(
     (iso) => {
-      console.log(`clicked ${iso}`);
       onDayClick?.(iso);
     },
     [onDayClick]
