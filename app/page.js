@@ -16,7 +16,7 @@ const IndexPage = () => {
           </Nav>
           <h1>Amy Kwak</h1>
           <h2>
-            Frontend Engineer who likes building stuff with
+            Software Engineer who likes building stuff with
             <br />
             <Typist />
           </h2>
