@@ -125,7 +125,7 @@ export default function MoodyApp() {
             />
           )}
           {/* new ChatGPT box */}
-          + <ChatAssistant entries={entries} />
+          {/* + <ChatAssistant entries={entries} /> */}
         </>
       )}
     </div>
