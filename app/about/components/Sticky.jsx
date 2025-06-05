@@ -16,14 +16,14 @@ const Sticky = () => {
         <Social
           href="https://www.linkedin.com/in/amykwak/"
           target="_blank"
-          color={"#0073b1"}
+          color="#0073b1"
         >
           LinkedIn
         </Social>
         <Social
           href="https://github.com/amyKwak"
           target="_blank"
-          color={"#24292e"}
+          color="#24292e"
         >
           GitHub
         </Social>
