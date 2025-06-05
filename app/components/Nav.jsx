@@ -8,9 +8,9 @@ import ThemeContext from "../contexts/ThemeContext";
 import theme from "../utils/theme";
 
 const Nav = ({ to, children }) => {
-  const { darkMode } = useContext(ThemeContext);
+  const { $darkMode } = useContext(ThemeContext);
   return (
-    <StyledNav $darkMode={darkMode} href={to}>
+    <StyledNav $darkMode={$darkMode} href={to}>
       {children}
     </StyledNav>
   );
@@ -30,12 +30,12 @@ const StyledNav = styled.a`
   padding: 0 0.6rem;
   span {
     color: ${(props) =>
-      props.darkMode ? theme.colors.white : theme.colors.black};
+      props.$darkMode ? theme.colors.white : theme.colors.black};
     z-index: 1;
     font-size: 1.6rem;
     line-height: 1.5;
     border-bottom: 1px dotted
-      ${(props) => (props.darkMode ? theme.colors.white : theme.colors.black)};
+      ${(props) => (props.$darkMode ? theme.colors.white : theme.colors.black)};
     position: relative;
     transition: all 0.25s ease-in-out;
   }

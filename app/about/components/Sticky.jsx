@@ -7,27 +7,27 @@ import ThemeContext from "../../contexts/ThemeContext";
 import theme from "../../utils/theme";
 
 const Sticky = () => {
-  const { darkMode } = useContext(ThemeContext);
+  const { $darkMode } = useContext(ThemeContext);
 
   return (
-    <StyledSticky $darkMode={darkMode}>
+    <StyledSticky $darkMode={$darkMode}>
       <div>
         <h3>Where to find me</h3>
         <Social
-          href="https://www.linkedin.com/in/dale-french-63101451/"
+          href="https://www.linkedin.com/in/amykwak/"
           target="_blank"
           color={"#0073b1"}
         >
           LinkedIn
         </Social>
         <Social
-          href="https://github.com/dale-french"
+          href="https://github.com/amyKwak"
           target="_blank"
           color={"#24292e"}
         >
           GitHub
         </Social>
-        <Social href="mailto:hello@dalefrench.dev" color={"#d93025"}>
+        <Social href="mailto:yoomikwak@gmail.com" color="#d93025">
           Mail
         </Social>
       </div>
@@ -48,7 +48,7 @@ const StyledSticky = styled.section`
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
   padding: 1.5rem 3rem 1.6rem;
   background-color: ${(props) =>
-    props.darkMode ? theme.colors.black : theme.colors.white};
+    props.$darkMode ? theme.colors.black : theme.colors.white};
 
   div {
     display: flex;
@@ -57,7 +57,7 @@ const StyledSticky = styled.section`
 
     h3 {
       color: ${(props) =>
-        props.darkMode ? theme.colors.white : theme.colors.black};
+        props.$darkMode ? theme.colors.white : theme.colors.black};
       margin: 0;
       line-height: 1;
       margin-right: 1rem;

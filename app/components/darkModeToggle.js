@@ -5,21 +5,21 @@ import PropTypes from "prop-types";
 import styled, { css } from "styled-components";
 import theme from "../utils/theme";
 
-function DarkModeToggle({ darkMode, onClick }) {
+function DarkModeToggle({ $darkMode, onClick }) {
   return (
     <Toggle
-      $darkMode={darkMode}
+      $darkMode={$darkMode}
       onClick={onClick}
-      aria-label={`Activate ${!darkMode ? "dark" : "light"} mode`}
-      title={`Activate ${!darkMode ? "dark" : "light"} mode`}
+      aria-label={`Activate ${!$darkMode ? "dark" : "light"} mode`}
+      title={`Activate ${!$darkMode ? "dark" : "light"} mode`}
     >
-      <Icon $ådarkMode={darkMode} />
+      <Icon $darkMode={$darkMode} />
     </Toggle>
   );
 }
 
 DarkModeToggle.propTypes = {
-  darkMode: PropTypes.bool,
+  $darkMode: PropTypes.bool,
   onClick: () => {},
 };
 
@@ -120,6 +120,6 @@ const Icon = styled.div`
     margin: -4px 0px 0px -4px;
   }
 
-  ${(props) => props.darkMode && darkModeStyles(props)};
-  ${(props) => !props.darkMode && lightModeStyles(props)};
+  ${(props) => props.$darkMode && darkModeStyles(props)};
+  ${(props) => !props.$darkMode && lightModeStyles(props)};
 `;
