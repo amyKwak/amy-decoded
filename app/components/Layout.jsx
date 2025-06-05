@@ -9,7 +9,7 @@ import theme from "../utils/theme";
 import "normalize.css";
 
 const Layout = ({ children }) => {
-  const { $darkMode } = useContext(ThemeContext);
+  const { darkMode } = useContext(ThemeContext);
 
   return (
     <>
@@ -21,8 +21,7 @@ const Layout = ({ children }) => {
         href="https://fonts.googleapis.com/css?family=Roboto&display=swap"
         rel="stylesheet"
       ></link>
-
-      <GlobalStyle $darkMode={$darkMode} />
+      <GlobalStyle darkMode={darkMode} />
       <main>{children}</main>
     </>
   );
@@ -43,7 +42,7 @@ const GlobalStyle = createGlobalStyle`
   html, body, #___gatsby, #gatsby-focus-wrapper, main {
     height: 100%;
     background: ${(props) =>
-      props.$darkMode ? theme.colors.black : theme.colors.white};
+      props.darkMode ? theme.colors.black : theme.colors.white};
     user-select: none;
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
@@ -63,7 +62,7 @@ const GlobalStyle = createGlobalStyle`
     margin: 0 0 2rem;
     line-height: 1.3;
     color: ${(props) =>
-      props.$darkMode ? theme.colors.white : theme.colors.black};
+      props.darkMode ? theme.colors.white : theme.colors.black};
     
     @media ${theme.devices.tablet} {
       font-size: 3rem
@@ -86,7 +85,7 @@ const GlobalStyle = createGlobalStyle`
     font-size: 1.3rem;
     line-height: 1.8;
     color: ${(props) =>
-      props.$darkMode ? theme.colors.white : theme.colors.black};
+      props.darkMode ? theme.colors.white : theme.colors.black};
   }
   a {
     text-decoration: none;
@@ -101,7 +100,7 @@ const GlobalStyle = createGlobalStyle`
       font-size: 1.6rem;
       margin-bottom: 1rem;
       color: ${(props) =>
-        props.$darkMode ? theme.colors.white : theme.colors.black};
+        props.darkMode ? theme.colors.white : theme.colors.black};
     }
   }
 `;

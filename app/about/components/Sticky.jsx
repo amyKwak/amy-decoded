@@ -7,10 +7,10 @@ import ThemeContext from "../../contexts/ThemeContext";
 import theme from "../../utils/theme";
 
 const Sticky = () => {
-  const { $darkMode } = useContext(ThemeContext);
+  const { darkMode } = useContext(ThemeContext);
 
   return (
-    <StyledSticky $darkMode={$darkMode}>
+    <StyledSticky darkMode={darkMode}>
       <div>
         <h3>Where to find me</h3>
         <Social
@@ -48,7 +48,7 @@ const StyledSticky = styled.section`
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
   padding: 1.5rem 3rem 1.6rem;
   background-color: ${(props) =>
-    props.$darkMode ? theme.colors.black : theme.colors.white};
+    props.darkMode ? theme.colors.black : theme.colors.white};
 
   div {
     display: flex;
@@ -57,7 +57,7 @@ const StyledSticky = styled.section`
 
     h3 {
       color: ${(props) =>
-        props.$darkMode ? theme.colors.white : theme.colors.black};
+        props.darkMode ? theme.colors.white : theme.colors.black};
       margin: 0;
       line-height: 1;
       margin-right: 1rem;

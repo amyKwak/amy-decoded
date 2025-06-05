@@ -7,22 +7,22 @@ import theme from "../utils/theme";
 import { DarkModeToggle } from ".";
 
 const Header = () => {
-  const { $darkMode, setDarkMode } = useContext(ThemeContext);
+  const { darkMode, setDarkMode } = useContext(ThemeContext);
 
   const handleToggle = () => {
-    setDarkMode(!$darkMode);
+    setDarkMode(!darkMode);
     if (typeof window !== "undefined") {
-      localStorage.setItem("dark", JSON.stringify(!$darkMode));
+      localStorage.setItem("dark", JSON.stringify(!darkMode));
     }
   };
 
   return (
     <StyledHeader>
-      <Logo href="/" $darkMode={$darkMode}>
+      <Logo href="/" darkMode={darkMode}>
         A<span>/</span>K
       </Logo>
       <ToggleContainer>
-        <DarkModeToggle $darkMode={$darkMode} onClick={handleToggle} />
+        <DarkModeToggle darkMode={darkMode} onClick={handleToggle} />
       </ToggleContainer>
     </StyledHeader>
   );
@@ -41,7 +41,7 @@ const Logo = styled.a`
   font-family: "Catamaran", sans-serif;
   font-size: 2.7rem;
   color: ${(props) =>
-    props.$darkMode ? theme.colors.white : theme.colors.black};
+    props.darkMode ? theme.colors.white : theme.colors.black};
   transition: color 0.25s ease-in-out;
   will-change: opacity;
 
@@ -56,7 +56,7 @@ const Logo = styled.a`
 
     span {
       color: ${(props) =>
-        props.$$darkMode ? theme.colors.white : theme.colors.black};
+        props.darkMode ? theme.colors.white : theme.colors.black};
     }
   }
 `;

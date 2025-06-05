@@ -1,1 +1,9 @@
-{"/favicon.ico/route":"/favicon.ico","/_not-found/page":"/_not-found","/page":"/","/about/page":"/about"}
+{
+  "/api/chat/route": "/api/chat",
+  "/favicon.ico/route": "/favicon.ico",
+  "/_not-found/page": "/_not-found",
+  "/moody/page": "/moody",
+  "/projects/page": "/projects",
+  "/about/page": "/about",
+  "/page": "/"
+}
