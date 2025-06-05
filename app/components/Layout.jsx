@@ -1,6 +1,5 @@
 import React, { useContext } from "react";
 import PropTypes from "prop-types";
-import Helmet from "react-helmet";
 import { createGlobalStyle } from "styled-components";
 
 import ThemeContext from "../contexts/ThemeContext";
@@ -12,16 +11,15 @@ const Layout = ({ children }) => {
 
   return (
     <>
-      <Helmet>
-        <link
-          href="https://fonts.googleapis.com/css?family=Catamaran:900&display=swap"
-          rel="stylesheet"
-        ></link>
-        <link
-          href="https://fonts.googleapis.com/css?family=Roboto&display=swap"
-          rel="stylesheet"
-        ></link>
-      </Helmet>
+      <link
+        href="https://fonts.googleapis.com/css?family=Catamaran:900&display=swap"
+        rel="stylesheet"
+      ></link>
+      <link
+        href="https://fonts.googleapis.com/css?family=Roboto&display=swap"
+        rel="stylesheet"
+      ></link>
+
       <GlobalStyle darkMode={darkMode} />
       <main>{children}</main>
     </>
