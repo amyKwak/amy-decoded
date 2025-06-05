@@ -1,16 +1,1 @@
-{
-  "app": {
-    "[project]/app/_not-found/page": [
-      "static/media/xn7gYHE41ni1AdIRggexSvfedN4-s.p.2b9b556b.woff2"
-    ],
-    "[project]/app/about/page": [
-      "static/media/xn7gYHE41ni1AdIRggexSvfedN4-s.p.2b9b556b.woff2"
-    ],
-    "[project]/app/page": [
-      "static/media/xn7gYHE41ni1AdIRggexSvfedN4-s.p.2b9b556b.woff2"
-    ]
-  },
-  "appUsingSizeAdjust": true,
-  "pages": {},
-  "pagesUsingSizeAdjust": false
-}
+{"pages":{},"app":{"/Users/amy/amy-decoded/app/layout":["static/media/4c9affa5bc8f420e-s.p.woff2"]},"appUsingSizeAdjust":true,"pagesUsingSizeAdjust":false}

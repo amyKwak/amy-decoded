@@ -4,6 +4,6 @@
   "/_not-found/page": "/_not-found",
   "/moody/page": "/moody",
   "/projects/page": "/projects",
-  "/about/page": "/about",
-  "/page": "/"
+  "/page": "/",
+  "/about/page": "/about"
 }
