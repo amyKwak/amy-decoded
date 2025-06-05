@@ -18,11 +18,11 @@ const Header = () => {
 
   return (
     <StyledHeader>
-      <Logo href="/" darkMode={darkMode}>
+      <Logo href="/" $darkMode={darkMode}>
         A<span>/</span>K
       </Logo>
       <ToggleContainer>
-        <DarkModeToggle darkMode={darkMode} onClick={handleToggle} />
+        <DarkModeToggle $darkMode={darkMode} onClick={handleToggle} />
       </ToggleContainer>
     </StyledHeader>
   );

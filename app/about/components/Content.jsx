@@ -23,7 +23,14 @@ const Section = styled.section`
   max-width: 1100px;
   margin: 0 auto;
   padding: 1.5rem 3rem;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: end;
+  padding-bottom: 15vh;
   h1 {
+    width: 100%;
     font-size: 8rem;
     color: ${(props) =>
       props.darkMode ? theme.colors.white : theme.colors.black};

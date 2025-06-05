@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useContext } from "react";
 import styled from "styled-components";
 import PropTypes from "prop-types";
@@ -8,7 +10,7 @@ import theme from "../utils/theme";
 const Nav = ({ to, children }) => {
   const { darkMode } = useContext(ThemeContext);
   return (
-    <StyledNav darkMode={darkMode} href={to}>
+    <StyledNav $darkMode={darkMode} href={to}>
       {children}
     </StyledNav>
   );

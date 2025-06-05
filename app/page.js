@@ -37,7 +37,6 @@ const Section = styled.section`
   padding: 1.5rem 3rem;
   h1 {
     color: ${theme.colors.blue};
-    font-weight: bold;
   }
   h2 {
     span {

@@ -10,7 +10,7 @@ const Sticky = () => {
   const { darkMode } = useContext(ThemeContext);
 
   return (
-    <StyledSticky darkMode={darkMode}>
+    <StyledSticky $darkMode={darkMode}>
       <div>
         <h3>Where to find me</h3>
         <Social

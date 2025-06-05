@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useContext } from "react";
 import PropTypes from "prop-types";
 import { createGlobalStyle } from "styled-components";
@@ -20,7 +22,7 @@ const Layout = ({ children }) => {
         rel="stylesheet"
       ></link>
 
-      <GlobalStyle darkMode={darkMode} />
+      <GlobalStyle $darkMode={darkMode} />
       <main>{children}</main>
     </>
   );
@@ -48,6 +50,7 @@ const GlobalStyle = createGlobalStyle`
   }
   h1 {
     font-size: 12rem;
+    font-weight: bold;
     line-height: 1;
     margin: 0 0 1rem;
 
