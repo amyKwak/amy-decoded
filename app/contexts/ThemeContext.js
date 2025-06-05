@@ -3,14 +3,14 @@ import React, { useState, createContext, useEffect } from "react";
 import PropTypes from "prop-types";
 
 const defaultState = {
-  darkMode: false,
+  $darkMode: false,
   setDarkMode: () => {},
 };
 
 const ThemeContext = createContext(defaultState);
 
 const ThemeProvider = ({ children }) => {
-  const [isDarkMode, setIsDarkMode] = useState(defaultState.darkMode);
+  const [isDarkMode, setIsDarkMode] = useState(defaultState.$darkMode);
 
   useEffect(() => {
     const storedDark = localStorage.getItem("dark");
@@ -22,7 +22,7 @@ const ThemeProvider = ({ children }) => {
   return (
     <ThemeContext.Provider
       value={{
-        darkMode: isDarkMode,
+        $darkMode: isDarkMode,
         setDarkMode: (value) => {
           setIsDarkMode(value);
           localStorage.setItem("dark", JSON.stringify(value));
