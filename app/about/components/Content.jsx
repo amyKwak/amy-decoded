@@ -9,7 +9,7 @@ import ThemeContext from "../../contexts/ThemeContext";
 function Content({ children }) {
   const { darkMode } = useContext(ThemeContext);
 
-  return <Section darkMode={dar}>{children}</Section>;
+  return <Section darkMode={darkMode}>{children}</Section>;
 }
 
 Content.propTypes = {
