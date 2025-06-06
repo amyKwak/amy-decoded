@@ -64,9 +64,9 @@ export default function AboutPage() {
 
         .section h1 {
           width: 100%;
-          font-size: 3.5rem;
+          font-size: 4rem;
+          font-weight: 900;
           line-height: 1;
-          margin-bottom: 5px;
           color: ${theme.colors.blue};
         }
 
