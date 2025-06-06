@@ -3,7 +3,7 @@ import { Manrope } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 
-import { ThemeProvider } from "./components/ThemeContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
 const manrope = Manrope({
   subsets: ["latin"],

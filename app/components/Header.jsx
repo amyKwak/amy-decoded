@@ -1,9 +1,9 @@
 "use client";
 
-import { useTheme } from "./ThemeContext";
+import { useTheme } from "../contexts/ThemeContext";
 import { DarkModeToggle } from "./DarkModeToggle"; // adjust path if needed
 
-export default function Nav() {
+export default function Header() {
   const { theme, toggleTheme } = useTheme();
 
   return (
