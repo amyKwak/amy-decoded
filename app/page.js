@@ -1,24 +1,26 @@
-"use client"; // if you’re using hooks or client-side logic
+"use client";
 
 import styles from "./page.module.css";
-import { useTheme } from "./components/ThemeContext";
-import Nav from "./components/Header";
+import Header from "./components/Header";
+import { Typist } from "./components/Typist";
 
 export default function HomePage() {
-  const { theme, toggleTheme } = useTheme(); // This comes from ThemeContext
-
   return (
-    <>
-      <Nav />
+    <div className={styles.pageWrapper}>
+      <Header />
       <section className={styles.section}>
         <a className={styles.about} href="/about">
           <span>Who am I?</span>
         </a>
         <h1>Amy Kwak</h1>
-        {/* <button className={styles.buttonPrimary} onClick={toggleTheme}>
-        {theme === "dark" ? "Switch to Light" : "Switch to Dark"}
-      </button> */}
+        <h2>
+          <span className={styles.text}>
+            Software Engineer who likes building stuff with
+          </span>
+          <br />
+          <Typist />
+        </h2>
       </section>
-    </>
+    </div>
   );
 }
