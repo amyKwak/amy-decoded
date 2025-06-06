@@ -8,22 +8,33 @@ export default function Header() {
 
   return (
     <>
-      <header className="header">
-        <a href="/" className="logo">
-          A<span>/</span>K
-        </a>
-        <div className="toggleContainer">
-          <DarkModeToggle darkMode={theme === "dark"} onClick={toggleTheme} />
-        </div>
-      </header>
+      <div className="header-wrapper">
+        <header className="header">
+          <a href="/" className="logo">
+            A<span>/</span>K
+          </a>
+          <div className="toggleContainer">
+            <DarkModeToggle darkMode={theme === "dark"} onClick={toggleTheme} />
+          </div>
+        </header>
+      </div>
 
       <style jsx>{`
         @import url("https://fonts.googleapis.com/css2?family=Catamaran:wght@400;700;900&display=swap");
 
+        .header-wrapper {
+          width: 100%;
+          position: absolute;
+          display: flex;
+          justify-content: center;
+        }
+
         .header {
           display: flex;
+          width: 100%;
           justify-content: space-between;
           padding: 0.9375rem 1.875rem;
+          max-width: 1100px;
         }
 
         .logo {

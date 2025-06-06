@@ -1,5 +1,3 @@
-// src/utils/theme.js
-
 const theme = {
   colors: {
     blue: "var(--color-primary)", // references the same --color-primary from global.css
@@ -7,7 +5,7 @@ const theme = {
     black: "var(--color-black)",
   },
   devices: {
-    tablet: "(max-width: 991.98px)",
+    tablet: "(min-width: 768px)",
   },
   fonts: {
     primary: "var(--font-body)", // references “Manrope, sans-serif”

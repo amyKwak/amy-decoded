@@ -1,4 +1,3 @@
-// app/layout.js
 import { Manrope } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
