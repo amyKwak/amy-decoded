@@ -8,11 +8,17 @@ export default function HomePage() {
   const { theme, toggleTheme } = useTheme(); // This comes from ThemeContext
 
   return (
-    <section className={styles.section}>
+    <>
       <Nav />
-      {/* <button className={styles.buttonPrimary} onClick={toggleTheme}>
+      <section className={styles.section}>
+        <a className={styles.about} href="/about">
+          <span>Who am I?</span>
+        </a>
+        <h1>Amy Kwak</h1>
+        {/* <button className={styles.buttonPrimary} onClick={toggleTheme}>
         {theme === "dark" ? "Switch to Light" : "Switch to Dark"}
       </button> */}
-    </section>
+      </section>
+    </>
   );
 }

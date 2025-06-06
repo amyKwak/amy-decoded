@@ -14,15 +14,12 @@
   /* Colors */
   --color-bg: #ffffff;
   --color-text: #111111;
-  --color-primary: #1e90ff; /* same as “blue” in theme.js */
+  --color-primary: #3371ff;
   --color-secondary: #ff8c00;
   --color-border: #e0e0e0;
-  --color-accent: #0191fe;
 
-  /* Additional named colors (so JS can reference “--color-white” & “--color-black”) */
   --color-white: #ffffff;
   --color-black: #1a202c;
-  --color-blue: #3371ff; /* if you need an exact “#3371FF” spot */
 
   /* Timing */
   --transition-fast: 0.2s ease-in-out;
