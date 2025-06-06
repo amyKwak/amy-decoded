@@ -37,7 +37,7 @@ export default function AboutPage() {
         .page-container {
           display: flex;
           flex-direction: column;
-          height: 100vh;
+          height: 100dvh;
           overflow: hidden;
         }
 
@@ -51,14 +51,15 @@ export default function AboutPage() {
         .section {
           flex: 1;
           width: 100%;
-          padding: 0px 30px 15vh;
-          max-width: 1100px;
+          padding: 0 30px;
+          max-width: 1000px;
           margin: 0 auto;
           display: flex;
           flex-direction: column;
           justify-content: flex-end;
           align-items: center;
-          overflow: auto;
+          overflow: hidden;
+          padding-bottom: 15vh;
         }
 
         .container {
