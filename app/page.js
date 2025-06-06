@@ -40,17 +40,17 @@ export default function HomePage() {
           overflow-y: auto;
         }
         h1 {
-          font-size: 60px;
+          font-size: 17vw;
           color: var(--color-primary);
           margin-bottom: 5px;
         }
         h2 {
           font-weight: 400;
-          font-size: 25px;
+          font-size: 7vw;
           text-align: center;
         }
         h3 {
-          font-size: 40px;
+          font-size: 10vw;
           color: var(--color-primary);
         }
         .text {
@@ -88,7 +88,17 @@ export default function HomePage() {
         .about:hover::after {
           height: 24px;
         }
-        @media (${theme.devices.tablet});
+        @media ${theme.devices.tablet} {
+          h1 {
+            font-size: 10vw;
+          }
+          h2 {
+            font-size: 2.5vw;
+          }
+          h3 {
+            font-size: 5vw;
+          }
+        }
       `}</style>
     </>
   );
