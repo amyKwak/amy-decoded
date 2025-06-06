@@ -1,77 +1,92 @@
 "use client";
 
-import { useContext } from "react";
-import styled from "styled-components";
-
+import React from "react";
 import { useTheme } from "../../contexts/ThemeContext";
 import theme from "../../utils/theme";
 
-const Sticky = () => {
-  const { theme, toggleTheme } = useTheme();
+export function Sticky() {
+  const { theme: currentTheme } = useTheme();
+  const isDark = currentTheme === "dark";
 
   return (
-    <StyledSticky $darkMode={theme === "dark"}>
-      <div>
-        <h3>Where to find me</h3>
-        <Social
-          href="https://www.linkedin.com/in/amykwak/"
-          target="_blank"
-          color="#0073b1"
-        >
-          LinkedIn
-        </Social>
-        <Social
-          href="https://github.com/amyKwak"
-          target="_blank"
-          color="#24292e"
-        >
-          GitHub
-        </Social>
-        <Social href="mailto:yoomikwak@gmail.com" color="#d93025">
-          Mail
-        </Social>
-      </div>
-    </StyledSticky>
+    <>
+      <section className={`sticky ${isDark ? "dark" : "light"}`}>
+        <div className="inner">
+          <h3>Where to find me</h3>
+          <a
+            href="https://www.linkedin.com/in/amykwak/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="social"
+            style={{ backgroundColor: "#0073b1" }}
+          >
+            LinkedIn
+          </a>
+          <a
+            href="https://github.com/amyKwak"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="social"
+            style={{ backgroundColor: "#24292e" }}
+          >
+            GitHub
+          </a>
+          <a
+            href="mailto:yoomikwak@gmail.com"
+            className="social"
+            style={{ backgroundColor: "#d93025" }}
+          >
+            Mail
+          </a>
+        </div>
+      </section>
+
+      <style jsx>{`
+        .sticky {
+          position: fixed;
+          bottom: 0;
+          box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+          padding: 15px 30px;
+          background-color: var(--color-white);
+          z-index: 1000;
+          width: 100%;
+          display: flex;
+          justify-content: center;
+        }
+        .sticky.dark {
+          background-color: var(--color-black);
+        }
+
+        .inner {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          max-width: 1000px;
+          width: 100%;
+        }
+
+        .inner h3 {
+          color: var(--color-text);
+          line-height: 1;
+          margin: 0;
+          font-weight: 400;
+        }
+
+        .social {
+          display: inline-block;
+          line-height: 1;
+          color: var(--color-white);
+          font-size: 1rem;
+          border-radius: 5px;
+          text-decoration: none;
+          padding: 0.5rem 0.5rem;
+        }
+        @media ${theme.devices.tablet} {
+          .inner h3 {
+            font-size: 25px;
+          }
+        }
+      `}</style>
+    </>
   );
-};
-
-Sticky.propTypes = {};
-
-export { Sticky };
-
-// Component Styles
-const StyledSticky = styled.section`
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
-  padding: 1.5rem 3rem 1.6rem;
-  background-color: ${(props) =>
-    props.$darkMode ? theme.colors.black : theme.colors.white};
-
-  div {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-
-    h3 {
-      color: ${(props) =>
-        props.$darkMode ? theme.colors.white : theme.colors.black};
-      margin: 0;
-      line-height: 1;
-      margin-right: 1rem;
-    }
-  }
-`;
-
-const Social = styled.a`
-  display: inline-block;
-  padding: 0.7rem;
-  line-height: 1;
-  margin: 5px;
-  color: ${theme.colors.white};
-  background: ${(props) => props.color};
-  font-size: 1.6rem;
-  border-radius: 5px;
-`;
+}
