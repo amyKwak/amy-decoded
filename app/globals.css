@@ -1,3 +1,6 @@
+/* src/globals.css */
+
+/* 1) RESET */
 *,
 *::before,
 *::after {
@@ -6,15 +9,20 @@
   box-sizing: border-box;
 }
 
-/* LIGHT MODE VARIABLES (default) */
+/* 2) LIGHT MODE VARIABLES (default) */
 :root {
   /* Colors */
   --color-bg: #ffffff;
   --color-text: #111111;
-  --color-primary: #1e90ff;
+  --color-primary: #1e90ff; /* same as “blue” in theme.js */
   --color-secondary: #ff8c00;
   --color-border: #e0e0e0;
   --color-accent: #0191fe;
+
+  /* Additional named colors (so JS can reference “--color-white” & “--color-black”) */
+  --color-white: #ffffff;
+  --color-black: #1a202c;
+  --color-blue: #3371ff; /* if you need an exact “#3371FF” spot */
 
   /* Timing */
   --transition-fast: 0.2s ease-in-out;
@@ -27,17 +35,14 @@
   --max-width: 1024px;
 }
 
-/* DARK MODE OVERRIDES */
+/* 3) DARK MODE OVERRIDES */
 [data-theme="dark"] {
-  --color-bg: #111111;
+  --color-bg: #1a202c;
   --color-text: #f5f5f5;
-  --color-primary: #0a74da;
-  --color-secondary: #ff9c00;
-  --color-border: #333333;
-  --color-accent: #0a84ff;
+  --color-primary: #3371ff;
 }
 
-/* BASE STYLES */
+/* 4) BASE STYLES */
 html,
 body {
   width: 100%;
@@ -54,17 +59,16 @@ a {
   text-decoration: none;
   transition: color var(--transition-fast);
 }
-
 a:hover {
   opacity: 0.8;
 }
 
-/* OPTIONAL UTILITY CLASSES */
+/* 5) OPTIONAL UTILITY CLASSES */
 .hidden {
   display: none;
 }
 
-/* OPTIONAL TYPOGRAPHY UTILITY (you can add more as needed) */
+/* 6) OPTIONAL TYPOGRAPHY UTILITY */
 h1,
 h2,
 h3,

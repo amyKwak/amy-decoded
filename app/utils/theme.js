@@ -1,14 +1,17 @@
+// src/utils/theme.js
+
 const theme = {
   colors: {
-    blue: "#3371FF",
-    white: "#FFFFFF",
-    black: "#1A202C",
+    blue: "var(--color-primary)", // references the same --color-primary from global.css
+    white: "var(--color-white)",
+    black: "var(--color-black)",
   },
   devices: {
     tablet: "(max-width: 991.98px)",
   },
   fonts: {
-    primary: "'Manrope', sans-serif",
+    primary: "var(--font-body)", // references “Manrope, sans-serif”
+    heading: "var(--font-heading)",
   },
 };
 
