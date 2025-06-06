@@ -12,7 +12,10 @@ export function Sticky() {
     <>
       <section className={`sticky ${isDark ? "dark" : "light"}`}>
         <div className="inner">
-          <h3>Where to find me</h3>
+          <h3>
+            Where to <br className="line-break" />
+            find me
+          </h3>
           <a
             href="https://www.linkedin.com/in/amykwak/"
             target="_blank"
@@ -84,6 +87,9 @@ export function Sticky() {
         @media ${theme.devices.tablet} {
           .inner h3 {
             font-size: 25px;
+          }
+          .line-break {
+            display: none;
           }
         }
       `}</style>
