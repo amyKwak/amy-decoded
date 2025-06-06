@@ -38,18 +38,6 @@
       "regex": "^/favicon\\.ico(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/favicon\\.ico(?:/)?$"
-    },
-    {
-      "page": "/moody",
-      "regex": "^/moody(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/moody(?:/)?$"
-    },
-    {
-      "page": "/projects",
-      "regex": "^/projects(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/projects(?:/)?$"
     }
   ],
   "dataRoutes": [],

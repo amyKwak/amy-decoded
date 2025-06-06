@@ -1,9 +1,6 @@
 {
-  "/api/chat/route": "/api/chat",
-  "/_not-found/page": "/_not-found",
   "/favicon.ico/route": "/favicon.ico",
-  "/page": "/",
-  "/moody/page": "/moody",
+  "/_not-found/page": "/_not-found",
   "/about/page": "/about",
-  "/projects/page": "/projects"
+  "/page": "/"
 }

@@ -70,25 +70,7 @@ export default function HomePage() {
           position: relative;
           transition: all 0.25s ease-in-out;
         }
-        .about::after {
-          content: "";
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          height: 0;
-          width: 100%;
-          transition: height 0.25s ease-in-out;
-          will-change: transform;
-          background-color: var(--color-primary);
-          z-index: 0;
-        }
-        .about:hover span {
-          color: var(--color-white);
-          border-color: var(--color-white);
-        }
-        .about:hover::after {
-          height: 24px;
-        }
+
         @media ${theme.devices.tablet} {
           h1 {
             font-size: 10vw;
@@ -98,6 +80,28 @@ export default function HomePage() {
           }
           h3 {
             font-size: 5vw;
+          }
+
+          .about::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 0;
+            width: 100%;
+            transition: height 0.25s ease-in-out;
+            will-change: transform;
+            background-color: var(--color-primary);
+            z-index: 0;
+          }
+
+          .about:hover span {
+            color: var(--color-white);
+            border-color: var(--color-white);
+          }
+
+          .about:hover::after {
+            height: 24px;
           }
         }
       `}</style>
