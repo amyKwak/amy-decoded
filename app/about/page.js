@@ -67,6 +67,7 @@ export default function AboutPage() {
           font-size: 4rem;
           line-height: 1;
           color: ${theme.colors.blue};
+          margin-bottom: 5px;
         }
 
         .section h2 {
@@ -82,6 +83,7 @@ export default function AboutPage() {
 
         .text--blue {
           color: ${theme.colors.blue};
+          white-space: nowrap;
         }
 
         @media ${theme.devices.tablet} {
