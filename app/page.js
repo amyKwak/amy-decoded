@@ -43,6 +43,7 @@ export default function HomePage() {
           font-size: 17vw;
           color: var(--color-primary);
           margin-bottom: 5px;
+          font-weight: 900;
         }
         h2 {
           font-weight: 400;
