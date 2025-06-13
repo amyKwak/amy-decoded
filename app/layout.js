@@ -18,7 +18,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head />
-      <body className={manrope.className}>
+      <body className={manrope.variable}>
         <ThemeProvider>
           <Analytics />
           {children}
