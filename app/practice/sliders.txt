@@ -1,0 +1,441 @@
+"use client";
+
+import { useEffect, useState, useRef } from "react";
+
+
+// One slide
+const PracticePage = ({ count = 10 }) => {
+  const [images, setImages] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    async function fetchImages() {
+      try {
+        const endpoint = `https://picsum.photos/v2/list?limit=${count}`;
+        const response = await fetch(endpoint);
+        if (!response.ok)
+          throw new Error(`Picsum API error: ${response.status}`);
+        const data = await response.json();
+        const formatted = data.map((photo) => ({
+          id: photo.id,
+          url: photo.download_url,
+          alt: `Photo by ${photo.author}`,
+        }));
+        setImages(formatted);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchImages();
+  }, [count]);
+
+  const scroll = (offset) => {
+    if (containerRef.current) {
+      const width = containerRef.current.offsetWidth;
+      containerRef.current.scrollBy({
+        left: offset * width,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  if (loading) return <div className="state">Loading images...</div>;
+  if (error) return <div className="state error">Error: {error}</div>;
+
+  return (
+    <div className="carousel">
+      <button
+        onClick={() => scroll(-1)}
+        className="nav-button prev"
+        aria-label="Previous"
+      >
+        &#8592;
+      </button>
+
+      <div className="slides" ref={containerRef}>
+        {images.map((img) => (
+          <div key={img.id} className="slide">
+            <img src={img.url} alt={img.alt} />
+          </div>
+        ))}
+      </div>
+
+      <button
+        onClick={() => scroll(1)}
+        className="nav-button next"
+        aria-label="Next"
+      >
+        &#8594;
+      </button>
+
+      <style jsx>{`
+        .state {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 256px;
+          font-size: 1rem;
+        }
+        .error {
+          color: #e00;
+        }
+        .carousel {
+          position: relative;
+          width: 100%;
+        }
+        .slides {
+          display: flex;
+          overflow-x: auto;
+          scroll-snap-type: x mandatory;
+          scroll-behavior: smooth;
+        }
+        .slide {
+          flex-shrink: 0;
+          width: 100%;
+          scroll-snap-align: start;
+        }
+        .slide img {
+          width: 100%;
+          height: auto;
+          object-fit: cover;
+          border-radius: 8px;
+        }
+        .nav-button {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          background: rgba(255, 255, 255, 0.8);
+          border: none;
+          padding: 8px;
+          border-radius: 50%;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          cursor: pointer;
+        }
+        .nav-button.prev {
+          left: 16px;
+        }
+        .nav-button.next {
+          right: 16px;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default PracticePage;
+
+
+// multiple slides
+const PracticePage = ({ count = 10 }) => {
+  const [images, setImages] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    async function fetchImages() {
+      const endpoint = `https://picsum.photos/v2/list?limit=${count}`;
+      const response = await fetch(endpoint);
+      if (!response.ok) {
+        setError(`Picsum API error: ${response.status}`);
+        return;
+      }
+      const data = await response.json();
+      const formatted = data.map((photo) => ({
+        id: photo.id,
+        url: photo.download_url,
+        alt: `Photo by ${photo.author}`,
+      }));
+      setImages(formatted);
+    }
+
+    fetchImages()
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [count]);
+
+  const scroll = (offset) => {
+    if (containerRef.current) {
+      const first = containerRef.current.children[0];
+      const width = first
+        ? first.offsetWidth + 10
+        : containerRef.current.offsetWidth;
+      containerRef.current.scrollBy({
+        left: offset * width,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  if (loading) return <div className="state">Loading images...</div>;
+  if (error) return <div className="state error">Error: {error}</div>;
+
+  return (
+    <div className="carousel">
+      <button
+        onClick={() => scroll(-1)}
+        className="nav-button prev"
+        aria-label="Previous"
+      >
+        &#8592;
+      </button>
+      <div className="slides" ref={containerRef}>
+        {images.map((img) => (
+          <div key={img.id} className="slide">
+            <img src={img.url} alt={img.alt} />
+          </div>
+        ))}
+      </div>
+      <button
+        onClick={() => scroll(1)}
+        className="nav-button next"
+        aria-label="Next"
+      >
+        &#8594;
+      </button>
+
+      <style jsx>{`
+        .state {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 256px;
+          font-size: 1rem;
+        }
+        .error {
+          color: #e00;
+        }
+        .carousel {
+          position: relative;
+          width: 100%;
+        }
+        .slides {
+          display: flex;
+          gap: 10px;
+          overflow-x: auto;
+          scroll-snap-type: x mandatory;
+          scroll-behavior: smooth;
+          padding-bottom: 8px; /* avoid scrollbar overlap */
+        }
+        .slide {
+          flex-shrink: 0;
+          width: 200px;
+          scroll-snap-align: start;
+        }
+        .slide img {
+          width: 100%;
+          height: auto;
+          object-fit: cover;
+          border-radius: 8px;
+        }
+        .nav-button {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          background: rgba(255, 255, 255, 0.8);
+          border: none;
+          padding: 8px;
+          border-radius: 50%;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          cursor: pointer;
+        }
+        .nav-button.prev {
+          left: 16px;
+        }
+        .nav-button.next {
+          right: 16px;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default PracticePage;
+
+
+// multiple images w/ reddit API
+/*
+ImageCarousel.jsx
+
+A clean, dependency-free React image carousel component using CSS scroll-snap and styled-jsx.
+// This version fetches image posts from a specified Reddit subreddit.
+
+Usage:
+import ImageCarousel from './ImageCarousel';
+
+function App() {
+  return (
+    <ImageCarousel
+      subreddit="pics"
+      count={12}
+      cardWidth={200}
+      gap={16}
+    />
+  );
+}
+
+Props:
+- subreddit (string, optional): The subreddit to fetch images from (default "pics").
+- count (number, optional): Number of images to display (default 10).
+- cardWidth (number, optional): Width of each slide card in pixels (default 200).
+- gap (number, optional): Gap between cards in pixels (default 16).
+
+Reddit endpoint used: https://www.reddit.com/r/{subreddit}/hot.json?limit={count * 2}
+(The component filters for image posts and slices to `count`.)
+*/
+"use client";
+import React, { useEffect, useState, useRef } from "react";
+import PropTypes from "prop-types";
+
+export default function ImageCarousel({
+  subreddit = "pics",
+  count = 10,
+  cardWidth = 200,
+  gap = 16,
+}) {
+  const [images, setImages] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    async function fetchImages() {
+      const limit = count * 2;
+      const endpoint = `https://www.reddit.com/r/${subreddit}/hot.json?limit=${limit}`;
+      const response = await fetch(endpoint);
+      if (!response.ok) {
+        setError(`Reddit API error: ${response.status}`);
+        return;
+      }
+      const json = await response.json();
+      const posts = json.data.children;
+      const filtered = posts
+        .map((child) => child.data)
+        .filter((post) => {
+          // only image posts
+          return (
+            post.post_hint === "image" ||
+            /\.(?:jpg|jpeg|png|gif)$/.test(post.url)
+          );
+        })
+        .slice(0, count);
+      const formatted = filtered.map((post) => ({
+        id: post.id,
+        url: post.url,
+        alt: post.title || `Image from r/${subreddit}`,
+      }));
+      setImages(formatted);
+    }
+
+    fetchImages()
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [subreddit, count]);
+
+  const scroll = (offset) => {
+    if (containerRef.current) {
+      const first = containerRef.current.children[0];
+      const width = first
+        ? first.offsetWidth + gap
+        : containerRef.current.offsetWidth;
+      containerRef.current.scrollBy({
+        left: offset * width,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  if (loading) return <div className="state">Loading images...</div>;
+  if (error) return <div className="state error">Error: {error}</div>;
+
+  return (
+    <div className="carousel">
+      <button
+        onClick={() => scroll(-1)}
+        className="nav-button prev"
+        aria-label="Previous"
+      >
+        &#8592;
+      </button>
+      <div className="slides" ref={containerRef}>
+        {images.map((img) => (
+          <div key={img.id} className="slide">
+            <img src={img.url} alt={img.alt} />
+          </div>
+        ))}
+      </div>
+      <button
+        onClick={() => scroll(1)}
+        className="nav-button next"
+        aria-label="Next"
+      >
+        &#8594;
+      </button>
+
+      <style jsx>{`
+        .state {
+          display: flex; /* centers loading/error text */
+          justify-content: center; /* horizontally */
+          align-items: center; /* vertically */
+          height: 256px;
+          font-size: 1rem;
+        }
+        .error {
+          color: #e00;
+        }
+        .carousel {
+          position: relative;
+          width: 100%;
+        }
+        .slides {
+          display: flex; /* horizontal row of cards */
+          gap: ${gap}px; /* space between cards */
+          overflow-x: auto; /* horizontal scroll */
+          scroll-snap-type: x mandatory; /* snap to cards */
+          scroll-behavior: smooth; /* smooth scroll */
+          padding-bottom: 8px; /* avoid scrollbar overlap */
+        }
+        .slide {
+          flex-shrink: 0; /* don’t shrink */
+          width: ${cardWidth}px; /* fixed card width */
+          scroll-snap-align: start; /* align left edge */
+        }
+        .slide img {
+          width: 100%; /* fill card */
+          height: auto; /* maintain aspect ratio */
+          object-fit: cover; /* crop to fill */
+          border-radius: 8px;
+        }
+        .nav-button {
+          position: absolute; /* overlay on carousel */
+          top: 50%; /* center vertically */
+          transform: translateY(-50%);
+          background: rgba(255, 255, 255, 0.8);
+          border: none;
+          padding: 8px;
+          border-radius: 50%;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          cursor: pointer;
+        }
+        .nav-button.prev {
+          left: 16px;
+        }
+        .nav-button.next {
+          right: 16px;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+ImageCarousel.propTypes = {
+  subreddit: PropTypes.string,
+  count: PropTypes.number,
+  cardWidth: PropTypes.number,
+  gap: PropTypes.number,
+};
