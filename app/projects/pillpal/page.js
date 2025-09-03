@@ -328,7 +328,7 @@ const Page = () => {
         .btn.danger {
           background: #fee2e2;
           border-color: #fecaca;
-          color: var(--color-text);
+          color: var(--color-black);
         }
       `}</style>
     </div>
