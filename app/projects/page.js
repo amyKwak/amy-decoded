@@ -1,19 +1,26 @@
 "use client";
 
+import Header from "../components/Header";
+
 const Projects = () => {
   return (
-    <div className="page">
-      <a href="/projects/pillpal" className="link">
-        PillPal
-      </a>
+    <div className="page-wrapper">
+      <Header />
+      <div className="links">
+        <a href="/projects/pillpal" className="link">
+          PillPal
+        </a>
+      </div>
       <style jsx>{`
-        .page {
-          max-width: 500px;
+        .page-wrapper {
           min-height: 100%;
+        }
+        .links {
           display: flex;
+          width: 100%;
           justify-content: center;
+          height: 100vh;
           align-items: center;
-          margin: 0 auto;
         }
         .link {
           font-weight: bold;
