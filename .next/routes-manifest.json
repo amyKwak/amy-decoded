@@ -34,10 +34,22 @@
       "namedRegex": "^/about(?:/)?$"
     },
     {
+      "page": "/cheerful",
+      "regex": "^/cheerful(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/cheerful(?:/)?$"
+    },
+    {
       "page": "/favicon.ico",
       "regex": "^/favicon\\.ico(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/favicon\\.ico(?:/)?$"
+    },
+    {
+      "page": "/practice",
+      "regex": "^/practice(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/practice(?:/)?$"
     }
   ],
   "dataRoutes": [],

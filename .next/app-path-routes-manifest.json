@@ -1,6 +1,8 @@
 {
-  "/favicon.ico/route": "/favicon.ico",
   "/_not-found/page": "/_not-found",
+  "/favicon.ico/route": "/favicon.ico",
+  "/cheerful/page": "/cheerful",
+  "/practice/page": "/practice",
   "/about/page": "/about",
   "/page": "/"
 }
