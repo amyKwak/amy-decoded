@@ -114,10 +114,6 @@ const ShotClock = () => {
       </main>
 
       <style jsx>{`
-        :global(html, body, #root) {
-          height: 100%;
-        }
-
         .wrap {
           min-height: 100vh;
           display: grid;
