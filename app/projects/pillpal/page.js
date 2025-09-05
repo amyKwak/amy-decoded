@@ -100,7 +100,7 @@ const Toggle = ({ id, checked, onChange, label }) => (
   </label>
 );
 
-const Page = () => {
+const PillPal = () => {
   const [data, setData] = useState({});
   const [today] = useState(() => {
     const d = new Date();
@@ -335,4 +335,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default PillPal;
