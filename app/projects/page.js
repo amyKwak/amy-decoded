@@ -10,6 +10,9 @@ const Projects = () => {
         <a href="/projects/pillpal" className="link">
           PillPal
         </a>
+        <a href="/projects/pillpal" className="link">
+          ShotClock
+        </a>
       </div>
       <style jsx>{`
         .page-wrapper {
@@ -17,6 +20,8 @@ const Projects = () => {
         }
         .links {
           display: flex;
+          flex-direction: column;
+          gap: 40px;
           width: 100%;
           justify-content: center;
           height: 100vh;
