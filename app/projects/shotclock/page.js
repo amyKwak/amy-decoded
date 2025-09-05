@@ -170,7 +170,7 @@ const ShotClock = () => {
 
         .advice {
           margin: 4px 0 10px;
-          font-size: clamp(12px, 2.4vw, 14px);
+          font-size: 1rem;
           font-weight: 600;
         }
         .advice.ok {
