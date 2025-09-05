@@ -10,7 +10,7 @@ const Projects = () => {
         <a href="/projects/pillpal" className="link">
           PillPal
         </a>
-        <a href="/projects/pillpal" className="link">
+        <a href="/projects/shotclock" className="link">
           ShotClock
         </a>
       </div>
