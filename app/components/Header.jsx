@@ -14,9 +14,9 @@ export default function Header() {
             A<span>/</span>K
           </a>
           <div className="options">
-            <a href="/projects" className="link">
+            {/* <a href="/projects" className="link">
               Projects
-            </a>
+            </a> */}
             <div className="toggleContainer">
               <DarkModeToggle
                 darkMode={theme === "dark"}
