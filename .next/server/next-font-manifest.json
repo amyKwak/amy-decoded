@@ -1,6 +1,15 @@
 {
   "app": {
+    "[project]/app/_not-found/page": [
+      "static/media/xn7gYHE41ni1AdIRggexSvfedN4-s.p.2b9b556b.woff2"
+    ],
     "[project]/app/page": [
+      "static/media/xn7gYHE41ni1AdIRggexSvfedN4-s.p.2b9b556b.woff2"
+    ],
+    "[project]/app/practice/page": [
+      "static/media/xn7gYHE41ni1AdIRggexSvfedN4-s.p.2b9b556b.woff2"
+    ],
+    "[project]/app/valentines-day/page": [
       "static/media/xn7gYHE41ni1AdIRggexSvfedN4-s.p.2b9b556b.woff2"
     ]
   },
