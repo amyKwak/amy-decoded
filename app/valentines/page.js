@@ -147,14 +147,9 @@ export default function ValentineScavengerHuntApp() {
   const [progress, setProgress] = useState(() => ({
     starryInput: "",
     starryCorrect: false,
-
     sudokuAnswer: "",
-
     logicGuess: "",
-
     crosswordGuess: "",
-
-    finalCode: "",
   }));
 
   const totalSteps = 11;
@@ -186,12 +181,10 @@ export default function ValentineScavengerHuntApp() {
   );
 
   useEffect(() => {
-    if (starryIsCorrect && !progress.starryCorrect) {
+    if (starryIsCorrect && !progress.starryCorrect)
       setField("starryCorrect", true);
-    }
-    if (!starryIsCorrect && progress.starryCorrect) {
+    if (!starryIsCorrect && progress.starryCorrect)
       setField("starryCorrect", false);
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [starryIsCorrect]);
 
@@ -200,10 +193,7 @@ export default function ValentineScavengerHuntApp() {
     if (!startedAt) return;
     if (finishedAt !== null) return;
 
-    const id = setInterval(() => {
-      setElapsed(Date.now() - startedAt);
-    }, 1000);
-
+    const id = setInterval(() => setElapsed(Date.now() - startedAt), 1000);
     return () => clearInterval(id);
   }, [startedAt, finishedAt]);
 
@@ -211,15 +201,12 @@ export default function ValentineScavengerHuntApp() {
     const totalSeconds = Math.floor(ms / 1000);
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
-
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   }
 
-  const sudokuAnswer = "251978364";
-  const sudokuSolved = normalizeAnswer(progress.sudokuAnswer) === sudokuAnswer;
-
+  const sudokuSolved = normalizeAnswer(progress.sudokuAnswer) === "251978364";
   const logicSolved = normalizeAnswer(progress.logicGuess) === "gazebo";
-
+  // NOTE: this currently expects empty string; leaving logic intact, just simplified.
   const crosswordSolved = normalizeAnswer(progress.crosswordGuess) === "";
 
   return (
@@ -538,7 +525,7 @@ export default function ValentineScavengerHuntApp() {
                   Back
                 </Button>
                 <Button onClick={next} disabled={false}>
-                  {/* FIX to disabled={!progress.crosswordSolved} */}
+                  {/* FIX to disabled={!crosswordSolved} */}
                   Next →
                 </Button>
               </div>
@@ -564,7 +551,6 @@ export default function ValentineScavengerHuntApp() {
                   Back
                 </Button>
                 <Button onClick={next} disabled={false}>
-                  {/* FIX to disabled={!progress.crosswordSolved} */}
                   Next →
                 </Button>
               </div>
@@ -724,17 +710,6 @@ export default function ValentineScavengerHuntApp() {
           color: #7a1834;
           margin-bottom: 8px;
         }
-        .clueText {
-          color: rgba(58, 11, 26, 0.82);
-          line-height: 1.45;
-        }
-
-        .fine {
-          font-size: 12px;
-          color: rgba(58, 11, 26, 0.6);
-          margin-top: 8px;
-          line-height: 1.35;
-        }
 
         .row {
           display: flex;
@@ -772,42 +747,6 @@ export default function ValentineScavengerHuntApp() {
           font-weight: 700;
         }
 
-        .check {
-          display: flex;
-          gap: 10px;
-          align-items: center;
-          margin-top: 10px;
-          font-weight: 800;
-          color: rgba(58, 11, 26, 0.78);
-        }
-        .check input {
-          width: 18px;
-          height: 18px;
-          accent-color: #ff4d7d;
-        }
-
-        .mono {
-          font-family:
-            ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-            "Liberation Mono", "Courier New", monospace;
-          background: rgba(58, 11, 26, 0.05);
-          padding: 12px;
-          border-radius: 14px;
-          border: 1px dashed rgba(122, 24, 52, 0.2);
-          letter-spacing: 1px;
-          font-weight: 900;
-          color: #7a1834;
-        }
-
-        .bigWord {
-          font-size: 34px;
-          font-weight: 950;
-          letter-spacing: 2px;
-          color: #7a1834;
-          text-align: center;
-          padding: 12px 0 2px;
-        }
-
         .finish {
           width: 100%;
           display: flex;
@@ -832,7 +771,6 @@ export default function ValentineScavengerHuntApp() {
 }
 
 function FloatingHearts() {
-  // lightweight decorative background
   const hearts = useMemo(
     () =>
       Array.from({ length: 14 }).map((_, i) => ({
@@ -876,7 +814,6 @@ function FloatingHearts() {
         .heart {
           position: absolute;
           color: #ff4d7d;
-          filter: blur(0px);
           animation-name: drift;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
