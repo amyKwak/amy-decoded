@@ -1,10 +1,31 @@
 {
   "app": {
+    "[project]/app/_not-found/page": [
+      "static/media/a343f882a40d2cc9-s.p.71e1367e.woff2"
+    ],
+    "[project]/app/about/page": [
+      "static/media/a343f882a40d2cc9-s.p.71e1367e.woff2"
+    ],
+    "[project]/app/cheerful/page": [
+      "static/media/a343f882a40d2cc9-s.p.71e1367e.woff2"
+    ],
     "[project]/app/page": [
-      "static/media/xn7gYHE41ni1AdIRggexSvfedN4-s.p.2b9b556b.woff2"
+      "static/media/a343f882a40d2cc9-s.p.71e1367e.woff2"
+    ],
+    "[project]/app/practice/page": [
+      "static/media/a343f882a40d2cc9-s.p.71e1367e.woff2"
+    ],
+    "[project]/app/projects/page": [
+      "static/media/a343f882a40d2cc9-s.p.71e1367e.woff2"
+    ],
+    "[project]/app/projects/pillpal/page": [
+      "static/media/a343f882a40d2cc9-s.p.71e1367e.woff2"
+    ],
+    "[project]/app/projects/shotclock/page": [
+      "static/media/a343f882a40d2cc9-s.p.71e1367e.woff2"
     ],
     "[project]/app/valentines/page": [
-      "static/media/xn7gYHE41ni1AdIRggexSvfedN4-s.p.2b9b556b.woff2"
+      "static/media/a343f882a40d2cc9-s.p.71e1367e.woff2"
     ]
   },
   "appUsingSizeAdjust": true,

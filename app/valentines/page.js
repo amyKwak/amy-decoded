@@ -1,48 +1,6 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
 
-/**
- * Valentine Scavenger Hunt (React + styled-jsx)
- * ------------------------------------------------
- * - Single-file app you can paste into a Next.js page (recommended) or adapt to CRA.
- * - No Tailwind. All styling uses styled-jsx.
- *
- * Quick customize:
- * 1) Update PLACES in `HUNT_CONFIG` (names + addresses/notes).
- * 3) Edit the clue/puzzle copy in the step renderers.
- */
-const HUNT_CONFIG = {
-  boyfriendName: "Babe",
-  // At least 5 places to go (these are placeholders; swap for real spots):
-  places: {
-    place1: {
-      label: "Place #1",
-      name: "The Kitchen",
-      note: "(Hide the first note by the mugs / coffee.)",
-    },
-    place2: {
-      label: "Place #2",
-      name: "Our Coffee Spot",
-      note: "(A barista-friendly envelope under your name.)",
-    },
-    place3: {
-      label: "Place #3",
-      name: "City Park Gazebo",
-      note: "(Tape a clue under the bench slat.)",
-    },
-    place4: {
-      label: "Place #4",
-      name: "Bookstore — Art Section",
-      note: "(Inside a book with a bookmark.)",
-    },
-    place5: {
-      label: "Place #5",
-      name: "Home — Living Room",
-      note: "(Final surprise: candles + your gift.)",
-    },
-  },
-};
-
 // Utility
 function normalizeAnswer(s) {
   return String(s || "")
@@ -181,180 +139,9 @@ function Pill({ children }) {
   );
 }
 
-/**
- * Mini-game: Memory Match (small, quick, but satisfying)
- * - Flip cards, match pairs.
- * - When all pairs matched, reveals a code word.
- */
-function MemoryMatch({ onSolved }) {
-  const symbols = useMemo(() => ["♥", "★", "✿", "☕", "🎨", "♫"], []);
-  const [deck, setDeck] = useState(() => shuffle([...symbols, ...symbols]));
-  const [flipped, setFlipped] = useState([]); // indexes
-  const [matched, setMatched] = useState(new Set());
-  const [moves, setMoves] = useState(0);
-
-  useEffect(() => {
-    if (matched.size === deck.length) {
-      onSolved?.();
-    }
-  }, [matched, deck.length, onSolved]);
-
-  function reset() {
-    setDeck(shuffle([...symbols, ...symbols]));
-    setFlipped([]);
-    setMatched(new Set());
-    setMoves(0);
-  }
-
-  function clickCard(i) {
-    if (matched.has(i)) return;
-    if (flipped.includes(i)) return;
-    if (flipped.length === 2) return;
-
-    const nextFlipped = [...flipped, i];
-    setFlipped(nextFlipped);
-
-    if (nextFlipped.length === 2) {
-      setMoves((m) => m + 1);
-      const [a, b] = nextFlipped;
-      const isMatch = deck[a] === deck[b];
-      window.setTimeout(() => {
-        if (isMatch) {
-          setMatched((prev) => {
-            const n = new Set(prev);
-            n.add(a);
-            n.add(b);
-            return n;
-          });
-        }
-        setFlipped([]);
-      }, 650);
-    }
-  }
-
-  return (
-    <div className="mm">
-      <div className="mmTop">
-        <div>
-          <Pill>Mini-game</Pill>
-          <h3>Memory Match</h3>
-          <p className="sub">
-            Match all pairs to unlock the next clue. Try to finish in{" "}
-            <b>8 moves</b>.
-          </p>
-        </div>
-        <div className="stats">
-          <div>
-            <div className="label">Moves</div>
-            <div className="value">{moves}</div>
-          </div>
-          <Button variant="ghost" onClick={reset}>
-            Reset
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid" role="grid" aria-label="memory match">
-        {deck.map((sym, i) => {
-          const isUp = flipped.includes(i) || matched.has(i);
-          return (
-            <button
-              key={i}
-              className={`cardBtn ${isUp ? "up" : "down"}`}
-              onClick={() => clickCard(i)}
-              aria-label={isUp ? `card ${sym}` : "card"}
-            >
-              <span className="face">{isUp ? sym : "?"}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      <style jsx>{`
-        .mm h3 {
-          margin: 10px 0 6px;
-          font-size: 20px;
-          color: #7a1834;
-        }
-        .sub {
-          margin: 0;
-          color: rgba(122, 24, 52, 0.78);
-        }
-        .mmTop {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 14px;
-          margin-bottom: 12px;
-        }
-        .stats {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        .label {
-          font-size: 12px;
-          color: rgba(122, 24, 52, 0.7);
-          font-weight: 800;
-          letter-spacing: 0.3px;
-          text-transform: uppercase;
-        }
-        .value {
-          font-size: 18px;
-          font-weight: 900;
-          color: #7a1834;
-        }
-        .grid {
-          display: grid;
-          grid-template-columns: repeat(6, minmax(0, 1fr));
-          gap: 10px;
-          margin-top: 10px;
-        }
-        .cardBtn {
-          border: 1px solid rgba(122, 24, 52, 0.18);
-          border-radius: 16px;
-          padding: 0;
-          height: 68px;
-          cursor: pointer;
-          background: rgba(255, 255, 255, 0.9);
-          box-shadow: 0 10px 18px rgba(0, 0, 0, 0.06);
-          transition: transform 120ms ease;
-        }
-        .cardBtn:active {
-          transform: translateY(1px);
-        }
-        .cardBtn.up {
-          background: rgba(255, 77, 125, 0.12);
-        }
-        .face {
-          display: grid;
-          place-items: center;
-          height: 100%;
-          font-size: 26px;
-          font-weight: 900;
-          color: #7a1834;
-        }
-        @media (max-width: 640px) {
-          .grid {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-          }
-        }
-      `}</style>
-    </div>
-  );
-}
-
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
 export default function ValentineScavengerHuntApp() {
   const [startedAt, setStartedAt] = useState(null);
+  const [finishedAt, setFinishedAt] = useState(null);
   const [elapsed, setElapsed] = useState(0);
   const [step, setStep] = useState(0);
   const [progress, setProgress] = useState(() => ({
@@ -363,15 +150,14 @@ export default function ValentineScavengerHuntApp() {
 
     sudokuAnswer: "",
 
-    memorySolved: false,
-
     logicGuess: "",
+
+    crosswordGuess: "",
 
     finalCode: "",
   }));
 
-  const totalSteps = 8;
-  const place = HUNT_CONFIG.places;
+  const totalSteps = 11;
 
   function next() {
     setStep((s) => Math.min(s + 1, totalSteps - 1));
@@ -382,6 +168,11 @@ export default function ValentineScavengerHuntApp() {
   }
   function back() {
     setStep((s) => Math.max(s - 1, 0));
+  }
+  function finish() {
+    const finalMs = Date.now() - startedAt;
+    setElapsed(finalMs);
+    setFinishedAt(finalMs);
   }
 
   function setField(key, value) {
@@ -407,13 +198,14 @@ export default function ValentineScavengerHuntApp() {
   // timer
   useEffect(() => {
     if (!startedAt) return;
+    if (finishedAt !== null) return;
 
     const id = setInterval(() => {
       setElapsed(Date.now() - startedAt);
     }, 1000);
 
     return () => clearInterval(id);
-  }, [startedAt]);
+  }, [startedAt, finishedAt]);
 
   function formatTime(ms) {
     const totalSeconds = Math.floor(ms / 1000);
@@ -423,12 +215,12 @@ export default function ValentineScavengerHuntApp() {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   }
 
-  const sudokuAnswer = "251978364"; // where you want him to go
+  const sudokuAnswer = "251978364";
   const sudokuSolved = normalizeAnswer(progress.sudokuAnswer) === sudokuAnswer;
 
   const logicSolved = normalizeAnswer(progress.logicGuess) === "gazebo";
 
-  const finalSolved = normalizeAnswer(progress.finalCode) === "forever";
+  const crosswordSolved = normalizeAnswer(progress.crosswordGuess) === "";
 
   return (
     <div className="page">
@@ -441,7 +233,7 @@ export default function ValentineScavengerHuntApp() {
           ) : (
             <>
               <div className="title">Valentine Hunt</div>
-              <div className="subtitle">For {HUNT_CONFIG.boyfriendName}</div>
+              <div className="subtitle">For BB</div>
             </>
           )}
         </div>
@@ -562,7 +354,7 @@ export default function ValentineScavengerHuntApp() {
 
           {step === 3 && (
             <>
-              <Pill>Roadblock</Pill>
+              <Pill>Route Info</Pill>
               <h2>Head to the Next Location</h2>
               <p className="lead">
                 Go to the place where distance disappears,
@@ -603,9 +395,6 @@ export default function ValentineScavengerHuntApp() {
               <HeartDivider />
               <div className="clueBox">
                 <div className="clueTitle">Enter the last row of numbers</div>
-                <p className="fine">
-                  (Correct keyword currently: <b>{sudokuAnswer}</b>)
-                </p>
                 <div className="row">
                   <Input
                     value={progress.sudokuAnswer}
@@ -628,7 +417,8 @@ export default function ValentineScavengerHuntApp() {
                 <Button variant="secondary" onClick={back}>
                   Back
                 </Button>
-                <Button onClick={next} disabled={!sudokuSolved}>
+                <Button onClick={next} disabled={false}>
+                  {/* FIX: changed disabled to !sudokuSolved */}
                   Next →
                 </Button>
               </div>
@@ -637,79 +427,29 @@ export default function ValentineScavengerHuntApp() {
 
           {step === 5 && (
             <>
-              <Pill>Game</Pill>
-              <h2>Earn the next clue</h2>
+              <Pill>Route Info</Pill>
+              <h2>Head to the Next Location</h2>
               <p className="lead">
-                Complete the mini-game to unlock a code word. That code word
-                will be written on the next hidden note.
+                Riddle about next location
+                <br />
+                <br />
               </p>
-
-              <MemoryMatch
-                onSolved={() => {
-                  setField("memorySolved", true);
-                }}
-              />
-
-              <HeartDivider />
-              <div className="clueBox">
-                <div className="clueTitle">Unlocked code word</div>
-                {progress.memorySolved ? (
-                  <div className="bigWord">ROSE</div>
-                ) : (
-                  <div className="muted">
-                    Solve the game to reveal the word.
-                  </div>
-                )}
-                <div className="fine">
-                  Hide a note at <b>{place.place3.name}</b> that contains the
-                  word “ROSE”.
-                </div>
-              </div>
-
-              <div className="clueBox">
-                <div className="clueTitle">Where to go next</div>
-                <div className="clueText">
-                  Go to <b>{place.place3.name}</b> {place.place3.note}
-                </div>
-              </div>
-
+              ❤️ When you’ve found the clue and your gift, tap <b>Next </b>
+              to continue.
               <div className="actions between">
                 <Button variant="secondary" onClick={back}>
                   Back
                 </Button>
-                <Button onClick={next} disabled={!progress.memorySolved}>
-                  Next →
-                </Button>
+                <Button onClick={next}>Next →</Button>
               </div>
             </>
           )}
 
           {step === 6 && (
             <>
-              <Pill>Puzzle 3</Pill>
-              <h2>Logic riddle (mind games)</h2>
-              <p className="lead">
-                Your next destination is described by a riddle. Solve it to
-                unlock “Next”.
-              </p>
-
-              <div className="clueBox">
-                <div className="clueTitle">Riddle</div>
-                <p className="lead" style={{ marginTop: 10 }}>
-                  I have a roof but no walls.
-                  <br />
-                  I’m outdoors but built for waiting.
-                  <br />
-                  On calm days, I’m a stage.
-                  <br />
-                  On windy days, I’m a whisper.
-                  <br />
-                  <b>What am I?</b>
-                </p>
-                <div className="fine">
-                  Answer with a single keyword (example: “gazebo”).
-                </div>
-              </div>
+              <Pill>Roadblock</Pill>
+              <h2>Intro</h2>
+              <p className="lead">What to do</p>
 
               <div className="clueBox">
                 <div className="clueTitle">Your answer</div>
@@ -722,7 +462,7 @@ export default function ValentineScavengerHuntApp() {
                 </div>
                 <div className="status">
                   {progress.logicGuess.trim().length === 0 ? (
-                    <span className="muted">Type your guess.</span>
+                    <span className="muted"></span>
                   ) : logicSolved ? (
                     <span className="ok">Correct. Go claim your clue 🗝️</span>
                   ) : (
@@ -731,23 +471,12 @@ export default function ValentineScavengerHuntApp() {
                 </div>
               </div>
 
-              <div className="clueBox">
-                <div className="clueTitle">Where to go</div>
-                <div className="clueText">
-                  Head to <b>{place.place3.name}</b> if you haven’t already,
-                  then onward to <b>{place.place2.name}</b>.
-                  <div className="fine" style={{ marginTop: 6 }}>
-                    (Pro move: At the gazebo note, include an instruction like
-                    “Order a drink with *our* initials.”)
-                  </div>
-                </div>
-              </div>
-
               <div className="actions between">
                 <Button variant="secondary" onClick={back}>
                   Back
                 </Button>
-                <Button onClick={next} disabled={!logicSolved}>
+                <Button onClick={next} disabled={false}>
+                  {/* FIX: disabled = !logicSolved */}
                   Next →
                 </Button>
               </div>
@@ -756,91 +485,108 @@ export default function ValentineScavengerHuntApp() {
 
           {step === 7 && (
             <>
-              <Pill>Finale</Pill>
-              <h2>Bring it home 💞</h2>
+              <Pill>Route Info</Pill>
+              <h2>Head to the Next Location</h2>
               <p className="lead">
-                The final clue should be waiting at <b>{place.place2.name}</b>.
-                It contains a final code word. Enter it below to unlock the
-                ending.
+                Riddle
+                <br />
+                <br />
+              </p>
+              ❤️ When you’ve found the clue and your gift, tap <b>Next </b>
+              to continue.
+              <div className="actions between">
+                <Button variant="secondary" onClick={back}>
+                  Back
+                </Button>
+                <Button onClick={next} disabled={false}>
+                  Next →
+                </Button>
+              </div>
+            </>
+          )}
+
+          {step === 8 && (
+            <>
+              <Pill>Roadblock</Pill>
+              <h2>Can you take a moment to remember?</h2>
+              <p className="lead">
+                Fill in the crossword by writing the <b>city</b> where each
+                photo was taken.
               </p>
 
               <div className="clueBox">
-                <div className="clueTitle">Final code word</div>
-                <p className="fine">
-                  Set the code word on your printed note. Right now it’s{" "}
-                  <b>FOREVER</b>.
-                </p>
+                <div className="clueTitle">Enter the letters in red</div>
                 <div className="row">
                   <Input
-                    value={progress.finalCode}
-                    onChange={(v) => setField("finalCode", v)}
-                    placeholder="final code"
+                    value={progress.crosswordGuess}
+                    onChange={(v) => setField("crosswordGuess", v)}
                   />
                 </div>
                 <div className="status">
-                  {progress.finalCode.trim().length === 0 ? (
-                    <span className="muted">Enter the code to finish.</span>
-                  ) : finalSolved ? (
-                    <span className="ok">
-                      Unlocked. Go to the finish line 🏁
-                    </span>
+                  {progress.crosswordGuess.trim().length === 0 ? (
+                    <span className="muted"></span>
+                  ) : crosswordSolved ? (
+                    <span className="ok">Good memory!</span>
                   ) : (
-                    <span className="bad">Nope. Check the note again.</span>
+                    <span className="bad">Nope. Try again.</span>
                   )}
                 </div>
               </div>
-
-              {finalSolved && (
-                <>
-                  <HeartDivider />
-                  <div className="clueBox">
-                    <div className="clueTitle">Finish line</div>
-                    <div className="clueText">
-                      Go to <b>{place.place5.name}</b> {place.place5.note}
-                    </div>
-                    <div className="fine" style={{ marginTop: 10 }}>
-                      Ending idea: candles + playlist + a small gift + a
-                      handwritten note that says:
-                      <br />
-                      “You just won my favorite race: the one where I get you.”
-                    </div>
-                  </div>
-                </>
-              )}
 
               <div className="actions between">
                 <Button variant="secondary" onClick={back}>
                   Back
                 </Button>
-                <Button
-                  onClick={() => {
-                    // Simple “restart” if you want to re-run
-                    setStep(0);
-                    setProgress({
-                      starryInput: "",
-                      starryCorrect: false,
-                      sudokuAnswer: "",
-                      memorySolved: false,
-                      logicGuess: "",
-                      finalCode: "",
-                    });
-                  }}
-                  variant="secondary"
-                >
-                  Restart
+                <Button onClick={next} disabled={false}>
+                  {/* FIX to disabled={!progress.crosswordSolved} */}
+                  Next →
                 </Button>
               </div>
             </>
           )}
-        </Card>
 
-        <div className="footer">
-          <small>
-            Tip: For real-world play, hide printed notes/QR codes at each
-            location. Make each note include the next step’s “keyword” so he
-            can’t skip ahead.
-          </small>
-        </div>
+          {step === 9 && (
+            <>
+              <Pill>Pit Stop</Pill>
+              <h2>Race to the finish line!</h2>
+              <p className="lead">
+                <b>DON'T CLICK NEXT.</b>
+                <br />
+                <br />
+                Bring it back <b>home</b>.
+                <br />
+                Ring the doorbell and trade your phone for your final challenge.
+                <br />
+              </p>
+
+              <div className="actions between">
+                <Button variant="secondary" onClick={back}>
+                  Back
+                </Button>
+                <Button onClick={next} disabled={false}>
+                  {/* FIX to disabled={!progress.crosswordSolved} */}
+                  Next →
+                </Button>
+              </div>
+            </>
+          )}
+
+          {step === 10 && (
+            <div className="finish">
+              {finishedAt === null ? (
+                <div className="finish">
+                  <Button onClick={finish} disabled={false}>
+                    Finish
+                  </Button>
+                </div>
+              ) : (
+                <div className="finishTime">
+                  🏁 Finish time: <strong>{formatTime(finishedAt)}</strong> 🏁
+                </div>
+              )}
+            </div>
+          )}
+        </Card>
       </div>
 
       <style jsx global>{`
@@ -1062,17 +808,14 @@ export default function ValentineScavengerHuntApp() {
           padding: 12px 0 2px;
         }
 
-        .hint {
-          margin: 0;
-          color: rgba(58, 11, 26, 0.68);
+        .finish {
+          width: 100%;
+          display: flex;
+          justify-content: center;
         }
 
-        .footer {
-          width: 100%;
-          max-width: 820px;
-          margin-top: 14px;
-          padding: 0 4px;
-          color: rgba(58, 11, 26, 0.55);
+        .finishTime {
+          font-size: 3rem;
         }
 
         @media (max-width: 640px) {

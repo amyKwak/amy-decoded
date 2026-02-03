@@ -1,5 +1,13 @@
 {
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/about/page": "app/about/page.js",
+  "/cheerful/page": "app/cheerful/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
   "/page": "app/page.js",
+  "/practice/page": "app/practice/page.js",
+  "/projects/page": "app/projects/page.js",
+  "/projects/pillpal/page": "app/projects/pillpal/page.js",
+  "/projects/shotclock/page": "app/projects/shotclock/page.js",
   "/valentines/page": "app/valentines/page.js"
 }

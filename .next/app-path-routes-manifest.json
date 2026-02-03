@@ -1,12 +1,13 @@
 {
+  "/_global-error/page": "/_global-error",
   "/_not-found/page": "/_not-found",
-  "/favicon.ico/route": "/favicon.ico",
   "/about/page": "/about",
+  "/cheerful/page": "/cheerful",
+  "/favicon.ico/route": "/favicon.ico",
+  "/page": "/",
   "/practice/page": "/practice",
   "/projects/page": "/projects",
-  "/page": "/",
-  "/projects/shotclock/page": "/projects/shotclock",
   "/projects/pillpal/page": "/projects/pillpal",
-  "/cheerful/page": "/cheerful",
-  "/valentines-day/page": "/valentines-day"
+  "/projects/shotclock/page": "/projects/shotclock",
+  "/valentines/page": "/valentines"
 }
