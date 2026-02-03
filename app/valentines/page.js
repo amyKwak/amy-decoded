@@ -9,7 +9,6 @@ import React, { useEffect, useMemo, useState } from "react";
  *
  * Quick customize:
  * 1) Update PLACES in `HUNT_CONFIG` (names + addresses/notes).
- * 2) Replace `PHOTO_CLUE_IMAGE_URL` with your photo URL (or import).
  * 3) Edit the clue/puzzle copy in the step renderers.
  */
 const HUNT_CONFIG = {
@@ -43,9 +42,6 @@ const HUNT_CONFIG = {
     },
   },
 };
-
-const PHOTO_CLUE_IMAGE_URL =
-  "https://images.unsplash.com/photo-1520962922320-2038eebab146?auto=format&fit=crop&w=1400&q=70"; // TODO: replace with your own photo
 
 // Utility
 function normalizeAnswer(s) {
@@ -364,12 +360,8 @@ export default function ValentineScavengerHuntApp() {
   const [progress, setProgress] = useState(() => ({
     starryInput: "",
     starryCorrect: false,
-    finishedPuzzleYes: false,
-    finishedPuzzleNo: false,
 
-    photoGuess: "",
-
-    caesarGuess: "",
+    sudokuAnswer: "",
 
     memorySolved: false,
 
@@ -408,9 +400,6 @@ export default function ValentineScavengerHuntApp() {
     }
     if (!starryIsCorrect && progress.starryCorrect) {
       setField("starryCorrect", false);
-      // also reset follow-ups if they change the answer
-      setField("finishedPuzzleYes", false);
-      setField("finishedPuzzleNo", false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [starryIsCorrect]);
@@ -434,10 +423,8 @@ export default function ValentineScavengerHuntApp() {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   }
 
-  const caesarTarget = "bookstore"; // where you want him to go
-  const caesarSolved = normalizeAnswer(progress.caesarGuess) === caesarTarget;
-
-  const photoSolved = normalizeAnswer(progress.photoGuess) === "coffee";
+  const sudokuAnswer = "251978364"; // where you want him to go
+  const sudokuSolved = normalizeAnswer(progress.sudokuAnswer) === sudokuAnswer;
 
   const logicSolved = normalizeAnswer(progress.logicGuess) === "gazebo";
 
@@ -482,8 +469,14 @@ export default function ValentineScavengerHuntApp() {
               </p>
               <HeartDivider />
               <ul className="bullets">
-                <li>Bring your phone.</li>
                 <li>Keep this page open so your timer keeps running.</li>
+                <li>
+                  All gifts will be wrapped in{" "}
+                  <b>
+                    <span style={{ color: "red" }}>red</span>
+                  </b>
+                  .
+                </li>
                 <li>
                   Finish as fast as you can — any time you have left in the hour
                   will be rewarded with a massage. 💆‍♂️💋
@@ -519,9 +512,6 @@ export default function ValentineScavengerHuntApp() {
               ❤️ When you’ve found the clue and your gift, tap <b>Next </b>
               to continue.
               <div className="actions between">
-                <Button variant="secondary" onClick={back}>
-                  Back
-                </Button>
                 <Button onClick={next}>Next →</Button>
               </div>
             </>
@@ -562,7 +552,8 @@ export default function ValentineScavengerHuntApp() {
                 <Button variant="secondary" onClick={back}>
                   Back
                 </Button>
-                <Button onClick={next} disabled={!progress.starryCorrect}>
+                <Button onClick={next} disabled={false}>
+                  {/* FIX to disabled={!progress.starryCorrect} */}
                   Next →
                 </Button>
               </div>
@@ -571,57 +562,32 @@ export default function ValentineScavengerHuntApp() {
 
           {step === 3 && (
             <>
-              <Pill>Clue 2</Pill>
-              <h2>Photo clue: Where is this?</h2>
+              <Pill>Roadblock</Pill>
+              <h2>Head to the Next Location</h2>
               <p className="lead">
-                Study the picture. You’re looking for a place that matches
-                it—and at that place, you’ll find the next hidden note.
+                Go to the place where distance disappears,
+                <br />
+                without a call, a text, or a voice in your ears.
+                <br />
+                <br />
+                Where names become numbers and time stands still,
+                <br />
+                until a small door opens by someone’s will.
+                <br />
+                <br />
+                Find the spot where messages finally land,
+                <br />
+                after crossing the world hand to hand.
+                <br />
+                <br />
               </p>
-
-              <div className="photoWrap">
-                <img src={PHOTO_CLUE_IMAGE_URL} alt="Clue location" />
-                <div className="photoCaption">
-                  <div className="capTitle">Your task</div>
-                  <div className="capText">
-                    Figure out where this is. When you arrive, look for
-                    something that smells amazing.
-                  </div>
-                </div>
-              </div>
-
-              <HeartDivider />
-              <div className="clueBox">
-                <div className="clueTitle">
-                  Type the keyword when you’re there
-                </div>
-                <p className="fine">
-                  (For now, the correct keyword is <b>coffee</b>.)
-                </p>
-                <div className="row">
-                  <Input
-                    value={progress.photoGuess}
-                    onChange={(v) => setField("photoGuess", v)}
-                    placeholder='Type the keyword (example: "coffee")'
-                  />
-                </div>
-                <div className="status">
-                  {progress.photoGuess.trim().length === 0 ? (
-                    <span className="muted">
-                      Enter the keyword to unlock Next.
-                    </span>
-                  ) : photoSolved ? (
-                    <span className="ok">Nice. I knew you’d get it ☕</span>
-                  ) : (
-                    <span className="bad">Nope. Look closer 👀</span>
-                  )}
-                </div>
-              </div>
-
+              ❤️ When you’ve found the clue and your gift, tap <b>Next </b>
+              to continue.
               <div className="actions between">
                 <Button variant="secondary" onClick={back}>
                   Back
                 </Button>
-                <Button onClick={next} disabled={!photoSolved}>
+                <Button onClick={next} disabled={false}>
                   Next →
                 </Button>
               </div>
@@ -630,54 +596,31 @@ export default function ValentineScavengerHuntApp() {
 
           {step === 4 && (
             <>
-              <Pill>Puzzle 2</Pill>
-              <h2>Crack the cipher</h2>
-              <p className="lead">
-                Amazing Race vibes: decode the message to learn your next
-                destination.
-              </p>
-
-              <div className="clueBox">
-                <div className="clueTitle">Cipher text</div>
-                <div className="mono">EPPWTXZK — IWK UJMM ZMKXK — QJH!</div>
-                <div className="fine">
-                  Hint: It’s a Caesar shift. Try shifting letters{" "}
-                  <b>back by 8</b>.
-                </div>
-              </div>
+              <Pill>Roadblock</Pill>
+              <h2>Can you solve my kind of chaos?</h2>
+              <p className="lead">Solve the Sudoku.</p>
 
               <HeartDivider />
               <div className="clueBox">
-                <div className="clueTitle">
-                  Enter the decoded destination keyword
-                </div>
+                <div className="clueTitle">Enter the last row of numbers</div>
                 <p className="fine">
-                  (Correct keyword currently: <b>{caesarTarget}</b>)
+                  (Correct keyword currently: <b>{sudokuAnswer}</b>)
                 </p>
                 <div className="row">
                   <Input
-                    value={progress.caesarGuess}
-                    onChange={(v) => setField("caesarGuess", v)}
-                    placeholder="destination keyword"
+                    value={progress.sudokuAnswer}
+                    onChange={(v) => setField("sudokuAnswer", v)}
+                    placeholder="Type the answer here"
                   />
                 </div>
                 <div className="status">
-                  {progress.caesarGuess.trim().length === 0 ? (
-                    <span className="muted">Decode it to continue.</span>
-                  ) : caesarSolved ? (
-                    <span className="ok">Yes! Off you go 📚</span>
+                  {progress.sudokuAnswer.trim().length === 0 ? (
+                    <span className="muted"></span>
+                  ) : sudokuSolved ? (
+                    <span className="ok">Yes! Off you go 🏃</span>
                   ) : (
-                    <span className="bad">
-                      Not yet… shift letters back by 8.
-                    </span>
+                    <span className="bad">Not yet…</span>
                   )}
-                </div>
-              </div>
-
-              <div className="clueBox">
-                <div className="clueTitle">Where to go</div>
-                <div className="clueText">
-                  Head to <b>{place.place4.name}</b> {place.place4.note}
                 </div>
               </div>
 
@@ -685,7 +628,7 @@ export default function ValentineScavengerHuntApp() {
                 <Button variant="secondary" onClick={back}>
                   Back
                 </Button>
-                <Button onClick={next} disabled={!caesarSolved}>
+                <Button onClick={next} disabled={!sudokuSolved}>
                   Next →
                 </Button>
               </div>
@@ -876,10 +819,7 @@ export default function ValentineScavengerHuntApp() {
                     setProgress({
                       starryInput: "",
                       starryCorrect: false,
-                      finishedPuzzleYes: false,
-                      finishedPuzzleNo: false,
-                      photoGuess: "",
-                      caesarGuess: "",
+                      sudokuAnswer: "",
                       memorySolved: false,
                       logicGuess: "",
                       finalCode: "",
@@ -1098,32 +1038,6 @@ export default function ValentineScavengerHuntApp() {
           width: 18px;
           height: 18px;
           accent-color: #ff4d7d;
-        }
-
-        .photoWrap {
-          margin-top: 14px;
-          border-radius: 18px;
-          overflow: hidden;
-          border: 1px solid rgba(122, 24, 52, 0.12);
-          background: rgba(255, 255, 255, 0.7);
-        }
-        .photoWrap img {
-          display: block;
-          width: 100%;
-          height: 320px;
-          object-fit: cover;
-        }
-        .photoCaption {
-          padding: 12px 14px;
-        }
-        .capTitle {
-          font-weight: 950;
-          color: #7a1834;
-        }
-        .capText {
-          color: rgba(58, 11, 26, 0.78);
-          margin-top: 6px;
-          line-height: 1.4;
         }
 
         .mono {
