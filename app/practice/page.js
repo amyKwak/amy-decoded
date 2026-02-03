@@ -10,7 +10,7 @@ const Counter = () => {
   const [count, setCount] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
 
-  function pause() {
+  function stop() {
     setIsPlaying(false);
   }
 
@@ -23,7 +23,7 @@ const Counter = () => {
     if (!isPlaying) return;
 
     const id = setInterval(() => {
-      setCount((t) => t + 1);
+      setCount((c) => c + 1);
     }, 1000);
 
     return () => clearInterval(id);
@@ -31,8 +31,10 @@ const Counter = () => {
 
   return (
     <div>
-      {count}
-      <button onClick={pause}>Pause</button>
+      Count: {count}
+      <button onClick={stop} disabled={!isPlaying}>
+        Stop
+      </button>
       <button onClick={reset}>Reset</button>
     </div>
   );

@@ -1,5 +1,10 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
+
+const FloatingHearts = dynamic(() => import("./FloatingHearts"), {
+  ssr: false,
+});
 
 // Utility
 function normalizeAnswer(s) {
@@ -220,7 +225,7 @@ export default function ValentineScavengerHuntApp() {
           ) : (
             <>
               <div className="title">Valentine Hunt</div>
-              <div className="subtitle">For BB</div>
+              <div className="subtitle">For Bb</div>
             </>
           )}
         </div>
@@ -236,7 +241,7 @@ export default function ValentineScavengerHuntApp() {
           {step === 0 && (
             <>
               <Pill>Happy Valentine’s Day</Pill>
-              <h1>❤️ Scavenger Hunt ❤️</h1>
+              <h2>❤️ Scavenger Hunt ❤️</h2>
               <p className="lead">
                 I planned a mini Amazing Race–style adventure just for you.
                 <br />
@@ -248,9 +253,8 @@ export default function ValentineScavengerHuntApp() {
               </p>
               <HeartDivider />
               <ul className="bullets">
-                <li>Keep this page open so your timer keeps running.</li>
                 <li>
-                  All gifts will be wrapped in{" "}
+                  All gifts are wrapped in{" "}
                   <b>
                     <span style={{ color: "red" }}>red</span>
                   </b>
@@ -360,8 +364,10 @@ export default function ValentineScavengerHuntApp() {
                 <br />
                 <br />
               </p>
-              ❤️ When you’ve found the clue and your gift, tap <b>Next </b>
-              to continue.
+              When you’ve found the next clue,
+              <br />
+              tap <b>Next </b>
+              to continue.❤️
               <div className="actions between">
                 <Button variant="secondary" onClick={back}>
                   Back
@@ -377,7 +383,7 @@ export default function ValentineScavengerHuntApp() {
             <>
               <Pill>Roadblock</Pill>
               <h2>Can you solve my kind of chaos?</h2>
-              <p className="lead">Solve the Sudoku.</p>
+              <p>Solve the Sudoku.</p>
 
               <HeartDivider />
               <div className="clueBox">
@@ -537,12 +543,11 @@ export default function ValentineScavengerHuntApp() {
               <Pill>Pit Stop</Pill>
               <h2>Race to the finish line!</h2>
               <p className="lead">
-                <b>DON'T CLICK NEXT.</b>
-                <br />
-                <br />
                 Bring it back <b>home</b>.
                 <br />
-                Ring the doorbell and trade your phone for your final challenge.
+                <br />
+                Ring the doorbell,
+                <br /> and trade your phone for your final challenge.
                 <br />
               </p>
 
@@ -673,7 +678,7 @@ export default function ValentineScavengerHuntApp() {
         .lead {
           margin: 0;
           color: rgba(58, 11, 26, 0.75);
-          font-size: 16px;
+          font-size: 0.7rem;
           line-height: 1.5;
         }
 
@@ -684,6 +689,7 @@ export default function ValentineScavengerHuntApp() {
         }
         .bullets li {
           margin: 6px 0;
+          font-size: 0.7rem;
         }
 
         .actions {
@@ -754,7 +760,7 @@ export default function ValentineScavengerHuntApp() {
         }
 
         .finishTime {
-          font-size: 3rem;
+          font-size: 1.5rem;
         }
 
         @media (max-width: 640px) {
@@ -763,70 +769,6 @@ export default function ValentineScavengerHuntApp() {
           }
           h2 {
             font-size: 22px;
-          }
-        }
-      `}</style>
-    </div>
-  );
-}
-
-function FloatingHearts() {
-  const hearts = useMemo(
-    () =>
-      Array.from({ length: 14 }).map((_, i) => ({
-        id: i,
-        left: Math.random() * 100,
-        top: Math.random() * 100,
-        size: 10 + Math.random() * 22,
-        duration: 8 + Math.random() * 10,
-        delay: Math.random() * 4,
-        opacity: 0.12 + Math.random() * 0.18,
-      })),
-    [],
-  );
-
-  return (
-    <div className="floatLayer" aria-hidden>
-      {hearts.map((h) => (
-        <span
-          key={h.id}
-          className="heart"
-          style={{
-            left: `${h.left}%`,
-            top: `${h.top}%`,
-            fontSize: `${h.size}px`,
-            animationDuration: `${h.duration}s`,
-            animationDelay: `${h.delay}s`,
-            opacity: h.opacity,
-          }}
-        >
-          ♥
-        </span>
-      ))}
-
-      <style jsx>{`
-        .floatLayer {
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          overflow: hidden;
-        }
-        .heart {
-          position: absolute;
-          color: #ff4d7d;
-          animation-name: drift;
-          animation-timing-function: ease-in-out;
-          animation-iteration-count: infinite;
-        }
-        @keyframes drift {
-          0% {
-            transform: translate(0, 0) rotate(0deg);
-          }
-          50% {
-            transform: translate(16px, -22px) rotate(10deg);
-          }
-          100% {
-            transform: translate(0, 0) rotate(0deg);
           }
         }
       `}</style>
