@@ -494,7 +494,12 @@ export default function ValentineScavengerHuntApp() {
               <Pill>Clue 1</Pill>
               <h2>Route Info</h2>
               <p className="lead">
-                Start where mornings begin and tiny rituals live.
+                Go where you’re closer to the sky than the street,
+                <br />
+                and the noise below fades under your feet. Find the place made
+                for slow time and quiet views, where the best seat is simply the
+                one you choose. When you’re closer to the sky than your own
+                front door, you’ve found the spot you’re looking for.
                 <br />
                 <b>Rule:</b> You’re not allowed to open any drawers.
               </p>
