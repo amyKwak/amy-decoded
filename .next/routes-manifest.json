@@ -50,6 +50,30 @@
       "regex": "^/practice(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/practice(?:/)?$"
+    },
+    {
+      "page": "/projects",
+      "regex": "^/projects(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/projects(?:/)?$"
+    },
+    {
+      "page": "/projects/pillpal",
+      "regex": "^/projects/pillpal(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/projects/pillpal(?:/)?$"
+    },
+    {
+      "page": "/projects/shotclock",
+      "regex": "^/projects/shotclock(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/projects/shotclock(?:/)?$"
+    },
+    {
+      "page": "/valentines-day",
+      "regex": "^/valentines\\-day(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/valentines\\-day(?:/)?$"
     }
   ],
   "dataRoutes": [],

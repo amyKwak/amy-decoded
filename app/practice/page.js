@@ -1,83 +1,41 @@
 "use client";
-import { useEffect, useMemo, useState, useRef } from "react";
 
-function CountdownTimer({ initialTime = 20000 }) {
-  const [remaining, setRemaining] = useState(initialTime); // ms - sanitize
-  const [isPaused, setIsPaused] = useState(true);
-  const [isDone, setIsDone] = useState(false);
+import { useEffect, useState } from "react";
 
-  const intervalRef = useRef(null);
-  const targetRef = useRef(null);
+// A counter starts automatically when the page loads
+// It increments once per second
+// There are two buttons: Stop (pauses it) and Reset (sets it back to 0 and keeps running)
+
+const Counter = () => {
+  const [count, setCount] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+
+  function pause() {
+    setIsPlaying(false);
+  }
+
+  function reset() {
+    setCount(0);
+    setIsPlaying(true);
+  }
 
   useEffect(() => {
-    setIsPaused(true);
-    cancelCountdown();
-    setRemaining(initialTime);
-    targetRef.current = null;
-  }, [initialTime]);
+    if (!isPlaying) return;
 
-  function formatMMSS(ms) {
-    const s = Math.floor(ms / 1000);
-    const mm = String(Math.max(0, Math.floor(s / 60))).padStart(2, "0");
-    const ss = String(Math.max(0, Math.floor(s % 60))).padStart(2, "0");
-    return `${mm}:${ss}`;
-  }
+    const id = setInterval(() => {
+      setCount((t) => t + 1);
+    }, 1000);
 
-  function countdown() {
-    intervalRef.current = setInterval(() => {
-      if (!targetRef.current) return;
-      const msLeft = targetRef.current - Date.now();
-      setRemaining(msLeft);
-      if (msLeft <= 0) {
-        clearInterval(intervalRef.current);
-        setIsPaused(true);
-        setIsDone(true);
-      }
-    }, 200);
-  }
-
-  function cancelCountdown() {
-    if (!intervalRef.current) return;
-    clearInterval(intervalRef.current);
-    intervalRef.current = null;
-  }
-
-  function handlePlay() {
-    if (!isPaused || remaining <= 0) return;
-    setIsPaused(false);
-    targetRef.current = Date.now() + remaining;
-    countdown();
-  }
-
-  function handlePause() {
-    if (isPaused) return;
-    setIsPaused(true);
-    targetRef.current = null;
-    cancelCountdown();
-  }
-
-  function handleReset() {
-    setIsPaused(true);
-    setIsDone(false);
-    setRemaining(initialTime);
-    targetRef.current = null;
-    cancelCountdown();
-  }
-
-  useEffect(() => cancelCountdown, []);
+    return () => clearInterval(id);
+  }, [isPlaying]);
 
   return (
     <div>
-      {isDone && <div>Times up!</div>}
-      <h1>Time remaining: {formatMMSS(remaining)}</h1>
-      <div>
-        <button onClick={isPaused ? handlePlay : handlePause}>
-          {isPaused ? "Play" : "Pause"}
-        </button>
-        <button onClick={handleReset}>Reset</button>
-      </div>
+      {count}
+      <button onClick={pause}>Pause</button>
+      <button onClick={reset}>Reset</button>
     </div>
   );
-}
+};
 
-export default CountdownTimer;
+export default Counter;

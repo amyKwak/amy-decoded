@@ -1,8 +1,12 @@
 {
   "/_not-found/page": "/_not-found",
   "/favicon.ico/route": "/favicon.ico",
-  "/cheerful/page": "/cheerful",
-  "/practice/page": "/practice",
   "/about/page": "/about",
-  "/page": "/"
+  "/practice/page": "/practice",
+  "/projects/page": "/projects",
+  "/page": "/",
+  "/projects/shotclock/page": "/projects/shotclock",
+  "/projects/pillpal/page": "/projects/pillpal",
+  "/cheerful/page": "/cheerful",
+  "/valentines-day/page": "/valentines-day"
 }
