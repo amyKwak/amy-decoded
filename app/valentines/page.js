@@ -148,6 +148,17 @@ function Input({ value, onChange, placeholder }) {
       placeholder={placeholder}
       autoComplete="off"
       spellCheck={false}
+      style={{
+        width: "100%",
+        padding: "14px 18px",
+        fontSize: "1.15rem",
+        borderRadius: "14px",
+        border: "2px solid #f2c2d1",
+        outline: "none",
+        background: "#fff9fb",
+        color: "#333",
+        boxShadow: "0 4px 12px rgba(255, 105, 135, 0.15)",
+      }}
     />
   );
 }
@@ -423,11 +434,6 @@ export default function ValentineScavengerHuntApp() {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   }
 
-  const canNextFromStarry =
-    progress.starryCorrect &&
-    progress.finishedPuzzleYes &&
-    !progress.finishedPuzzleNo;
-
   const caesarTarget = "bookstore"; // where you want him to go
   const caesarSolved = normalizeAnswer(progress.caesarGuess) === caesarTarget;
 
@@ -491,60 +497,54 @@ export default function ValentineScavengerHuntApp() {
 
           {step === 1 && (
             <>
-              <Pill>Clue 1</Pill>
-              <h2>Route Info</h2>
+              <Pill>Route Info</Pill>
+              <h2>Head to the Next Location</h2>
               <p className="lead">
                 Go where you’re closer to the sky than the street,
                 <br />
-                and the noise below fades under your feet. Find the place made
-                for slow time and quiet views, where the best seat is simply the
-                one you choose. When you’re closer to the sky than your own
-                front door, you’ve found the spot you’re looking for.
+                and the noise below fades under your feet.
                 <br />
-                <b>Rule:</b> You’re not allowed to open any drawers.
+                <br />
+                Find the place made for slow time and quiet views,
+                <br />
+                where the best seat is simply the one you choose.
+                <br />
+                <br />
+                When you’re closer to the sky than your own front door,
+                <br />
+                you’ve found the spot you’re looking for.
+                <br />
+                <br />
               </p>
-
-              <div className="clueBox">
-                <div className="clueTitle">Where to go</div>
-                <div className="clueText">
-                  Head to <b>{place.place1.name}</b> {place.place1.note}
-                </div>
-                <div className="fine">
-                  (Replace this filler with your real hiding instructions.)
-                </div>
-              </div>
-
-              <HeartDivider />
-              <p className="hint">
-                Optional hint: Think “mug”, “beans”, “sweetener”…
-              </p>
-
+              ❤️ When you’ve found the clue and your gift, tap <b>Next </b>
+              to continue.
               <div className="actions between">
                 <Button variant="secondary" onClick={back}>
                   Back
                 </Button>
-                <Button onClick={next}>I Found It →</Button>
+                <Button onClick={next}>Next →</Button>
               </div>
             </>
           )}
 
           {step === 2 && (
             <>
-              <Pill>Puzzle 1</Pill>
-              <h2>Answer the secret phrase</h2>
+              <Pill>Roadblock</Pill>
+              <h2>Can you reveal the picture hiding inside the pieces?</h2>
               <p className="lead">
-                In the envelope you found, imagine there’s a tiny puzzle (like a
-                mini jigsaw, a maze, or a word search). When you finish it, it
-                reveals a two-word answer.
+                You <b>must</b> complete the puzzle to unlock the correct
+                answer.
               </p>
 
               <div className="clueBox">
-                <div className="clueTitle">Enter the answer</div>
+                <div className="clueTitle">
+                  What is this puzzle an image of?
+                </div>
                 <div className="row">
                   <Input
                     value={progress.starryInput}
                     onChange={(v) => setField("starryInput", v)}
-                    placeholder='Type the answer here (example: "Starry Night")'
+                    placeholder="Type the answer here"
                   />
                 </div>
                 <div className="status">
@@ -553,81 +553,19 @@ export default function ValentineScavengerHuntApp() {
                   ) : progress.starryInput.trim().length > 0 ? (
                     <span className="bad">Not quite… try again.</span>
                   ) : (
-                    <span className="muted">
-                      (Answer is “Starry Night”) — keep this for now.
-                    </span>
+                    <span className="muted"></span>
                   )}
                 </div>
               </div>
 
-              {progress.starryCorrect && (
-                <>
-                  <HeartDivider />
-                  <div className="clueBox">
-                    <div className="clueTitle">Did you finish the puzzle?</div>
-                    <label className="check">
-                      <input
-                        type="checkbox"
-                        checked={progress.finishedPuzzleYes}
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          setField("finishedPuzzleYes", checked);
-                          if (checked) setField("finishedPuzzleNo", false);
-                        }}
-                      />
-                      Yes, I finished it.
-                    </label>
-                    <label className="check">
-                      <input
-                        type="checkbox"
-                        checked={progress.finishedPuzzleNo}
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          setField("finishedPuzzleNo", checked);
-                          if (checked) setField("finishedPuzzleYes", false);
-                        }}
-                      />
-                      No, not yet.
-                    </label>
-
-                    <div className="status">
-                      {progress.finishedPuzzleNo && (
-                        <span className="bad">
-                          You must finish the puzzle first 😤
-                        </span>
-                      )}
-                      {progress.finishedPuzzleYes &&
-                        !progress.finishedPuzzleNo && (
-                          <span className="ok">
-                            Perfect. You may proceed 😌
-                          </span>
-                        )}
-                    </div>
-                  </div>
-
-                  <div className="actions between">
-                    <Button variant="secondary" onClick={back}>
-                      Back
-                    </Button>
-                    <Button onClick={next} disabled={!canNextFromStarry}>
-                      Next →
-                    </Button>
-                  </div>
-                </>
-              )}
-
-              {!progress.starryCorrect && (
-                <div className="actions between">
-                  <Button variant="secondary" onClick={back}>
-                    Back
-                  </Button>
-                  <Button
-                    onClick={() => setField("starryInput", "Starry Night")}
-                  >
-                    Auto-fill (testing)
-                  </Button>
-                </div>
-              )}
+              <div className="actions between">
+                <Button variant="secondary" onClick={back}>
+                  Back
+                </Button>
+                <Button onClick={next} disabled={!progress.starryCorrect}>
+                  Next →
+                </Button>
+              </div>
             </>
           )}
 
