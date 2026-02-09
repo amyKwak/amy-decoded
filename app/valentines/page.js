@@ -211,7 +211,6 @@ export default function ValentineScavengerHuntApp() {
 
   const sudokuSolved = normalizeAnswer(progress.sudokuAnswer) === "251978364";
   const logicSolved = normalizeAnswer(progress.logicGuess) === "gazebo";
-  // NOTE: this currently expects empty string; leaving logic intact, just simplified.
   const crosswordSolved = normalizeAnswer(progress.crosswordGuess) === "";
 
   return (
@@ -355,12 +354,12 @@ export default function ValentineScavengerHuntApp() {
                 <br />
                 Where names become numbers and time stands still,
                 <br />
-                until a small door opens by someone’s will.
+                until a small metal door opens by someone’s will.
                 <br />
                 <br />
-                Find the spot where messages finally land,
+                Find what you seek where the letters reside,
                 <br />
-                after crossing the world hand to hand.
+                waiting in silence — safe and inside.
                 <br />
                 <br />
               </p>
@@ -373,45 +372,6 @@ export default function ValentineScavengerHuntApp() {
                   Back
                 </Button>
                 <Button onClick={next} disabled={false}>
-                  Next →
-                </Button>
-              </div>
-            </>
-          )}
-
-          {step === 4 && (
-            <>
-              <Pill>Roadblock</Pill>
-              <h2>Can you solve my kind of chaos?</h2>
-              <p>Solve the Sudoku.</p>
-
-              <HeartDivider />
-              <div className="clueBox">
-                <div className="clueTitle">Enter the last row of numbers</div>
-                <div className="row">
-                  <Input
-                    value={progress.sudokuAnswer}
-                    onChange={(v) => setField("sudokuAnswer", v)}
-                    placeholder="Type the answer here"
-                  />
-                </div>
-                <div className="status">
-                  {progress.sudokuAnswer.trim().length === 0 ? (
-                    <span className="muted"></span>
-                  ) : sudokuSolved ? (
-                    <span className="ok">Yes! Off you go 🏃</span>
-                  ) : (
-                    <span className="bad">Not yet…</span>
-                  )}
-                </div>
-              </div>
-
-              <div className="actions between">
-                <Button variant="secondary" onClick={back}>
-                  Back
-                </Button>
-                <Button onClick={next} disabled={false}>
-                  {/* FIX: changed disabled to !sudokuSolved */}
                   Next →
                 </Button>
               </div>
@@ -434,6 +394,46 @@ export default function ValentineScavengerHuntApp() {
                   Back
                 </Button>
                 <Button onClick={next}>Next →</Button>
+              </div>
+            </>
+          )}
+
+          {step === 4 && (
+            <>
+              <Pill>Roadblock</Pill>
+              <h2>Can you take a moment to remember?</h2>
+              <p className="lead">
+                Fill in the crossword by writing the <b>city</b> where each
+                photo was taken.
+              </p>
+
+              <div className="clueBox">
+                <div className="clueTitle">Enter the letters in red</div>
+                <div className="row">
+                  <Input
+                    value={progress.crosswordGuess}
+                    onChange={(v) => setField("crosswordGuess", v)}
+                  />
+                </div>
+                <div className="status">
+                  {progress.crosswordGuess.trim().length === 0 ? (
+                    <span className="muted"></span>
+                  ) : crosswordSolved ? (
+                    <span className="ok">Good memory!</span>
+                  ) : (
+                    <span className="bad">Nope. Try again.</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="actions between">
+                <Button variant="secondary" onClick={back}>
+                  Back
+                </Button>
+                <Button onClick={next} disabled={false}>
+                  {/* FIX to disabled={!crosswordSolved} */}
+                  Next →
+                </Button>
               </div>
             </>
           )}
@@ -481,7 +481,19 @@ export default function ValentineScavengerHuntApp() {
               <Pill>Route Info</Pill>
               <h2>Head to the Next Location</h2>
               <p className="lead">
-                Riddle
+                Not the seat and not the dash,
+                <br />
+                not where you ride or stash your trash.
+                <br />
+                <br />
+                Go to the very back you load,
+                <br />
+                where suitcases begin their road.
+                <br />
+                <br />
+                Lift the lid behind you — take a peek,
+                <br />
+                that dark little hold is what you seek.
                 <br />
                 <br />
               </p>
@@ -501,27 +513,26 @@ export default function ValentineScavengerHuntApp() {
           {step === 8 && (
             <>
               <Pill>Roadblock</Pill>
-              <h2>Can you take a moment to remember?</h2>
-              <p className="lead">
-                Fill in the crossword by writing the <b>city</b> where each
-                photo was taken.
-              </p>
+              <h2>Can you solve my kind of chaos?</h2>
+              <p>Solve the Sudoku.</p>
 
+              <HeartDivider />
               <div className="clueBox">
-                <div className="clueTitle">Enter the letters in red</div>
+                <div className="clueTitle">Enter the last row of numbers</div>
                 <div className="row">
                   <Input
-                    value={progress.crosswordGuess}
-                    onChange={(v) => setField("crosswordGuess", v)}
+                    value={progress.sudokuAnswer}
+                    onChange={(v) => setField("sudokuAnswer", v)}
+                    placeholder="Type the answer here"
                   />
                 </div>
                 <div className="status">
-                  {progress.crosswordGuess.trim().length === 0 ? (
+                  {progress.sudokuAnswer.trim().length === 0 ? (
                     <span className="muted"></span>
-                  ) : crosswordSolved ? (
-                    <span className="ok">Good memory!</span>
+                  ) : sudokuSolved ? (
+                    <span className="ok">Yes! Off you go 🏃</span>
                   ) : (
-                    <span className="bad">Nope. Try again.</span>
+                    <span className="bad">Not yet…</span>
                   )}
                 </div>
               </div>
@@ -531,7 +542,7 @@ export default function ValentineScavengerHuntApp() {
                   Back
                 </Button>
                 <Button onClick={next} disabled={false}>
-                  {/* FIX to disabled={!crosswordSolved} */}
+                  {/* FIX: changed disabled to !sudokuSolved */}
                   Next →
                 </Button>
               </div>
@@ -547,7 +558,7 @@ export default function ValentineScavengerHuntApp() {
                 <br />
                 <br />
                 Ring the doorbell,
-                <br /> and trade your phone for your final challenge.
+                <br /> and trade your phone for the final challenge.
                 <br />
               </p>
 

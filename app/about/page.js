@@ -17,15 +17,19 @@ export default function AboutPage() {
           <section className={`section ${isDark ? "dark" : "light"}`}>
             <div className="container">
               <h1>Software Engineer</h1>
-              <h2>Based in Seattle,</h2>
+              <h2>📍Seattle, WA</h2>
               <h3>
-                I’m passionate about creating{" "}
-                <span className="text--blue">user-centered interfaces</span>{" "}
-                that blend thoughtful design with delightful interactions. With
-                2 years of experience developing{" "}
-                <span className="text--blue">frontend solutions</span>, I thrive
-                on crafting experiences that connect people to technology in
-                meaningful ways.
+                I enjoy building digital experiences that{" "}
+                <span className="text--blue">help people</span> get things done.
+                <br />I care about writing maintainable code, collaborating
+                closely with designers and product partners, and shipping work
+                that meaningfully improves real user journeys.
+                <br />
+                I’m driven by{" "}
+                <span className="text--blue">
+                  learning, feedback, and solving problems
+                </span>{" "}
+                that make products better for the people who use them.
               </h3>
             </div>
           </section>
@@ -92,7 +96,7 @@ export default function AboutPage() {
             margin-bottom: 0;
           }
           .section h2 {
-            font-size: 60px;
+            font-size: 2.8rem;
           }
           .section h3 {
             font-size: 25px;
