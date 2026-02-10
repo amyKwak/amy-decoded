@@ -87,7 +87,6 @@ export default function AboutPage() {
 
         .text--blue {
           color: ${theme.colors.blue};
-          white-space: nowrap;
         }
 
         @media ${theme.devices.tablet} {
