@@ -19,17 +19,14 @@ export default function AboutPage() {
               <h1>Software Engineer</h1>
               <h2>📍Seattle, WA</h2>
               <h3>
-                I enjoy building digital experiences that{" "}
-                <span className="text--blue">help people</span> get things done.
-                <br />I care about writing maintainable code, collaborating
-                closely with designers and product partners, and shipping work
-                that meaningfully improves real user journeys.
-                <br />
-                I’m driven by{" "}
-                <span className="text--blue">
-                  learning, feedback, and solving problems
-                </span>{" "}
-                that make products better for the people who use them.
+                I build high-quality, scalable digital experiences that help
+                people get things done efficiently. My work focuses on clean,
+                maintainable frontend architecture, performance optimization,
+                and experimentation (A/B testing) to improve usability and
+                conversion. I collaborate closely with designers and product
+                teams to ship data-informed features, while delivering
+                production-ready internal tools and API integrations for
+                real-world applications.
               </h3>
             </div>
           </section>
