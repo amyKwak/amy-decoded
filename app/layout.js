@@ -1,8 +1,7 @@
 import { Manrope } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
-
-import { ThemeProvider } from "./contexts/ThemeContext";
+import Providers from "./providers";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -17,12 +16,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <head />
       <body className={manrope.variable}>
-        <ThemeProvider>
+        <Providers>
           <Analytics />
           {children}
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
