@@ -35,7 +35,7 @@ export function Sticky() {
             GitHub
           </a>
           <a
-            href="mailto:yoomikwak@gmail.com"
+            href="mailto:amykwak26@gmail.com"
             className="social"
             style={{ backgroundColor: "#d93025" }}
           >
