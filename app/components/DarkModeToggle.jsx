@@ -19,8 +19,8 @@ function DarkModeToggle({ darkMode, onClick }) {
 }
 
 DarkModeToggle.propTypes = {
-  $darkMode: PropTypes.bool,
-  onClick: () => {},
+  darkMode: PropTypes.bool,
+  onClick: PropTypes.func,
 };
 
 export { DarkModeToggle };
