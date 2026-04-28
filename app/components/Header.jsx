@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useTheme } from "../contexts/ThemeContext";
 import { DarkModeToggle } from "./DarkModeToggle"; // adjust path if needed
 
@@ -10,9 +11,9 @@ export default function Header() {
     <>
       <div className="header-wrapper">
         <header className="header">
-          <a href="/" className="logo">
+          <Link href="/" className="logo">
             A<span>/</span>K
-          </a>
+          </Link>
           <div className="options">
             {/* <a href="/projects" className="link">
               Projects
