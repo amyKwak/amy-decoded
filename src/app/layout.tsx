@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Catamaran } from "next/font/google";
+import { Manrope } from "next/font/google";
 import { ThemeProvider } from "../contexts/ThemeContext";
 import "./globals.css";
 
-const catamaran = Catamaran({
-  variable: "--font-catamaran",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
-  weight: ["400", "700", "900"],
+  weight: ["400", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -20,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${catamaran.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-(family-name:--font-catamaran)">
+    <html lang="en" className={`${manrope.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col font-(family-name:--font-manrope)">
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
