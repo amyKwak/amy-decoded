@@ -9,11 +9,11 @@ export default function Header() {
 
   return (
     <div className="w-full absolute flex justify-center">
-      <header className="flex w-full justify-between px-[1.875rem] py-[0.9375rem] max-w-[1100px]">
+      <header className="flex w-full justify-between px-7.5 py-3.75 max-w-275">
         <Link
           href="/"
           className="font-black text-[1.6875rem] text-text no-underline transition-colors duration-250 ease-in-out hover:text-primary [&>span]:text-primary [&>span]:transition-colors [&>span]:duration-250 hover:[&>span]:text-text"
-          style={{ fontFamily: "'Catamaran', sans-serif" }}
+          style={{ fontFamily: "var(--font-catamaran), sans-serif" }}
         >
           A<span>/</span>K
         </Link>
