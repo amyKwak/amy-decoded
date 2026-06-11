@@ -44,13 +44,6 @@ export const metadata: Metadata = {
     description:
       "Software Engineer based in Seattle, WA. Specializing in React, Next.js, and TypeScript.",
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "Amy Kwak — Software Engineer",
-    description:
-      "Software Engineer based in Seattle, WA. Specializing in React, Next.js, and TypeScript.",
-    creator: "@amykwak",
-  },
   robots: {
     index: true,
     follow: true,
