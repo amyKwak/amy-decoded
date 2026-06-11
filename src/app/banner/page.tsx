@@ -229,7 +229,7 @@ export default function BannerPage() {
               </label>
               <input
                 type="text"
-                className="w-full text-base py-3.5 px-4 rounded-2xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full text-base text-gray-900 py-3.5 px-4 rounded-2xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black"
                 placeholder="Your banner text here"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
