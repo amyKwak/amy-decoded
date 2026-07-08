@@ -1,17 +1,24 @@
 import type { Metadata } from "next";
-import { Manrope, Catamaran } from "next/font/google";
-import { ThemeProvider } from "../contexts/ThemeContext";
+import { Newsreader, Figtree, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
   subsets: ["latin"],
+  style: ["normal", "italic"],
+  weight: ["300", "400", "500"],
 });
 
-const catamaran = Catamaran({
-  variable: "--font-catamaran",
+const figtree = Figtree({
+  variable: "--font-figtree",
   subsets: ["latin"],
-  weight: ["900"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -58,10 +65,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${manrope.variable} ${catamaran.variable} h-full antialiased`}
+      className={`${newsreader.variable} ${figtree.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-(family-name:--font-manrope)">
-        <ThemeProvider>{children}</ThemeProvider>
+      <body className="min-h-full flex flex-col font-(family-name:--font-figtree)">
+        {children}
       </body>
     </html>
   );
