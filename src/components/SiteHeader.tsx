@@ -9,30 +9,32 @@ export function SiteHeader({ active }: { active: "about" | "projects" }) {
 
   return (
     <>
-      <header className="flex items-center justify-between px-6 tablet:px-11 py-5 tablet:py-6.5 border-b border-border-soft">
-        <Link href="/" className="flex items-center gap-2.75">
-          <IkigaiMark className="w-7 h-7" />
-          <span className="font-serif text-base tablet:text-lg text-ink">Amy Kwak</span>
-        </Link>
-
-        <nav className="hidden tablet:flex items-center gap-6.5 text-[15px] text-ink">
-          <Link href="/about" className={active === "about" ? "font-semibold" : "text-faint"}>
-            About
+      <header className="border-b border-border-soft">
+        <div className="max-w-[1120px] mx-auto flex items-center justify-between px-6 tablet:px-10 py-5 tablet:py-6.5">
+          <Link href="/" className="flex items-center gap-2.75">
+            <IkigaiMark className="w-7 h-7" />
+            <span className="font-serif text-base tablet:text-lg text-ink">Amy Kwak</span>
           </Link>
-          <Link href="/projects" className={active === "projects" ? "font-semibold" : "text-faint"}>
-            Projects
-          </Link>
-        </nav>
 
-        <button
-          onClick={() => setOpen(true)}
-          className="tablet:hidden flex items-center gap-1.75 font-mono text-xs text-ink bg-surface border border-border-btn rounded-full px-3.5 py-2"
-        >
-          Menu
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <path d="M4 7h16M4 12h16M4 17h16" />
-          </svg>
-        </button>
+          <nav className="hidden tablet:flex items-center gap-6.5 text-[15px] text-ink">
+            <Link href="/about" className={active === "about" ? "font-semibold" : "text-faint"}>
+              About
+            </Link>
+            <Link href="/projects" className={active === "projects" ? "font-semibold" : "text-faint"}>
+              Projects
+            </Link>
+          </nav>
+
+          <button
+            onClick={() => setOpen(true)}
+            className="tablet:hidden flex items-center gap-1.75 font-mono text-xs text-ink bg-surface border border-border-btn rounded-full px-3.5 py-2"
+          >
+            Menu
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+          </button>
+        </div>
       </header>
 
       {open && (

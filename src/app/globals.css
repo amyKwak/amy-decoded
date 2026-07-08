@@ -31,5 +31,10 @@ body {
 
 a {
   text-decoration: none;
-  transition: color 0.2s ease-in-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  a:hover {
+    -webkit-text-stroke: 0.3px currentColor;
+  }
 }
