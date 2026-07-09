@@ -19,7 +19,8 @@ export default function HomePage() {
             Amy Kwak
           </h1>
           <p className="text-[15px] tablet:text-[18px] leading-relaxed tablet:leading-[1.6] text-body max-w-[520px] mb-8 tablet:mb-10">
-            I build web applications that people actually enjoy using.
+            Full stack engineer with a designer's eye. I build web experiences
+            that look good, load fast, and move metrics.
           </p>
 
           <nav className="tablet:hidden flex flex-col items-center gap-5.5 mb-7">
@@ -37,7 +38,7 @@ export default function HomePage() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-[15px] font-semibold text-ink border-b border-border-btn pb-[3px]"
           >
-            Résumé
+            Resume
             <svg
               width="15"
               height="15"
