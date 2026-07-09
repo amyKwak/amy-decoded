@@ -26,7 +26,7 @@ export default function AboutPage() {
           About
         </div>
         <h1 className="font-serif font-normal text-[34px] tablet:text-[52px] leading-[1.1] tracking-[-0.01em] text-ink max-w-190">
-          I build product and user-facing interfaces that work.
+          Thoughtful interfaces backed by solid engineering.
         </h1>
       </section>
 
@@ -121,10 +121,10 @@ export default function AboutPage() {
               <p>
                 The logo comes from <em>ikigai</em>, a Japanese concept for a
                 life worth living, the reason you get up in the morning.
-                It&apos;s pictured as four overlapping circles: what you
-                love, what you&apos;re good at, what the world needs, and
-                what you can be paid for. Ikigai is the small space in the
-                center where all four meet.
+                It&apos;s pictured as four overlapping circles: what you love,
+                what you&apos;re good at, what the world needs, and what you can
+                be paid for. Ikigai is the small space in the center where all
+                four meet.
               </p>
               <p>
                 I used that diagram as the blueprint for the mark, and the
