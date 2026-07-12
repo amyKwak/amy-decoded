@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Newsreader, Figtree, JetBrains_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const newsreader = Newsreader({
@@ -69,6 +70,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col font-(family-name:--font-figtree)">
         {children}
+        <Analytics />
       </body>
     </html>
   );
