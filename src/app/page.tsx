@@ -19,8 +19,8 @@ export default function HomePage() {
             Amy Kwak
           </h1>
           <p className="text-[15px] tablet:text-[18px] leading-relaxed tablet:leading-[1.6] text-body max-w-[520px] mb-8 tablet:mb-10">
-            Full stack engineer with a designer's eye. I build web experiences
-            that look good, load fast, and move metrics.
+            I build web apps end to end. Polished interfaces on the front,
+            solid systems behind them, shipped fast and built to last.
           </p>
 
           <nav className="tablet:hidden flex flex-col items-center gap-5.5 mb-7">
