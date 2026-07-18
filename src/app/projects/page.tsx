@@ -2,6 +2,14 @@ import { SiteHeader } from "../../components/SiteHeader";
 
 const PROJECTS = [
   {
+    name: "Thyme",
+    description:
+      "A recipe keeper for fuss-free cooking. Import recipes from a link, pasted text, or a photo, then cook them one step at a time.",
+    url: "https://thyme-beta.vercel.app/thyme",
+    image: "/projects/thyme-card.png",
+    alt: "Thyme wordmark with a sprout mark on a pale green background",
+  },
+  {
     name: "Cheerful",
     description:
       "A small weekly ritual app. Jot down five good things from your week, then come back in the evenings to reflect on them.",
