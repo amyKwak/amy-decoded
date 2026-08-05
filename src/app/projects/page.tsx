@@ -8,6 +8,7 @@ const PROJECTS = [
     url: "https://thyme-beta.vercel.app/thyme",
     image: "/projects/thyme-card.png",
     alt: "Thyme wordmark with a sprout mark on a pale green background",
+    hidden: true,
   },
   {
     name: "Cheerful",
@@ -39,7 +40,7 @@ export default function ProjectsPage() {
 
       <section className="flex-1 max-w-280 mx-auto w-full px-6 tablet:px-10 pt-8 tablet:pt-10 pb-2">
         <div className="grid grid-cols-1 tablet:grid-cols-2 gap-4.5 tablet:gap-5.5">
-          {PROJECTS.map((project) => (
+          {PROJECTS.filter((project) => !project.hidden).map((project) => (
             <div
               key={project.name}
               className="bg-surface border border-border-soft rounded-[14px] overflow-hidden flex flex-col"
