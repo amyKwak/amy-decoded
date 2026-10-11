@@ -1,4 +1,13 @@
-const claims = [
+type Claim = {
+  id: string;
+  provider: string;
+  service: string;
+  date: string;
+  amount: number;
+  status: "approved" | "pending" | "denied";
+};
+
+const claims: Claim[] = [
   {
     id: "c1",
     provider: "Swedish Medical Center",
@@ -49,16 +58,18 @@ const claims = [
   },
 ];
 
-export function App({ claims }) {
+export function App({ claims }: { claims: Claim[] }) {
   return (
     <div>
       <h1>Claims</h1>
       <ul>
         {claims.map((claim) => {
           const { id, provider, service } = claim;
-          <li key={id}>
-            {provider} {service}
-          </li>;
+          return (
+            <li key={id}>
+              {provider} {service}
+            </li>
+          );
         })}
       </ul>
     </div>
