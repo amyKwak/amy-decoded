@@ -189,23 +189,25 @@ function Home({
   }
 
   return (
-    <main className={screen}>
-      <div className="flex justify-end">
+    // Both "Start a game" and "Join a friend" should fit on the first screen of
+    // a small phone, so the hero shrinks on short screens.
+    <main className={`${screen} relative`}>
+      <div className="tablet:top-10 absolute top-5 right-6">
         <HelpButton />
       </div>
 
       <div className="flex flex-col items-center text-center">
-        <Mascot className="h-40 w-40 animate-[noggin-bob_2.6s_ease-in-out_infinite]" />
-        <h1 className="mt-3 text-[68px] leading-[0.9] font-extrabold tracking-[-0.04em]">
+        <Mascot className="h-24 w-24 animate-[noggin-bob_2.6s_ease-in-out_infinite] [@media(max-height:600px)]:h-18 [@media(max-height:600px)]:w-18 [@media(min-height:700px)]:h-32 [@media(min-height:700px)]:w-32 [@media(min-height:820px)]:h-40 [@media(min-height:820px)]:w-40" />
+        <h1 className="mt-2 text-[56px] leading-[0.9] font-extrabold tracking-[-0.04em] [@media(max-height:600px)]:text-5xl [@media(min-height:820px)]:text-[68px]">
           Noggin
         </h1>
-        <p className="text-noggin-muted mt-3 max-w-70 text-[19px] leading-snug text-balance">
+        <p className="text-noggin-muted mt-2.5 max-w-72 text-[17px] leading-snug text-balance [@media(min-height:820px)]:text-[19px]">
           What&apos;s on your forehead? Guess it before your friend does.
         </p>
       </div>
       {errorBox}
 
-      <div className="mt-auto flex flex-col pt-8">
+      <div className="mt-auto flex flex-col pt-6 [@media(max-height:600px)]:pt-4">
         <label htmlFor="noggin-name" className={`${label} mb-2`}>
           Your name
         </label>
@@ -220,14 +222,14 @@ function Home({
         />
         <button
           type="button"
-          className={`${bigBtn} bg-noggin-tomato mt-5`}
+          className={`${bigBtn} bg-noggin-tomato mt-4 [@media(max-height:600px)]:mt-3 [@media(max-height:600px)]:h-14`}
           onClick={() => onCreate(playerName("Player 1"))}
         >
           Start a game
         </button>
         <button
           type="button"
-          className={`${bigBtn} mt-4 bg-white`}
+          className={`${bigBtn} mt-3.5 bg-white [@media(max-height:600px)]:mt-3 [@media(max-height:600px)]:h-14`}
           onClick={() => setJoining(true)}
         >
           Join a friend
