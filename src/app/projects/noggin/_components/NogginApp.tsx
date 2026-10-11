@@ -548,8 +548,12 @@ function Lobby({
   };
 
   return (
-    <main className={screen}>
-      <div className="flex items-center justify-between">
+    // Everything fits on one phone screen: the room code sits in the top bar,
+    // players are one compact row, and Start stays at the bottom by your thumb.
+    <main
+      className={`${screen} pt-4! pb-5! [@media(max-height:620px)]:pt-3! [@media(max-height:620px)]:pb-2!`}
+    >
+      <div className="flex items-start justify-between gap-2">
         <button
           type="button"
           className={iconBtn}
@@ -558,30 +562,36 @@ function Lobby({
         >
           <Icon d="M6 6l12 12M18 6L6 18" size={20} />
         </button>
+
+        <div className="flex flex-col items-center">
+          <p className="text-noggin-muted text-[11px] font-extrabold tracking-[0.14em] uppercase">
+            Room code
+          </p>
+          <p className="sr-only">{snap.code.split("").join(" ")}</p>
+          <div className="mt-1.5 flex gap-1.5" aria-hidden="true">
+            {snap.code.split("").map((ch, i) => (
+              <span
+                key={i}
+                className={`border-noggin-ink flex h-12 w-10 items-center justify-center rounded-xl border-[2.5px] text-[28px] leading-none font-extrabold shadow-[0_3px_0_var(--color-noggin-ink)] [@media(max-height:620px)]:h-10 [@media(max-height:620px)]:w-9 [@media(max-height:620px)]:text-2xl ${TILE_STYLE[i]}`}
+              >
+                {ch}
+              </span>
+            ))}
+          </div>
+        </div>
+
         <HelpButton />
       </div>
 
-      <div className="mt-1 text-center">
-        <p className={label}>Room code</p>
-        <p className="sr-only">{snap.code.split("").join(" ")}</p>
-        <div className="mt-3 flex justify-center gap-2.5" aria-hidden="true">
-          {snap.code.split("").map((ch, i) => (
-            <span
-              key={i}
-              className={`border-noggin-ink flex h-19 w-16 items-center justify-center rounded-2xl border-3 text-[46px] leading-none font-extrabold shadow-[0_5px_0_var(--color-noggin-ink)] ${TILE_STYLE[i]}`}
-            >
-              {ch}
-            </span>
-          ))}
-        </div>
+      <div className="mt-3.5 flex justify-center [@media(max-height:620px)]:mt-2">
         <button
           type="button"
-          className={`border-noggin-ink mt-5 inline-flex h-11 items-center gap-2 rounded-full border-[2.5px] bg-white px-4.5 text-base font-bold shadow-[0_3px_0_var(--color-noggin-ink)] ${press} ${focusRing}`}
+          className={`border-noggin-ink inline-flex h-10 items-center gap-2 rounded-full border-[2.5px] bg-white px-4 text-[15px] font-bold shadow-[0_3px_0_var(--color-noggin-ink)] ${press} ${focusRing}`}
           onClick={share}
         >
           <Icon
             d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 002 2h10a2 2 0 002-2v-5"
-            size={18}
+            size={16}
           />
           {copied ? "Link copied!" : "Share invite"}
         </button>
@@ -590,13 +600,13 @@ function Lobby({
       {snap.notice && (
         <p
           role="status"
-          className="bg-noggin-sun/45 mt-6 flex items-center justify-between gap-3 rounded-2xl px-4 py-3 text-[15px] font-semibold"
+          className="bg-noggin-sun/45 mt-4 flex items-center justify-between gap-3 rounded-2xl px-4 py-2.5 text-[15px] font-semibold"
         >
           {snap.notice}
           <button
             type="button"
             aria-label="Dismiss"
-            className={`text-xl leading-none ${focusRing}`}
+            className={`flex h-8 w-8 items-center justify-center text-xl leading-none ${focusRing}`}
             onClick={() => room.clearNotice()}
           >
             ×
@@ -604,8 +614,8 @@ function Lobby({
         </p>
       )}
 
-      <div className="relative mt-7">
-        <ul className="grid grid-cols-2 gap-3" aria-label="Players">
+      <div className="relative mt-5 [@media(max-height:620px)]:mt-3">
+        <ul className="grid grid-cols-2 gap-10" aria-label="Players">
           <PlayerCard
             role={me}
             name={state.players[me]}
@@ -619,7 +629,7 @@ function Lobby({
           />
         </ul>
         <span
-          className="bg-noggin-sun border-noggin-ink absolute top-1/2 left-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-[60%] -rotate-8 items-center justify-center rounded-full border-3 text-[15px] font-extrabold"
+          className="bg-noggin-sun border-noggin-ink absolute top-1/2 left-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 -rotate-8 items-center justify-center rounded-full border-[2.5px] text-xs font-extrabold"
           aria-hidden="true"
         >
           VS
@@ -647,7 +657,7 @@ function Lobby({
 
       <button
         type="button"
-        className={`${hugeBtn} bg-noggin-tomato mt-auto`}
+        className={`${hugeBtn} bg-noggin-tomato mt-auto h-16! shrink-0 [@media(max-height:620px)]:h-14!`}
         disabled={!ready || needsPrompt}
         onClick={() => room.dispatch({ type: "start" })}
       >
@@ -665,29 +675,29 @@ function Lobby({
 
 function VoiceToggle({ voice }: { voice: VoiceSetting }) {
   const note = !voice.supported
-    ? "Not available in this browser. Try Chrome or Safari."
+    ? "Not available in this browser"
     : voice.blocked
-      ? "Mic is blocked. Allow it in your browser settings."
-      : "Say your word out loud and your phone hears it. No tapping needed.";
+      ? "Mic blocked. Allow it in browser settings"
+      : "Say your word out loud to win";
   return (
     <label
-      className={`has-focus-visible:outline-noggin-cobalt mt-6 mb-8 flex items-center gap-3.5 rounded-[22px] border-3 p-3.5 has-focus-visible:outline-3 has-focus-visible:outline-offset-3 ${
+      className={`has-focus-visible:outline-noggin-cobalt mt-4 mb-4 flex items-center gap-3 rounded-[18px] border-[2.5px] px-3 py-2.5 has-focus-visible:outline-3 has-focus-visible:outline-offset-3 [@media(max-height:620px)]:my-2.5 [@media(max-height:620px)]:py-2 ${
         voice.supported
-          ? "border-noggin-ink cursor-pointer bg-white"
+          ? "border-noggin-line cursor-pointer bg-white"
           : "border-noggin-line bg-white/60"
       }`}
     >
       <span
-        className={`border-noggin-ink flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-[2.5px] ${voice.on ? "bg-noggin-sun" : "bg-noggin-bg"}`}
+        className={`border-noggin-ink flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 ${voice.on ? "bg-noggin-sun" : "bg-noggin-bg"}`}
         aria-hidden="true"
       >
-        <MicIcon className="stroke-noggin-ink h-5.5 w-5.5" />
+        <MicIcon className="stroke-noggin-ink h-4.5 w-4.5" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-lg leading-tight font-extrabold">
+        <span className="block text-base leading-tight font-extrabold">
           Listen for my word
         </span>
-        <span className="text-noggin-muted mt-0.5 block text-sm leading-snug font-semibold">
+        <span className="text-noggin-muted block truncate text-[13px] leading-snug [@media(max-height:620px)]:hidden">
           {note}
         </span>
       </span>
@@ -700,11 +710,11 @@ function VoiceToggle({ voice }: { voice: VoiceSetting }) {
         onChange={(e) => void voice.toggle(e.target.checked)}
       />
       <span
-        className={`border-noggin-ink relative h-8 w-14 shrink-0 rounded-full border-[2.5px] transition-colors ${voice.on ? "bg-noggin-cobalt" : "bg-noggin-line"}`}
+        className={`border-noggin-ink relative h-7.5 w-13 shrink-0 rounded-full border-[2.5px] transition-colors ${voice.on ? "bg-noggin-cobalt" : "bg-noggin-line"}`}
         aria-hidden="true"
       >
         <span
-          className={`border-noggin-ink absolute top-0.5 left-0.5 h-5.5 w-5.5 rounded-full border-[2.5px] bg-white transition-transform ${voice.on ? "translate-x-6" : ""}`}
+          className={`border-noggin-ink absolute top-0.5 left-0.5 h-5 w-5 rounded-full border-[2.5px] bg-white transition-transform ${voice.on ? "translate-x-5.5" : ""}`}
         />
       </span>
     </label>
@@ -742,34 +752,34 @@ function PlayerCard({
 }) {
   if (!name) {
     return (
-      <li className="flex flex-col items-center gap-2 rounded-[22px] border-3 border-dashed border-[#c9b994] px-3 py-4">
-        <span
-          className="bg-noggin-line h-14 w-14 animate-pulse rounded-full"
-          aria-hidden="true"
-        />
-        <span className="text-noggin-muted text-[17px] font-bold">
+      <li className="text-noggin-muted flex h-16 min-w-0 flex-col items-center justify-center rounded-2xl border-[2.5px] border-dashed border-[#c9b994] px-2 text-center [@media(max-height:620px)]:h-14">
+        <span className="flex items-center gap-1.5 text-[15px] leading-tight font-bold">
+          <span
+            className="bg-noggin-muted/50 h-2 w-2 animate-pulse rounded-full"
+            aria-hidden="true"
+          />
           Waiting…
         </span>
-        <span className="text-noggin-muted text-[13px] font-bold">
-          share the code
-        </span>
+        <span className="text-xs font-semibold">Share the code</span>
       </li>
     );
   }
   return (
-    <li className="border-noggin-ink flex animate-[noggin-pop_0.4s_ease-out] flex-col items-center gap-2 rounded-[22px] border-3 bg-white px-3 py-4 shadow-[0_5px_0_var(--color-noggin-ink)]">
+    <li className="border-noggin-ink flex h-16 min-w-0 animate-[noggin-pop_0.4s_ease-out] items-center gap-2.5 rounded-2xl border-[2.5px] bg-white px-3 shadow-[0_4px_0_var(--color-noggin-ink)] [@media(max-height:620px)]:h-14">
       <span
-        className={`border-noggin-ink flex h-14 w-14 items-center justify-center rounded-full border-3 text-[26px] font-extrabold ${PLAYER_BG[role]}`}
+        className={`border-noggin-ink flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[2.5px] text-base font-extrabold ${PLAYER_BG[role]}`}
         aria-hidden="true"
       >
         {name.charAt(0).toUpperCase()}
       </span>
-      <span className="max-w-full truncate text-[19px] font-extrabold">
-        {name}
-      </span>
-      <span className="text-noggin-muted text-[13px] font-bold">
-        {you ? "you" : "ready"}
-        {wins !== null && ` · ${wins} ${wins === 1 ? "win" : "wins"}`}
+      <span className="min-w-0">
+        <span className="block truncate text-base leading-tight font-extrabold">
+          {name}
+        </span>
+        <span className="text-noggin-muted block truncate text-xs font-semibold">
+          {you ? "You" : "Ready"}
+          {wins !== null && ` · ${wins} ${wins === 1 ? "win" : "wins"}`}
+        </span>
       </span>
     </li>
   );
@@ -792,13 +802,13 @@ function PromptField({
   onChange: (prompt: string) => void;
 }) {
   return (
-    <div className="mt-7">
+    <div className="mt-5 [@media(max-height:620px)]:mt-3.5">
       <label htmlFor="noggin-prompt" className={`${label} mb-2`}>
         Pick a topic
       </label>
       <input
         id="noggin-prompt"
-        className={input}
+        className={`${input} [@media(max-height:620px)]:h-13`}
         value={value}
         maxLength={PROMPT_MAX}
         autoComplete="off"
@@ -809,7 +819,7 @@ function PromptField({
       />
       <p
         id="noggin-prompt-hint"
-        className="text-noggin-muted mt-1.5 flex items-center gap-1.5 pl-1 text-[13px] leading-snug"
+        className="text-noggin-muted mt-1.5 flex items-center gap-1.5 pl-1 text-[13px] leading-snug [@media(max-height:620px)]:hidden"
       >
         <svg
           viewBox="0 0 24 24"
@@ -820,12 +830,13 @@ function PromptField({
         </svg>
         Claude picks the word from your topic.
       </p>
-      <div className="mt-3 flex flex-wrap gap-2">
+      {/* One swipeable row of ideas keeps the screen short. */}
+      <div className="-mx-6 mt-2.5 flex [scrollbar-width:none] gap-2 overflow-x-auto px-6 py-0.5 [@media(max-height:620px)]:mt-1.5">
         {PROMPT_IDEAS.map((idea) => (
           <button
             key={idea}
             type="button"
-            className={`border-noggin-line h-9 rounded-full border-2 bg-white px-3.5 text-sm font-bold transition active:scale-95 ${focusRing}`}
+            className={`border-noggin-line h-9 shrink-0 rounded-full border-2 bg-white px-3.5 text-sm font-bold whitespace-nowrap transition active:scale-95 ${focusRing}`}
             onClick={() => onChange(idea)}
           >
             {idea}
@@ -845,7 +856,7 @@ function PromptPreview({
   hostName: string;
 }) {
   return (
-    <div className="mt-7">
+    <div className="mt-5 [@media(max-height:620px)]:mt-3.5">
       <p className={`${label} mb-2`}>Topic</p>
       <p
         aria-live="polite"
