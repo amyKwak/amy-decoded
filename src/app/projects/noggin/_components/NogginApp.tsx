@@ -774,7 +774,7 @@ function PlayerCard({
 
 const PROMPT_IDEAS = [
   "A number from 1 to 100",
-  "Celebs born after 1995",
+  "Celebs born after 1990",
   "Disney movies",
   "Animals",
   "Foods",

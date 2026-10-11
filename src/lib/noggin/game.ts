@@ -18,7 +18,7 @@ export type GameState = {
   round: number;
   /** Rounds won by each player since the current guest joined. */
   score: Record<Role, number>;
-  /** What the words should be, typed by the room's creator, like "a celebrity born after 1995". */
+  /** What the words should be, typed by the room's creator, like "a celebrity born after 1990". */
   prompt: string;
   /** Claude's short name for the prompt's category, shown above the word. */
   label: string | null;
