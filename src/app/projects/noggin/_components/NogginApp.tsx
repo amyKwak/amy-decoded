@@ -1,0 +1,980 @@
+"use client";
+
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
+import {
+  COUNTDOWN_SECONDS,
+  normalizeRoomCode,
+  type GameState,
+  type Mode,
+  type Role,
+} from "@/lib/noggin/game";
+import { NogginRoom, type RoomSnapshot } from "@/lib/noggin/room";
+
+const focusRing =
+  "focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-noggin-cobalt";
+// Chunky "sticker" buttons: a hard drop shadow that collapses when pressed.
+const press =
+  "transition-[translate,box-shadow] duration-75 active:translate-y-1 active:shadow-[0_1px_0_var(--color-noggin-ink)] disabled:cursor-not-allowed disabled:opacity-40 disabled:active:translate-y-0";
+const btn =
+  "inline-flex items-center justify-center rounded-[20px] border-3 px-6 font-extrabold transition-[translate,box-shadow] duration-75 active:translate-y-1 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:translate-y-0 focus-visible:outline-3 focus-visible:outline-offset-3";
+const inkBtn = `${btn} w-full border-noggin-ink active:shadow-[0_1px_0_var(--color-noggin-ink)] focus-visible:outline-noggin-cobalt`;
+const bigBtn = `${inkBtn} h-16 text-[21px] shadow-[0_5px_0_var(--color-noggin-ink)]`;
+const hugeBtn = `${inkBtn} h-17 text-[23px] shadow-[0_6px_0_var(--color-noggin-ink)]`;
+const iconBtn = `flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-3 border-noggin-ink bg-white shadow-[0_4px_0_var(--color-noggin-ink)] ${press} ${focusRing}`;
+const input = `h-15 w-full rounded-[18px] border-3 border-noggin-line bg-white px-4.5 text-xl font-semibold outline-none placeholder:text-noggin-muted/70 focus:border-noggin-ink`;
+const label =
+  "block text-[13px] font-extrabold uppercase tracking-[0.12em] text-noggin-muted";
+const screen =
+  "mx-auto flex w-full max-w-120 flex-1 flex-col px-6 pt-5 pb-8 tablet:pt-10";
+
+const PLAYER_BG: Record<Role, string> = {
+  host: "bg-noggin-tomato text-noggin-ink",
+  guest: "bg-noggin-cobalt text-white",
+};
+const NAME_KEY = "noggin:name";
+const noopSubscribe = () => () => {};
+
+export function NogginApp() {
+  const [room, setRoom] = useState<NogginRoom | null>(null);
+  const [joinError, setJoinError] = useState<string | null>(null);
+  const hydrated = useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
+
+  useEffect(() => () => room?.destroy(), [room]);
+
+  const leave = (error: string | null = null) => {
+    setRoom(null);
+    setJoinError(error);
+  };
+
+  if (!hydrated) return null;
+  if (!room) {
+    return (
+      <Home
+        error={joinError}
+        onCreate={(name) => setRoom(NogginRoom.host(name))}
+        onJoin={(code, name) => setRoom(NogginRoom.join(code, name))}
+      />
+    );
+  }
+  return <RoomView key={room.getSnapshot().code} room={room} onLeave={leave} />;
+}
+
+// ---- Home ----
+
+function Home({
+  error,
+  onCreate,
+  onJoin,
+}: {
+  error: string | null;
+  onCreate: (name: string) => void;
+  onJoin: (code: string, name: string) => void;
+}) {
+  // Only rendered after hydration, so these can read the browser directly.
+  const [name, setName] = useState(() => {
+    try {
+      return localStorage.getItem(NAME_KEY) ?? "";
+    } catch {
+      return "";
+    }
+  });
+  const [code, setCode] = useState(() =>
+    normalizeRoomCode(
+      new URLSearchParams(window.location.search).get("room") ?? "",
+    ),
+  );
+  // An invite link lands straight on the join screen.
+  const [joining, setJoining] = useState(code.length > 0);
+
+  const playerName = (fallback: string) => {
+    const trimmed = name.trim().slice(0, 16);
+    try {
+      localStorage.setItem(NAME_KEY, trimmed);
+    } catch {}
+    return trimmed || fallback;
+  };
+
+  const errorBox = error && (
+    <p
+      role="alert"
+      className="bg-noggin-tomato/15 mt-4 rounded-2xl border-2 border-[#b3311a]/30 px-4 py-3 text-[15px] font-semibold text-[#9c2a14]"
+    >
+      {error}
+    </p>
+  );
+
+  if (joining) {
+    return (
+      <main className={screen}>
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            className={iconBtn}
+            aria-label="Back"
+            onClick={() => setJoining(false)}
+          >
+            <Icon d="M15 5l-7 7 7 7" />
+          </button>
+          <HelpButton />
+        </div>
+
+        <form
+          className="flex flex-1 flex-col"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (code.length === 4) onJoin(code, playerName("Player 2"));
+          }}
+        >
+          <h1 className="mt-10 text-5xl leading-[0.95] font-extrabold tracking-[-0.03em]">
+            Got a code?
+          </h1>
+          <p className="text-noggin-muted mt-3 text-lg leading-snug">
+            Ask your friend for the 4 letters on their screen.
+          </p>
+          {errorBox}
+
+          <label htmlFor="noggin-code" className={`${label} mt-8 mb-2`}>
+            Room code
+          </label>
+          <input
+            id="noggin-code"
+            className="border-noggin-line placeholder:text-noggin-muted/50 focus:border-noggin-ink h-24 w-full rounded-[22px] border-3 bg-white pl-[0.32em] text-center text-[52px] font-extrabold tracking-[0.32em] uppercase outline-none"
+            value={code}
+            placeholder="ABCD"
+            autoCapitalize="characters"
+            autoComplete="off"
+            spellCheck={false}
+            onChange={(e) => setCode(normalizeRoomCode(e.target.value))}
+          />
+
+          {!name.trim() && (
+            <>
+              <label htmlFor="noggin-name" className={`${label} mt-6 mb-2`}>
+                Your name
+              </label>
+              <input
+                id="noggin-name"
+                className={input}
+                value={name}
+                maxLength={16}
+                autoComplete="nickname"
+                placeholder="Type your name"
+                onChange={(e) => setName(e.target.value)}
+              />
+            </>
+          )}
+
+          <button
+            type="submit"
+            className={`${bigBtn} bg-noggin-cobalt mt-auto text-white`}
+            disabled={code.length !== 4}
+          >
+            Join game
+          </button>
+        </form>
+      </main>
+    );
+  }
+
+  return (
+    <main className={screen}>
+      <div className="flex justify-end">
+        <HelpButton />
+      </div>
+
+      <div className="flex flex-col items-center text-center">
+        <Mascot className="h-40 w-40 animate-[noggin-bob_2.6s_ease-in-out_infinite]" />
+        <h1 className="mt-3 text-[68px] leading-[0.9] font-extrabold tracking-[-0.04em]">
+          Noggin
+        </h1>
+        <p className="text-noggin-muted mt-3 max-w-70 text-[19px] leading-snug text-balance">
+          What&apos;s on your forehead? Guess it before your friend does.
+        </p>
+      </div>
+      {errorBox}
+
+      <div className="mt-auto flex flex-col pt-8">
+        <label htmlFor="noggin-name" className={`${label} mb-2`}>
+          Your name
+        </label>
+        <input
+          id="noggin-name"
+          className={input}
+          value={name}
+          maxLength={16}
+          autoComplete="nickname"
+          placeholder="Type your name"
+          onChange={(e) => setName(e.target.value)}
+        />
+        <button
+          type="button"
+          className={`${bigBtn} bg-noggin-tomato mt-5`}
+          onClick={() => onCreate(playerName("Player 1"))}
+        >
+          Start a game
+        </button>
+        <button
+          type="button"
+          className={`${bigBtn} mt-4 bg-white`}
+          onClick={() => setJoining(true)}
+        >
+          Join a friend
+        </button>
+      </div>
+    </main>
+  );
+}
+
+function Mascot({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 40 40" className={className} aria-hidden="true">
+      <circle
+        cx="20"
+        cy="23"
+        r="15.5"
+        strokeWidth="1.4"
+        className="fill-noggin-sun stroke-noggin-ink"
+      />
+      <g transform="rotate(-7 20 10)">
+        <rect
+          x="9.5"
+          y="3.5"
+          width="21"
+          height="12.5"
+          rx="2.5"
+          strokeWidth="1.4"
+          className="fill-noggin-tomato stroke-noggin-ink"
+        />
+        <text
+          x="20"
+          y="13.6"
+          textAnchor="middle"
+          fontSize="9.5"
+          fontWeight="800"
+          className="fill-noggin-ink"
+        >
+          ?
+        </text>
+      </g>
+      <circle cx="14.5" cy="25.5" r="1.9" className="fill-noggin-ink" />
+      <circle cx="25.5" cy="25.5" r="1.9" className="fill-noggin-ink" />
+      <path
+        d="M15.5 31 q4.5 3.4 9 0"
+        fill="none"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        className="stroke-noggin-ink"
+      />
+    </svg>
+  );
+}
+
+function Icon({ d, size = 22 }: { d: string; size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="stroke-noggin-ink"
+      aria-hidden="true"
+    >
+      <path d={d} />
+    </svg>
+  );
+}
+
+// ---- How to play (hidden behind a button) ----
+
+const STEPS: { title: string; body: string; chip: string; tilt: string }[] = [
+  {
+    title: "Pair up",
+    body: "One of you starts a game. The other joins with the 4-letter code.",
+    chip: "bg-noggin-sun",
+    tilt: "-rotate-4",
+  },
+  {
+    title: "Pick a deck",
+    body: "Numbers from 1 to 100, or celebrities. Then hit Start.",
+    chip: "bg-noggin-tomato",
+    tilt: "rotate-3",
+  },
+  {
+    title: "Forehead time",
+    body: "When the countdown ends, hold your phone to your forehead, screen out.",
+    chip: "bg-noggin-cobalt text-white",
+    tilt: "-rotate-3",
+  },
+  {
+    title: "Ask yes or no",
+    body: "Take turns asking questions. Guess yours first, then tap “I got it!”",
+    chip: "bg-white",
+    tilt: "rotate-4",
+  },
+];
+
+function HelpButton() {
+  const [open, setOpen] = useState(false);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const openerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  const close = () => {
+    setOpen(false);
+    openerRef.current?.focus();
+  };
+
+  return (
+    <>
+      <button
+        ref={openerRef}
+        type="button"
+        className={`${iconBtn} text-[22px] font-extrabold`}
+        aria-label="How to play"
+        aria-haspopup="dialog"
+        onClick={() => setOpen(true)}
+      >
+        ?
+      </button>
+
+      {open && (
+        <div className="text-noggin-ink fixed inset-0 z-60 flex flex-col justify-end">
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-label="Close how to play"
+            className="bg-noggin-ink/55 absolute inset-0 animate-[noggin-fade_0.2s_ease-out]"
+            onClick={close}
+          />
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="noggin-how"
+            className="bg-noggin-bg border-noggin-ink relative mx-auto w-full max-w-120 animate-[noggin-sheet_0.28s_cubic-bezier(0.2,0.9,0.3,1.1)] rounded-t-[30px] border-3 border-b-0 px-6 pt-3 pb-[max(1.75rem,env(safe-area-inset-bottom))]"
+          >
+            <span
+              className="mx-auto mb-3.5 block h-1.25 w-11 rounded bg-[#d6c9ae]"
+              aria-hidden="true"
+            />
+            <div className="flex items-center justify-between">
+              <h2
+                id="noggin-how"
+                className="text-[32px] font-extrabold tracking-[-0.03em]"
+              >
+                How to play
+              </h2>
+              <button
+                ref={closeRef}
+                type="button"
+                className={`${iconBtn} h-11! w-11!`}
+                aria-label="Close"
+                onClick={close}
+              >
+                <Icon d="M6 6l12 12M18 6L6 18" size={18} />
+              </button>
+            </div>
+
+            <ol className="mt-5 space-y-4">
+              {STEPS.map((step, i) => (
+                <li key={step.title} className="flex items-start gap-3.5">
+                  <span
+                    className={`border-noggin-ink flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-[2.5px] text-[19px] font-extrabold ${step.chip} ${step.tilt}`}
+                    aria-hidden="true"
+                  >
+                    {i + 1}
+                  </span>
+                  <div>
+                    <p className="text-lg font-extrabold">{step.title}</p>
+                    <p className="text-noggin-muted mt-0.5 text-base leading-snug">
+                      {step.body}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+
+            <button
+              type="button"
+              className={`${inkBtn} bg-noggin-sun mt-6 h-15 text-xl shadow-[0_5px_0_var(--color-noggin-ink)]`}
+              onClick={close}
+            >
+              Let&apos;s play
+            </button>
+          </section>
+        </div>
+      )}
+    </>
+  );
+}
+
+// ---- In a room ----
+
+function RoomView({
+  room,
+  onLeave,
+}: {
+  room: NogginRoom;
+  onLeave: (error?: string | null) => void;
+}) {
+  const snap = useSyncExternalStore(
+    room.subscribe,
+    room.getSnapshot,
+    room.getSnapshot,
+  );
+
+  useEffect(() => {
+    if (snap.status === "failed") onLeave(snap.error);
+  }, [snap.status, snap.error, onLeave]);
+
+  const phase = snap.state?.phase;
+  useWakeLock(phase === "countdown" || phase === "playing");
+
+  if (!snap.state) {
+    return (
+      <main className="text-noggin-muted flex flex-1 flex-col items-center justify-center gap-4 px-6 py-20">
+        <Mascot className="h-20 w-20 animate-[noggin-bob_1.2s_ease-in-out_infinite]" />
+        <p className="text-noggin-ink text-xl font-bold">
+          {snap.role === "host" ? "Making a room…" : `Joining ${snap.code}…`}
+        </p>
+        <button
+          type="button"
+          className={`mt-2 text-base font-semibold underline underline-offset-4 ${focusRing}`}
+          onClick={() => onLeave()}
+        >
+          Cancel
+        </button>
+      </main>
+    );
+  }
+
+  const { state } = snap;
+  if (state.phase === "countdown") return <Countdown key={state.round} />;
+  if (state.phase === "playing")
+    return (
+      <Playing
+        state={state}
+        role={snap.role}
+        onGotIt={() => room.dispatch({ type: "gotIt" })}
+      />
+    );
+  if (state.phase === "done")
+    return (
+      <Result
+        state={state}
+        role={snap.role}
+        onAgain={() => room.dispatch({ type: "lobby" })}
+        onLeave={() => onLeave()}
+      />
+    );
+  return (
+    <Lobby snap={snap} state={state} room={room} onLeave={() => onLeave()} />
+  );
+}
+
+const TILE_STYLE = [
+  "bg-noggin-sun -rotate-5",
+  "bg-white rotate-3",
+  "bg-noggin-sun -rotate-2",
+  "bg-white rotate-5",
+];
+
+function Lobby({
+  snap,
+  state,
+  room,
+  onLeave,
+}: {
+  snap: RoomSnapshot;
+  state: GameState;
+  room: NogginRoom;
+  onLeave: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+  const me = snap.role;
+  const them: Role = me === "host" ? "guest" : "host";
+  const ready = state.players.guest !== null;
+
+  const share = async () => {
+    const url = `${window.location.origin}/projects/noggin?room=${snap.code}`;
+    try {
+      if (navigator.share)
+        await navigator.share({ title: "Play Noggin with me", url });
+      else {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch {}
+  };
+
+  return (
+    <main className={screen}>
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          className={iconBtn}
+          aria-label="Leave room"
+          onClick={onLeave}
+        >
+          <Icon d="M6 6l12 12M18 6L6 18" size={20} />
+        </button>
+        <HelpButton />
+      </div>
+
+      <div className="mt-1 text-center">
+        <p className={label}>Room code</p>
+        <p className="sr-only">{snap.code.split("").join(" ")}</p>
+        <div className="mt-3 flex justify-center gap-2.5" aria-hidden="true">
+          {snap.code.split("").map((ch, i) => (
+            <span
+              key={i}
+              className={`border-noggin-ink flex h-19 w-16 items-center justify-center rounded-2xl border-3 text-[46px] leading-none font-extrabold shadow-[0_5px_0_var(--color-noggin-ink)] ${TILE_STYLE[i]}`}
+            >
+              {ch}
+            </span>
+          ))}
+        </div>
+        <button
+          type="button"
+          className={`border-noggin-ink mt-5 inline-flex h-11 items-center gap-2 rounded-full border-[2.5px] bg-white px-4.5 text-base font-bold shadow-[0_3px_0_var(--color-noggin-ink)] ${press} ${focusRing}`}
+          onClick={share}
+        >
+          <Icon
+            d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 002 2h10a2 2 0 002-2v-5"
+            size={18}
+          />
+          {copied ? "Link copied!" : "Share invite"}
+        </button>
+      </div>
+
+      {snap.notice && (
+        <p
+          role="status"
+          className="bg-noggin-sun/45 mt-6 flex items-center justify-between gap-3 rounded-2xl px-4 py-3 text-[15px] font-semibold"
+        >
+          {snap.notice}
+          <button
+            type="button"
+            aria-label="Dismiss"
+            className={`text-xl leading-none ${focusRing}`}
+            onClick={() => room.clearNotice()}
+          >
+            ×
+          </button>
+        </p>
+      )}
+
+      <div className="relative mt-7">
+        <ul className="grid grid-cols-2 gap-3" aria-label="Players">
+          <PlayerCard role={me} name={state.players[me]} you />
+          <PlayerCard role={them} name={state.players[them]} />
+        </ul>
+        <span
+          className="bg-noggin-sun border-noggin-ink absolute top-1/2 left-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-[60%] -rotate-8 items-center justify-center rounded-full border-3 text-[15px] font-extrabold"
+          aria-hidden="true"
+        >
+          VS
+        </span>
+      </div>
+
+      <fieldset className="mt-7">
+        <legend className={`${label} mb-2.5`}>What&apos;s on your head?</legend>
+        <div className="grid grid-cols-2 gap-3">
+          <ModeOption
+            mode="number"
+            current={state.mode}
+            title="Numbers"
+            detail="1 to 100"
+            onPick={(mode) => room.dispatch({ type: "mode", mode })}
+          />
+          <ModeOption
+            mode="celeb"
+            current={state.mode}
+            title="Celebs"
+            detail="Famous faces"
+            onPick={(mode) => room.dispatch({ type: "mode", mode })}
+          />
+        </div>
+      </fieldset>
+
+      <button
+        type="button"
+        className={`${hugeBtn} bg-noggin-tomato mt-auto`}
+        disabled={!ready}
+        onClick={() => room.dispatch({ type: "start" })}
+      >
+        {ready ? "Start!" : "Waiting for a friend…"}
+      </button>
+    </main>
+  );
+}
+
+function PlayerCard({
+  role,
+  name,
+  you,
+}: {
+  role: Role;
+  name: string | null;
+  you?: boolean;
+}) {
+  if (!name) {
+    return (
+      <li className="flex flex-col items-center gap-2 rounded-[22px] border-3 border-dashed border-[#c9b994] px-3 py-4">
+        <span
+          className="bg-noggin-line h-14 w-14 animate-pulse rounded-full"
+          aria-hidden="true"
+        />
+        <span className="text-noggin-muted text-[17px] font-bold">
+          Waiting…
+        </span>
+        <span className="text-noggin-muted text-[13px] font-bold">
+          share the code
+        </span>
+      </li>
+    );
+  }
+  return (
+    <li className="border-noggin-ink flex animate-[noggin-pop_0.4s_ease-out] flex-col items-center gap-2 rounded-[22px] border-3 bg-white px-3 py-4 shadow-[0_5px_0_var(--color-noggin-ink)]">
+      <span
+        className={`border-noggin-ink flex h-14 w-14 items-center justify-center rounded-full border-3 text-[26px] font-extrabold ${PLAYER_BG[role]}`}
+        aria-hidden="true"
+      >
+        {name.charAt(0).toUpperCase()}
+      </span>
+      <span className="max-w-full truncate text-[19px] font-extrabold">
+        {name}
+      </span>
+      <span className="text-noggin-muted text-[13px] font-bold">
+        {you ? "you" : "ready"}
+      </span>
+    </li>
+  );
+}
+
+function ModeOption({
+  mode,
+  current,
+  title,
+  detail,
+  onPick,
+}: {
+  mode: Mode;
+  current: Mode;
+  title: string;
+  detail: string;
+  onPick: (mode: Mode) => void;
+}) {
+  const selected = mode === current;
+  return (
+    <label
+      className={`has-focus-visible:outline-noggin-cobalt flex min-h-32 cursor-pointer flex-col justify-end gap-1 rounded-[22px] border-3 p-3.5 transition has-focus-visible:outline-3 has-focus-visible:outline-offset-3 ${
+        selected
+          ? "border-noggin-ink bg-noggin-sun shadow-[0_5px_0_var(--color-noggin-ink)]"
+          : "border-[#c9b994] bg-white shadow-[0_2px_0_var(--color-noggin-ink)]"
+      }`}
+    >
+      <input
+        type="radio"
+        name="noggin-mode"
+        className="sr-only"
+        checked={selected}
+        onChange={() => onPick(mode)}
+      />
+      {mode === "number" ? (
+        <span
+          className="text-[30px] leading-none font-extrabold"
+          aria-hidden="true"
+        >
+          42
+        </span>
+      ) : (
+        <svg
+          viewBox="0 0 24 24"
+          className="fill-noggin-ink h-7.5 w-7.5"
+          aria-hidden="true"
+        >
+          <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z" />
+        </svg>
+      )}
+      <span className="text-lg font-extrabold">{title}</span>
+      <span className="text-noggin-muted text-sm font-semibold">{detail}</span>
+    </label>
+  );
+}
+
+// ---- Full-screen game views ----
+
+function Fullscreen({
+  className,
+  children,
+}: {
+  className: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={`fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden px-5 ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function Countdown() {
+  const [n, setN] = useState(COUNTDOWN_SECONDS);
+
+  useEffect(() => {
+    const start = Date.now();
+    const id = setInterval(() => {
+      // Hold at 1 until the host's "go" arrives so both phones flip together.
+      setN(
+        Math.max(
+          1,
+          COUNTDOWN_SECONDS - Math.floor((Date.now() - start) / 1000),
+        ),
+      );
+    }, 100);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <Fullscreen className="bg-noggin-sun text-noggin-ink text-center">
+      <p className="text-[30px] leading-tight font-extrabold tracking-[-0.02em]">
+        Phone on your forehead!
+      </p>
+      <p className="text-noggin-ink/75 mt-2 text-lg font-semibold">
+        Screen facing out. No peeking.
+      </p>
+      <p
+        key={n}
+        className="animate-[noggin-pop_0.5s_ease-out] text-[min(70vw,40dvh)] leading-none font-extrabold tracking-[-0.05em] tabular-nums"
+        aria-live="assertive"
+      >
+        {n}
+      </p>
+    </Fullscreen>
+  );
+}
+
+function Playing({
+  state,
+  role,
+  onGotIt,
+}: {
+  state: GameState;
+  role: Role;
+  onGotIt: () => void;
+}) {
+  const word = state.words?.[role] ?? "";
+  // Numbers are short, so they can go even bigger.
+  const fitRef = useFitText<HTMLParagraphElement>(
+    word,
+    state.mode === "number" ? "min(56vw, 42dvh)" : "min(20vw, 20dvh)",
+  );
+
+  useEffect(() => {
+    navigator.vibrate?.(150);
+  }, []);
+
+  return (
+    <Fullscreen className={PLAYER_BG[role]}>
+      <p className="absolute top-[max(1.5rem,env(safe-area-inset-top))] text-sm font-extrabold tracking-[0.18em] uppercase">
+        Noggin · {state.mode === "number" ? "Number" : "Celebrity"}
+      </p>
+
+      <p
+        ref={fitRef}
+        className="w-full animate-[noggin-pop_0.5s_ease-out] text-center leading-[0.92] font-extrabold tracking-[-0.03em] text-balance"
+      >
+        {word}
+      </p>
+
+      <button
+        type="button"
+        onClick={onGotIt}
+        className={`${btn} border-noggin-ink text-noggin-ink focus-visible:outline-noggin-ink absolute inset-x-5 bottom-[max(1.5rem,env(safe-area-inset-bottom))] h-18 rounded-3xl bg-white text-2xl shadow-[0_6px_0_var(--color-noggin-ink)] active:shadow-[0_1px_0_var(--color-noggin-ink)]`}
+      >
+        I got it!
+      </button>
+    </Fullscreen>
+  );
+}
+
+const CONFETTI = [
+  "top-[9%] left-[9%] h-5.5 w-5.5 rotate-20 rounded bg-noggin-sun",
+  "top-[15%] right-[10%] h-4.5 w-4.5 rounded-full bg-noggin-tomato",
+  "top-[7%] right-[25%] h-2.5 w-7 -rotate-24 rounded-md bg-[#6d8bff]",
+  "top-[25%] left-[14%] h-3 w-3 rounded-full bg-[#6d8bff]",
+  "top-[28%] right-[15%] h-2.5 w-6 rotate-34 rounded-md bg-noggin-sun",
+];
+
+function Result({
+  state,
+  role,
+  onAgain,
+  onLeave,
+}: {
+  state: GameState;
+  role: Role;
+  onAgain: () => void;
+  onLeave: () => void;
+}) {
+  const them: Role = role === "host" ? "guest" : "host";
+  const won = state.winner === role;
+  const winnerName = state.winner ? state.players[state.winner] : null;
+
+  return (
+    <Fullscreen className="bg-noggin-ink text-white">
+      {won &&
+        CONFETTI.map((c) => (
+          <span key={c} className={`absolute ${c}`} aria-hidden="true" />
+        ))}
+      <div className="flex w-full max-w-100 flex-1 flex-col pt-[max(4rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+        <div className="my-auto animate-[noggin-pop_0.45s_ease-out] text-center">
+          {won ? (
+            <svg
+              viewBox="0 0 52 44"
+              className="mx-auto h-22 w-26"
+              aria-hidden="true"
+            >
+              <path
+                d="M4 14l11 9 11-19 11 19 11-9-5 26H9z"
+                strokeWidth="2.5"
+                strokeLinejoin="round"
+                className="fill-noggin-sun stroke-white"
+              />
+            </svg>
+          ) : (
+            <svg
+              viewBox="0 0 40 40"
+              className="mx-auto h-24 w-24"
+              aria-hidden="true"
+            >
+              <circle
+                cx="20"
+                cy="20"
+                r="17"
+                strokeWidth="2"
+                className="fill-noggin-sun stroke-white"
+              />
+              <circle cx="14" cy="17" r="2" className="fill-noggin-ink" />
+              <circle cx="26" cy="17" r="2" className="fill-noggin-ink" />
+              <path
+                d="M14 28 q6 -4 12 0"
+                fill="none"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                className="stroke-noggin-ink"
+              />
+            </svg>
+          )}
+          <h2 className="mt-4 text-[56px] leading-[0.95] font-extrabold tracking-[-0.04em] break-words">
+            {won ? "You win!" : `${winnerName} wins!`}
+          </h2>
+          <p className="mt-3 text-lg text-[#d9d2c4]">
+            {won ? "Big brain. Huge noggin." : "So close. Run it back?"}
+          </p>
+
+          <dl className="mt-9 grid grid-cols-2 gap-3 text-left">
+            {[role, them].map((r) => (
+              <div
+                key={r}
+                className={`rounded-[20px] border-3 border-white p-4 ${PLAYER_BG[r]}`}
+              >
+                <dt className="text-sm font-bold">
+                  {r === role ? "You were" : `${state.players[r]} was`}
+                </dt>
+                <dd className="mt-1.5 text-[26px] leading-none font-extrabold break-words">
+                  {state.words?.[r]}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        <button
+          type="button"
+          onClick={onAgain}
+          className={`${btn} bg-noggin-sun text-noggin-ink h-17 w-full border-white text-[23px] shadow-[0_6px_0_white] focus-visible:outline-white active:shadow-[0_1px_0_white]`}
+        >
+          Play again
+        </button>
+        <button
+          type="button"
+          onClick={onLeave}
+          className="mt-2 h-12 w-full text-[17px] font-bold text-[#d9d2c4] focus-visible:outline-3 focus-visible:outline-white"
+        >
+          Leave room
+        </button>
+      </div>
+    </Fullscreen>
+  );
+}
+
+/** Shrinks the text until its widest line fits, so long names stay as big as possible without clipping. */
+function useFitText<T extends HTMLElement>(text: string, maxSize: string) {
+  const ref = useRef<T>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const fit = () => {
+      el.style.fontSize = maxSize;
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      for (let i = 0; i < 30; i++) {
+        const widest = Math.max(
+          ...Array.from(range.getClientRects(), (r) => r.width),
+        );
+        if (widest <= el.clientWidth) break;
+        el.style.fontSize = `${parseFloat(getComputedStyle(el).fontSize) * 0.94}px`;
+      }
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, [text, maxSize]);
+  return ref;
+}
+
+/** Keep the screen awake while the phone is on someone's forehead. */
+function useWakeLock(active: boolean) {
+  useEffect(() => {
+    if (!active || !("wakeLock" in navigator)) return;
+    let lock: WakeLockSentinel | null = null;
+    let cancelled = false;
+    navigator.wakeLock
+      .request("screen")
+      .then((l) => {
+        if (cancelled) void l.release();
+        else lock = l;
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      void lock?.release();
+    };
+  }, [active]);
+}

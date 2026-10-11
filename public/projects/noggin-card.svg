@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" font-family="ui-sans-serif, system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif">
+  <rect width="800" height="380" fill="#fff7ea"/>
+  <g transform="translate(118 72)">
+    <rect x="0" y="0" width="150" height="236" rx="22" fill="#ff5a36" transform="rotate(-7 75 118)"/>
+    <text x="75" y="140" text-anchor="middle" font-size="76" font-weight="800" fill="#fff" transform="rotate(-7 75 118)">42</text>
+  </g>
+  <g transform="translate(232 82)">
+    <rect x="0" y="0" width="150" height="236" rx="22" fill="#2f54eb" transform="rotate(6 75 118)"/>
+    <text x="75" y="110" text-anchor="middle" font-size="27" font-weight="800" fill="#fff" transform="rotate(6 75 118)">Dolly</text>
+    <text x="75" y="142" text-anchor="middle" font-size="27" font-weight="800" fill="#fff" transform="rotate(6 75 118)">Parton</text>
+  </g>
+  <text x="440" y="200" font-size="78" font-weight="800" letter-spacing="-2.5" fill="#1a1712">Noggin</text>
+  <circle cx="676" cy="137" r="18" fill="#ffd23f"/>
+  <text x="676" y="146" text-anchor="middle" font-size="26" font-weight="800" fill="#1a1712">?</text>
+  <text x="444" y="240" font-size="22" font-weight="500" fill="#6b6356">What's on your forehead?</text>
+</svg>

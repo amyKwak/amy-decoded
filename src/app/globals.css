@@ -19,6 +19,38 @@
   --font-mono: var(--font-jetbrains-mono);
 
   --breakpoint-tablet: 768px;
+
+  /* Moody (/projects/moody), palette after Burnt Toast Creative */
+  --color-moody-ink: #3b3654;
+  --color-moody-muted: #6b6680;
+  --color-moody-bg: #fcfaff;
+  --color-moody-line: #e7e3f3;
+  --color-moody-cream: #ffeacd;
+  --color-moody-pink-pale: #ffd6ef;
+  --color-moody-pink: #ffc6e7;
+  --color-moody-hot-pink: #ffa5d6;
+  --color-moody-peach: #ffce9c;
+  --color-moody-yellow: #ffef8c;
+  --color-moody-green: #7befb5;
+  --color-moody-mint: #b5ffc6;
+  --color-moody-sky-pale: #bdefff;
+  --color-moody-sky: #9ce7ff;
+  --color-moody-blue: #84b5ff;
+  --color-moody-lavender: #c6c6ff;
+  --color-moody-periwinkle: #a5a5f7;
+  --color-moody-red: #f48198;
+  --color-moody-red-soft: #ffe4ea;
+  --color-moody-accent: #5b5bd0;
+  --color-moody-accent-soft: #ececff;
+
+  /* Noggin (/projects/noggin) */
+  --color-noggin-bg: #fff7ea;
+  --color-noggin-ink: #1a1712;
+  --color-noggin-muted: #6b6356;
+  --color-noggin-line: #ebe0cc;
+  --color-noggin-sun: #ffd23f;
+  --color-noggin-tomato: #ff5a36;
+  --color-noggin-cobalt: #2f54eb;
 }
 
 html,
@@ -36,5 +68,50 @@ a {
 @media (hover: hover) and (pointer: fine) {
   a:hover {
     -webkit-text-stroke: 0.3px currentColor;
+  }
+}
+
+@keyframes noggin-pop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes noggin-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(3deg);
+  }
+}
+
+@keyframes noggin-sheet {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes noggin-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [class*="animate-[noggin-"] {
+    animation: none;
   }
 }
