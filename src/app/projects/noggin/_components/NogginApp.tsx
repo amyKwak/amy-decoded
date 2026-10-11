@@ -196,7 +196,8 @@ function Home({
         <HelpButton />
       </div>
 
-      <div className="flex flex-col items-center text-center">
+      {/* Fills the space above the form, so the logo sits centered between the top and "Your name". */}
+      <div className="flex flex-1 flex-col items-center justify-center text-center">
         <Mascot className="h-24 w-24 animate-[noggin-bob_2.6s_ease-in-out_infinite] [@media(max-height:600px)]:h-18 [@media(max-height:600px)]:w-18 [@media(min-height:700px)]:h-32 [@media(min-height:700px)]:w-32 [@media(min-height:820px)]:h-40 [@media(min-height:820px)]:w-40" />
         <h1 className="mt-2 text-[56px] leading-[0.9] font-extrabold tracking-[-0.04em] [@media(max-height:600px)]:text-5xl [@media(min-height:820px)]:text-[68px]">
           Noggin
@@ -207,7 +208,7 @@ function Home({
       </div>
       {errorBox}
 
-      <div className="mt-auto flex flex-col pt-6 [@media(max-height:600px)]:pt-4">
+      <div className="flex flex-col pt-6 [@media(max-height:600px)]:pt-4">
         <label htmlFor="noggin-name" className={`${label} mb-2`}>
           Your name
         </label>
