@@ -322,7 +322,7 @@ const STEPS: { title: string; body: string; chip: string; tilt: string }[] = [
   },
   {
     title: "Ask yes or no",
-    body: "Take turns asking questions. Guess yours first, then tap “I got it!” With Say it to win on, just say your word out loud. Careful: if your friend blurts it out, that counts too!",
+    body: "Take turns asking questions. Guess yours first, then tap “I got it!” With “Listen for my word” on, you can just say your word out loud instead. Careful: if your friend blurts it out, that counts too!",
     chip: "bg-white",
     tilt: "rotate-4",
   },
@@ -665,7 +665,7 @@ function VoiceToggle({ voice }: { voice: VoiceSetting }) {
     ? "Not available in this browser. Try Chrome or Safari."
     : voice.blocked
       ? "Mic is blocked. Allow it in your browser settings."
-      : "Your phone listens and wins when you say your word.";
+      : "Say your word out loud and your phone hears it. No tapping needed.";
   return (
     <label
       className={`has-focus-visible:outline-noggin-cobalt mt-6 mb-8 flex items-center gap-3.5 rounded-[22px] border-3 p-3.5 has-focus-visible:outline-3 has-focus-visible:outline-offset-3 ${
@@ -682,7 +682,7 @@ function VoiceToggle({ voice }: { voice: VoiceSetting }) {
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-lg leading-tight font-extrabold">
-          Say it to win
+          Listen for my word
         </span>
         <span className="text-noggin-muted mt-0.5 block text-sm leading-snug font-semibold">
           {note}
@@ -1284,7 +1284,7 @@ function useFitText<T extends HTMLElement>(
   return ref;
 }
 
-// ---- Say it to win ----
+// ---- Listen for my word ----
 
 /** Just the parts of the Web Speech API's SpeechRecognition this uses (TypeScript doesn't ship its types). */
 type Recognition = {
@@ -1319,7 +1319,7 @@ type VoiceSetting = {
 };
 
 /**
- * This phone's "Say it to win" switch, remembered between games. Turning it on
+ * This phone's "Listen for my word" switch, remembered between games. Turning it on
  * asks for the mic right away, in the lobby, so the permission prompt doesn't
  * pop up once the phone is on someone's forehead.
  */
