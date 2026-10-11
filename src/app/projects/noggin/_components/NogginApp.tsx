@@ -15,6 +15,7 @@ import {
   type Role,
 } from "@/lib/noggin/game";
 import { NogginRoom, type RoomSnapshot } from "@/lib/noggin/room";
+import { heardWord } from "@/lib/noggin/voice";
 
 const focusRing =
   "focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-noggin-cobalt";
@@ -38,6 +39,7 @@ const PLAYER_BG: Record<Role, string> = {
   guest: "bg-noggin-cobalt text-white",
 };
 const NAME_KEY = "noggin:name";
+const VOICE_KEY = "noggin:voice";
 const noopSubscribe = () => () => {};
 
 export function NogginApp() {
@@ -320,7 +322,7 @@ const STEPS: { title: string; body: string; chip: string; tilt: string }[] = [
   },
   {
     title: "Ask yes or no",
-    body: "Take turns asking questions. Guess yours first, then tap “I got it!”",
+    body: "Take turns asking questions. Guess yours first, then tap “I got it!” With Say it to win on, just say your word out loud. Careful: if your friend blurts it out, that counts too!",
     chip: "bg-white",
     tilt: "rotate-4",
   },
@@ -450,6 +452,7 @@ function RoomView({
 
   const phase = snap.state?.phase;
   useWakeLock(phase === "countdown" || phase === "playing");
+  const voice = useVoiceSetting();
 
   if (!snap.state) {
     return (
@@ -476,6 +479,7 @@ function RoomView({
       <Playing
         state={state}
         role={snap.role}
+        listen={voice.on}
         onGotIt={() => room.dispatch({ type: "gotIt" })}
       />
     );
@@ -489,7 +493,13 @@ function RoomView({
       />
     );
   return (
-    <Lobby snap={snap} state={state} room={room} onLeave={() => onLeave()} />
+    <Lobby
+      snap={snap}
+      state={state}
+      room={room}
+      voice={voice}
+      onLeave={() => onLeave()}
+    />
   );
 }
 
@@ -504,8 +514,10 @@ function Lobby({
   snap,
   state,
   room,
+  voice,
   onLeave,
 }: {
+  voice: VoiceSetting;
   snap: RoomSnapshot;
   state: GameState;
   room: NogginRoom;
@@ -628,6 +640,8 @@ function Lobby({
         </div>
       </fieldset>
 
+      <VoiceToggle voice={voice} />
+
       <button
         type="button"
         className={`${hugeBtn} bg-noggin-tomato mt-auto`}
@@ -637,6 +651,71 @@ function Lobby({
         {ready ? "Start!" : "Waiting for a friend…"}
       </button>
     </main>
+  );
+}
+
+function VoiceToggle({ voice }: { voice: VoiceSetting }) {
+  const note = !voice.supported
+    ? "Not available in this browser. Try Chrome or Safari."
+    : voice.blocked
+      ? "Mic is blocked. Allow it in your browser settings."
+      : "Your phone listens and wins when you say your word.";
+  return (
+    <label
+      className={`has-focus-visible:outline-noggin-cobalt mt-6 mb-8 flex items-center gap-3.5 rounded-[22px] border-3 p-3.5 has-focus-visible:outline-3 has-focus-visible:outline-offset-3 ${
+        voice.supported
+          ? "border-noggin-ink cursor-pointer bg-white"
+          : "border-noggin-line bg-white/60"
+      }`}
+    >
+      <span
+        className={`border-noggin-ink flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-[2.5px] ${voice.on ? "bg-noggin-sun" : "bg-noggin-bg"}`}
+        aria-hidden="true"
+      >
+        <MicIcon className="stroke-noggin-ink h-5.5 w-5.5" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-lg leading-tight font-extrabold">
+          Say it to win
+        </span>
+        <span className="text-noggin-muted mt-0.5 block text-sm leading-snug font-semibold">
+          {note}
+        </span>
+      </span>
+      <input
+        type="checkbox"
+        role="switch"
+        className="sr-only"
+        checked={voice.on}
+        disabled={!voice.supported}
+        onChange={(e) => void voice.toggle(e.target.checked)}
+      />
+      <span
+        className={`border-noggin-ink relative h-8 w-14 shrink-0 rounded-full border-[2.5px] transition-colors ${voice.on ? "bg-noggin-cobalt" : "bg-noggin-line"}`}
+        aria-hidden="true"
+      >
+        <span
+          className={`border-noggin-ink absolute top-0.5 left-0.5 h-5.5 w-5.5 rounded-full border-[2.5px] bg-white transition-transform ${voice.on ? "translate-x-6" : ""}`}
+        />
+      </span>
+    </label>
+  );
+}
+
+function MicIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <rect x="9" y="3" width="6" height="11" rx="3" />
+      <path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21" />
+    </svg>
   );
 }
 
@@ -879,13 +958,16 @@ function usePortrait() {
 function Playing({
   state,
   role,
+  listen,
   onGotIt,
 }: {
   state: GameState;
   role: Role;
+  listen: boolean;
   onGotIt: () => void;
 }) {
   const word = state.words?.[role] ?? "";
+  const hearing = useListenFor(word, listen, onGotIt);
   // The word is always laid out sideways, like holding the phone up on your
   // forehead. With rotation lock on the page stays portrait, so turn it ourselves
   // (a quarter turn right, which reads upright once the top of the phone is on the left).
@@ -910,9 +992,26 @@ function Playing({
             : "inset-0 pt-[max(1.25rem,env(safe-area-inset-top))] pr-[max(1.5rem,env(safe-area-inset-right))] pb-[max(1.25rem,env(safe-area-inset-bottom))] pl-[max(1.5rem,env(safe-area-inset-left))]"
         }`}
       >
-        <p className="text-sm font-extrabold tracking-[0.18em] uppercase">
-          Noggin · {state.mode === "number" ? "Number" : "Celebrity"}
-        </p>
+        <div className="flex items-center gap-3">
+          <p className="text-sm font-extrabold tracking-[0.18em] uppercase">
+            Noggin · {state.mode === "number" ? "Number" : "Celebrity"}
+          </p>
+          {hearing !== "off" && (
+            <span
+              role="status"
+              className="inline-flex items-center gap-1.5 rounded-full bg-white/25 px-2.5 py-1 text-xs font-extrabold tracking-[0.1em] uppercase"
+            >
+              <MicIcon className="h-3.5 w-3.5 stroke-current" />
+              {hearing === "listening" ? "Listening" : "Mic blocked"}
+              {hearing === "listening" && (
+                <span
+                  className="h-2 w-2 animate-pulse rounded-full bg-current"
+                  aria-hidden="true"
+                />
+              )}
+            </span>
+          )}
+        </div>
 
         <div className="flex min-h-0 w-full flex-1 items-center">
           <p
@@ -1125,6 +1224,147 @@ function useFitText<T extends HTMLElement>(
     return () => window.removeEventListener("resize", fit);
   }, [text, maxSize, rotated]);
   return ref;
+}
+
+// ---- Say it to win ----
+
+/** Just the parts of the Web Speech API's SpeechRecognition this uses (TypeScript doesn't ship its types). */
+type Recognition = {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  maxAlternatives: number;
+  onstart: (() => void) | null;
+  onresult:
+    | ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void)
+    | null;
+  onerror: ((e: { error: string }) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  abort(): void;
+};
+type RecognitionCtor = new () => Recognition;
+
+function recognitionCtor(): RecognitionCtor | undefined {
+  const w = window as unknown as {
+    SpeechRecognition?: RecognitionCtor;
+    webkitSpeechRecognition?: RecognitionCtor;
+  };
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition;
+}
+
+type VoiceSetting = {
+  supported: boolean;
+  on: boolean;
+  blocked: boolean;
+  toggle: (on: boolean) => Promise<void>;
+};
+
+/**
+ * This phone's "Say it to win" switch, remembered between games. Turning it on
+ * asks for the mic right away, in the lobby, so the permission prompt doesn't
+ * pop up once the phone is on someone's forehead.
+ */
+function useVoiceSetting(): VoiceSetting {
+  const [supported] = useState(() => recognitionCtor() !== undefined);
+  const [on, setOn] = useState(() => {
+    try {
+      return supported && localStorage.getItem(VOICE_KEY) === "on";
+    } catch {
+      return false;
+    }
+  });
+  const [blocked, setBlocked] = useState(false);
+
+  const toggle = async (next: boolean) => {
+    if (next) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        stream.getTracks().forEach((t) => t.stop());
+        setBlocked(false);
+      } catch {
+        setBlocked(true);
+        next = false;
+      }
+    }
+    setOn(next);
+    try {
+      localStorage.setItem(VOICE_KEY, next ? "on" : "off");
+    } catch {}
+  };
+
+  return { supported, on, blocked, toggle };
+}
+
+/** Listens while `active` and calls `onHeard` once when `word` is said. */
+function useListenFor(
+  word: string,
+  active: boolean,
+  onHeard: () => void,
+): "off" | "listening" | "blocked" {
+  const [status, setStatus] = useState<"off" | "listening" | "blocked">("off");
+  const onHeardRef = useRef(onHeard);
+  useEffect(() => {
+    onHeardRef.current = onHeard;
+  });
+
+  useEffect(() => {
+    const Ctor = recognitionCtor();
+    if (!active || !Ctor || !word) return;
+
+    let done = false;
+    let restart: ReturnType<typeof setTimeout> | undefined;
+    const rec = new Ctor();
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.lang = "en-US";
+    rec.maxAlternatives = 3;
+
+    rec.onstart = () => setStatus("listening");
+    rec.onresult = (e) => {
+      if (done) return;
+      const results = Array.from(e.results);
+      // Check every alternative of every phrase, plus the whole thing joined
+      // up, in case a name got split across two phrases.
+      const heard =
+        results.some((alts) =>
+          Array.from(alts).some((a) => heardWord(a.transcript, word)),
+        ) ||
+        heardWord(results.map((alts) => alts[0]?.transcript).join(" "), word);
+      if (!heard) return;
+      done = true;
+      rec.abort();
+      onHeardRef.current();
+    };
+    rec.onerror = (e) => {
+      if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+        done = true;
+        setStatus("blocked");
+      }
+    };
+    // Browsers stop listening after a pause, so keep starting it again.
+    rec.onend = () => {
+      if (done) return;
+      restart = setTimeout(() => {
+        try {
+          rec.start();
+        } catch {}
+      }, 250);
+    };
+
+    try {
+      rec.start();
+    } catch {}
+    return () => {
+      done = true;
+      clearTimeout(restart);
+      rec.abort();
+    };
+  }, [word, active]);
+
+  return active ? status : "off";
 }
 
 /** Keep the screen awake while the phone is on someone's forehead. */
