@@ -15,6 +15,8 @@ export type GameState = {
   words: { host: string; guest: string } | null;
   winner: Role | null;
   round: number;
+  /** Rounds won by each player since the current guest joined. */
+  score: Record<Role, number>;
 };
 
 export type Action =
@@ -37,6 +39,7 @@ export function initialState(
     words: null,
     winner: null,
     round: 0,
+    score: { host: 0, guest: 0 },
   };
 }
 
@@ -69,7 +72,12 @@ export function reduce(
   switch (action.type) {
     case "join":
       if (from !== "guest") return state;
-      return { ...state, players: { ...state.players, guest: action.name } };
+      // A new opponent starts the score fresh.
+      return {
+        ...state,
+        players: { ...state.players, guest: action.name },
+        score: { host: 0, guest: 0 },
+      };
     case "leave":
       return {
         ...state,
@@ -77,6 +85,7 @@ export function reduce(
         players: { ...state.players, guest: null },
         words: null,
         winner: null,
+        score: { host: 0, guest: 0 },
       };
     case "mode":
       if (state.phase !== "lobby" || state.mode === action.mode) return state;
@@ -96,7 +105,12 @@ export function reduce(
       return { ...state, phase: "playing" };
     case "gotIt":
       if (state.phase !== "playing") return state;
-      return { ...state, phase: "done", winner: from };
+      return {
+        ...state,
+        phase: "done",
+        winner: from,
+        score: { ...state.score, [from]: state.score[from] + 1 },
+      };
     case "lobby":
       if (state.phase !== "done") return state;
       return { ...state, phase: "lobby" };

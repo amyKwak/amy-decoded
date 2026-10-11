@@ -314,7 +314,7 @@ const STEPS: { title: string; body: string; chip: string; tilt: string }[] = [
   },
   {
     title: "Forehead time",
-    body: "When the countdown ends, hold your phone to your forehead, screen out.",
+    body: "Turn your phone sideways, top on the left, and hold it to your forehead with the screen facing out.",
     chip: "bg-noggin-cobalt text-white",
     tilt: "-rotate-3",
   },
@@ -588,8 +588,17 @@ function Lobby({
 
       <div className="relative mt-7">
         <ul className="grid grid-cols-2 gap-3" aria-label="Players">
-          <PlayerCard role={me} name={state.players[me]} you />
-          <PlayerCard role={them} name={state.players[them]} />
+          <PlayerCard
+            role={me}
+            name={state.players[me]}
+            wins={state.round > 0 ? state.score[me] : null}
+            you
+          />
+          <PlayerCard
+            role={them}
+            name={state.players[them]}
+            wins={state.round > 0 ? state.score[them] : null}
+          />
         </ul>
         <span
           className="bg-noggin-sun border-noggin-ink absolute top-1/2 left-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-[60%] -rotate-8 items-center justify-center rounded-full border-3 text-[15px] font-extrabold"
@@ -634,10 +643,13 @@ function Lobby({
 function PlayerCard({
   role,
   name,
+  wins,
   you,
 }: {
   role: Role;
   name: string | null;
+  /** Null before the first round, when there's no score to show yet. */
+  wins: number | null;
   you?: boolean;
 }) {
   if (!name) {
@@ -669,6 +681,7 @@ function PlayerCard({
       </span>
       <span className="text-noggin-muted text-[13px] font-bold">
         {you ? "you" : "ready"}
+        {wins !== null && ` · ${wins} ${wins === 1 ? "win" : "wins"}`}
       </span>
     </li>
   );
@@ -708,7 +721,7 @@ function ModeOption({
           className="text-[30px] leading-none font-extrabold"
           aria-hidden="true"
         >
-          42
+          67
         </span>
       ) : (
         <svg
@@ -761,21 +774,105 @@ function Countdown() {
   }, []);
 
   return (
-    <Fullscreen className="bg-noggin-sun text-noggin-ink text-center">
-      <p className="text-[30px] leading-tight font-extrabold tracking-[-0.02em]">
-        Phone on your forehead!
-      </p>
-      <p className="text-noggin-ink/75 mt-2 text-lg font-semibold">
-        Screen facing out. No peeking.
-      </p>
+    <Fullscreen className="bg-noggin-sun text-noggin-ink text-center landscape:flex-row landscape:gap-10">
+      <div className="flex flex-col items-center landscape:max-w-80 landscape:items-start landscape:text-left">
+        <p className="text-[32px] leading-[1.05] font-extrabold tracking-[-0.02em]">
+          <span className="landscape:hidden">Turn it sideways!</span>
+          <span className="portrait:hidden">Up on your forehead!</span>
+        </p>
+        <SidewaysPhone className="my-5 h-32 w-32 landscape:hidden" />
+        <p className="text-noggin-ink/80 mt-2 max-w-72 text-lg leading-snug font-semibold text-balance landscape:mt-3">
+          <span className="landscape:hidden">
+            Top of your phone on the{" "}
+            <strong className="text-noggin-ink">left</strong>, then hold it to
+            your forehead.
+          </span>
+          <span className="portrait:hidden">
+            Screen facing out. No peeking.
+          </span>
+        </p>
+      </div>
       <p
         key={n}
-        className="animate-[noggin-pop_0.5s_ease-out] text-[min(70vw,40dvh)] leading-none font-extrabold tracking-[-0.05em] tabular-nums"
+        className="animate-[noggin-pop_0.5s_ease-out] text-[min(40vw,24dvh)] leading-none font-extrabold tracking-[-0.05em] tabular-nums landscape:text-[min(60dvh,40vw)]"
         aria-live="assertive"
       >
         {n}
       </p>
     </Fullscreen>
+  );
+}
+
+/** A phone turning a quarter turn to the left, with its top marked, so it's clear which way to hold it. */
+function SidewaysPhone({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 120 120" className={className} aria-hidden="true">
+      <path
+        d="M98 34 A46 46 0 0 0 34 18"
+        fill="none"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeDasharray="2 9"
+        className="stroke-noggin-ink"
+      />
+      <path
+        d="M40 9 L31 18 L42 25"
+        fill="none"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="stroke-noggin-ink"
+      />
+      <g className="origin-center animate-[noggin-turn_2.4s_ease-in-out_infinite]">
+        <rect
+          x="38"
+          y="24"
+          width="44"
+          height="76"
+          rx="9"
+          strokeWidth="4"
+          className="stroke-noggin-ink fill-white"
+        />
+        <rect
+          x="52"
+          y="30"
+          width="16"
+          height="4"
+          rx="2"
+          className="fill-noggin-ink"
+        />
+        <text
+          x="60"
+          y="49"
+          textAnchor="middle"
+          fontSize="11"
+          fontWeight="800"
+          className="fill-noggin-tomato"
+        >
+          TOP
+        </text>
+        <rect
+          x="47"
+          y="58"
+          width="26"
+          height="26"
+          rx="5"
+          className="fill-noggin-tomato"
+        />
+      </g>
+    </svg>
+  );
+}
+
+function usePortrait() {
+  return useSyncExternalStore(
+    (onChange) => {
+      const mq = window.matchMedia("(orientation: portrait)");
+      mq.addEventListener("change", onChange);
+      return () => mq.removeEventListener("change", onChange);
+    },
+    () => window.matchMedia("(orientation: portrait)").matches,
+    () => true,
   );
 }
 
@@ -789,10 +886,15 @@ function Playing({
   onGotIt: () => void;
 }) {
   const word = state.words?.[role] ?? "";
+  // The word is always laid out sideways, like holding the phone up on your
+  // forehead. With rotation lock on the page stays portrait, so turn it ourselves
+  // (a quarter turn right, which reads upright once the top of the phone is on the left).
+  const rotated = usePortrait();
   // Numbers are short, so they can go even bigger.
   const fitRef = useFitText<HTMLParagraphElement>(
     word,
-    state.mode === "number" ? "min(56vw, 42dvh)" : "min(20vw, 20dvh)",
+    state.mode === "number" ? "min(60vmin, 40vmax)" : "min(13vmax, 24vmin)",
+    rotated,
   );
 
   useEffect(() => {
@@ -801,24 +903,34 @@ function Playing({
 
   return (
     <Fullscreen className={PLAYER_BG[role]}>
-      <p className="absolute top-[max(1.5rem,env(safe-area-inset-top))] text-sm font-extrabold tracking-[0.18em] uppercase">
-        Noggin · {state.mode === "number" ? "Number" : "Celebrity"}
-      </p>
-
-      <p
-        ref={fitRef}
-        className="w-full animate-[noggin-pop_0.5s_ease-out] text-center leading-[0.92] font-extrabold tracking-[-0.03em] text-balance"
+      <div
+        className={`absolute flex flex-col items-center px-6 py-5 ${
+          rotated
+            ? "top-1/2 left-1/2 h-[100vw] w-[100dvh] -translate-x-1/2 -translate-y-1/2 rotate-90"
+            : "inset-0 pt-[max(1.25rem,env(safe-area-inset-top))] pr-[max(1.5rem,env(safe-area-inset-right))] pb-[max(1.25rem,env(safe-area-inset-bottom))] pl-[max(1.5rem,env(safe-area-inset-left))]"
+        }`}
       >
-        {word}
-      </p>
+        <p className="text-sm font-extrabold tracking-[0.18em] uppercase">
+          Noggin · {state.mode === "number" ? "Number" : "Celebrity"}
+        </p>
 
-      <button
-        type="button"
-        onClick={onGotIt}
-        className={`${btn} border-noggin-ink text-noggin-ink focus-visible:outline-noggin-ink absolute inset-x-5 bottom-[max(1.5rem,env(safe-area-inset-bottom))] h-18 rounded-3xl bg-white text-2xl shadow-[0_6px_0_var(--color-noggin-ink)] active:shadow-[0_1px_0_var(--color-noggin-ink)]`}
-      >
-        I got it!
-      </button>
+        <div className="flex min-h-0 w-full flex-1 items-center">
+          <p
+            ref={fitRef}
+            className="w-full animate-[noggin-pop_0.5s_ease-out] text-center leading-[0.92] font-extrabold tracking-[-0.03em] text-balance"
+          >
+            {word}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={onGotIt}
+          className={`${btn} border-noggin-ink text-noggin-ink focus-visible:outline-noggin-ink h-16 w-full max-w-sm shrink-0 rounded-3xl bg-white text-2xl shadow-[0_6px_0_var(--color-noggin-ink)] active:shadow-[0_1px_0_var(--color-noggin-ink)]`}
+        >
+          I got it!
+        </button>
+      </div>
     </Fullscreen>
   );
 }
@@ -898,7 +1010,25 @@ function Result({
             {won ? "Big brain. Huge noggin." : "So close. Run it back?"}
           </p>
 
-          <dl className="mt-9 grid grid-cols-2 gap-3 text-left">
+          <div
+            className="mt-8 flex items-center justify-center gap-4"
+            aria-label={`Score: you ${state.score[role]}, ${state.players[them]} ${state.score[them]}`}
+          >
+            <ScoreChip role={role} name="You" wins={state.score[role]} />
+            <span
+              className="text-2xl font-extrabold text-[#d9d2c4]"
+              aria-hidden="true"
+            >
+              –
+            </span>
+            <ScoreChip
+              role={them}
+              name={state.players[them] ?? ""}
+              wins={state.score[them]}
+            />
+          </div>
+
+          <dl className="mt-6 grid grid-cols-2 gap-3 text-left">
             {[role, them].map((r) => (
               <div
                 key={r}
@@ -934,8 +1064,42 @@ function Result({
   );
 }
 
-/** Shrinks the text until its widest line fits, so long names stay as big as possible without clipping. */
-function useFitText<T extends HTMLElement>(text: string, maxSize: string) {
+function ScoreChip({
+  role,
+  name,
+  wins,
+}: {
+  role: Role;
+  name: string;
+  wins: number;
+}) {
+  return (
+    <div
+      className="flex min-w-0 flex-col items-center gap-1.5"
+      aria-hidden="true"
+    >
+      <span
+        className={`flex h-16 w-16 items-center justify-center rounded-2xl border-3 border-white text-[34px] leading-none font-extrabold tabular-nums ${PLAYER_BG[role]}`}
+      >
+        {wins}
+      </span>
+      <span className="max-w-24 truncate text-sm font-bold text-[#d9d2c4]">
+        {name}
+      </span>
+    </div>
+  );
+}
+
+/**
+ * Shrinks the text until its widest line fits and it isn't taller than its box,
+ * so long names stay as big as possible without clipping.
+ * `rotated` means the text is turned a quarter turn, so its on-screen line width is a rect's height.
+ */
+function useFitText<T extends HTMLElement>(
+  text: string,
+  maxSize: string,
+  rotated = false,
+) {
   const ref = useRef<T>(null);
   useLayoutEffect(() => {
     const el = ref.current;
@@ -944,18 +1108,22 @@ function useFitText<T extends HTMLElement>(text: string, maxSize: string) {
       el.style.fontSize = maxSize;
       const range = document.createRange();
       range.selectNodeContents(el);
-      for (let i = 0; i < 30; i++) {
+      const box = el.parentElement;
+      for (let i = 0; i < 40; i++) {
         const widest = Math.max(
-          ...Array.from(range.getClientRects(), (r) => r.width),
+          ...Array.from(range.getClientRects(), (r) =>
+            rotated ? r.height : r.width,
+          ),
         );
-        if (widest <= el.clientWidth) break;
+        const tooTall = box !== null && el.offsetHeight > box.clientHeight;
+        if (widest <= el.clientWidth && !tooTall) break;
         el.style.fontSize = `${parseFloat(getComputedStyle(el).fontSize) * 0.94}px`;
       }
     };
     fit();
     window.addEventListener("resize", fit);
     return () => window.removeEventListener("resize", fit);
-  }, [text, maxSize]);
+  }, [text, maxSize, rotated]);
   return ref;
 }
 

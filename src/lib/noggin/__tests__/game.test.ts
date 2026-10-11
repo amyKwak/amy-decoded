@@ -61,6 +61,32 @@ describe("reduce", () => {
     expect(reduce(done, { type: "lobby" }, "host").phase).toBe("lobby");
   });
 
+  it("keeps score across rounds and resets it for a new opponent", () => {
+    const playRound = (state: typeof full, winner: "host" | "guest") => {
+      const counting = reduce(state, { type: "start" }, "host");
+      const playing = reduce(
+        counting,
+        { type: "go", round: counting.round },
+        "host",
+      );
+      return reduce(
+        reduce(playing, { type: "gotIt" }, winner),
+        { type: "lobby" },
+        "host",
+      );
+    };
+
+    let state = playRound(full, "guest");
+    state = playRound(state, "guest");
+    state = playRound(state, "host");
+    expect(state.score).toEqual({ host: 1, guest: 2 });
+
+    const left = reduce(state, { type: "leave" }, "guest");
+    expect(left.score).toEqual({ host: 0, guest: 0 });
+    const rejoined = reduce(state, { type: "join", name: "Kai" }, "guest");
+    expect(rejoined.score).toEqual({ host: 0, guest: 0 });
+  });
+
   it("ignores a guest claiming to be the host", () => {
     expect(reduce(full, { type: "join", name: "Imposter" }, "host")).toBe(full);
   });
