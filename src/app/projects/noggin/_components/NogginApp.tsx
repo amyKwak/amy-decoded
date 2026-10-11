@@ -791,7 +791,7 @@ function PromptField({
   return (
     <div className="mt-7">
       <label htmlFor="noggin-prompt" className={`${label} mb-2`}>
-        What kind of words should you guess?
+        Pick a topic
       </label>
       <input
         id="noggin-prompt"
@@ -800,7 +800,7 @@ function PromptField({
         maxLength={PROMPT_MAX}
         autoComplete="off"
         enterKeyHint="done"
-        placeholder="Type any topic or category"
+        placeholder="Any topic you like"
         aria-describedby="noggin-prompt-hint"
         onChange={(e) => onChange(e.target.value)}
       />
@@ -815,7 +815,7 @@ function PromptField({
         >
           <path d="M10 2l1.8 6.2L18 10l-6.2 1.8L10 18l-1.8-6.2L2 10l6.2-1.8zM19 14l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9z" />
         </svg>
-        Claude will pick a different word for each of you.
+        Claude picks the word from your topic.
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
         {PROMPT_IDEAS.map((idea) => (
@@ -843,7 +843,7 @@ function PromptPreview({
 }) {
   return (
     <div className="mt-7">
-      <p className={`${label} mb-2`}>Words you&apos;ll guess</p>
+      <p className={`${label} mb-2`}>Topic</p>
       <p
         aria-live="polite"
         className={`flex min-h-15 items-center rounded-[18px] border-3 px-4.5 py-3 text-xl leading-snug font-bold ${
