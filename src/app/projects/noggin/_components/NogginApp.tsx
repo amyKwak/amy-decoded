@@ -801,9 +801,23 @@ function PromptField({
         autoComplete="off"
         enterKeyHint="done"
         placeholder="Type any topic or category"
+        aria-describedby="noggin-prompt-hint"
         onChange={(e) => onChange(e.target.value)}
       />
-      <div className="mt-2.5 flex flex-wrap gap-2">
+      <p
+        id="noggin-prompt-hint"
+        className="text-noggin-muted mt-1.5 flex items-center gap-1.5 pl-1 text-[13px] leading-snug"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          className="h-3.5 w-3.5 shrink-0 fill-current"
+          aria-hidden="true"
+        >
+          <path d="M10 2l1.8 6.2L18 10l-6.2 1.8L10 18l-1.8-6.2L2 10l6.2-1.8zM19 14l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9z" />
+        </svg>
+        Claude will pick a different word for each of you.
+      </p>
+      <div className="mt-3 flex flex-wrap gap-2">
         {PROMPT_IDEAS.map((idea) => (
           <button
             key={idea}
@@ -815,9 +829,6 @@ function PromptField({
           </button>
         ))}
       </div>
-      <p className="text-noggin-muted mt-3 text-sm leading-snug font-semibold">
-        Claude picks a different word for each of you.
-      </p>
     </div>
   );
 }
