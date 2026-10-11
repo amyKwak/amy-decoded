@@ -7,7 +7,7 @@ const PROJECTS = [
       "A 1v1 party game for two phones. Hold yours to your forehead and ask yes or no questions to guess your number or celebrity first. Peer-to-peer over WebRTC, no game server.",
     url: "/projects/noggin",
     image: "/projects/noggin-card.svg",
-    alt: "Noggin wordmark beside two tilted phone cards showing 42 and Dolly Parton",
+    alt: "Noggin wordmark beside two tilted phone cards showing 67 and Dolly Parton",
   },
   {
     name: "Moody",
