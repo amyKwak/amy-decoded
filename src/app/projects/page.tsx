@@ -12,10 +12,10 @@ const PROJECTS = [
   {
     name: "Moody",
     description:
-      "A mood journal with a research-backed check-in. Claude suggests feeling words and answers questions about your own entries with tool use.",
+      "A gentle daily mood check-in. Track mood and sleep in under a minute, then ask Claude what lifts you and what wears you down, using tool use over your own entries.",
     url: "/projects/moody",
     image: "/projects/moody-card.svg",
-    alt: "Moody wordmark next to a small four-color mood grid",
+    alt: "Moody wordmark beside a soft four-color mood grid",
   },
   {
     name: "Thyme",

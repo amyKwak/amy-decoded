@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cleanTags } from "@/lib/moody/extract-parse";
-import { focusRing } from "./ui";
+import { field, focusRing, pill, pillOn, secondaryBtn } from "./ui";
 
 /**
  * Emotional granularity (Barrett): the user confirms specific feeling words.
@@ -30,7 +30,7 @@ export function FeelingPicker({
     setDraft("");
   }
 
-  const chip = `rounded-full border px-3.5 py-1.5 text-sm ${focusRing}`;
+  const chip = `${pill} ${focusRing}`;
 
   return (
     <div>
@@ -43,7 +43,7 @@ export function FeelingPicker({
                 type="button"
                 aria-pressed={on}
                 onClick={() => toggle(w)}
-                className={`${chip} ${on ? "border-moody-ink bg-moody-pink font-bold text-moody-ink" : "border-moody-ink bg-white text-moody-ink hover:bg-moody-pink-pale"}`}
+                className={`${chip} ${on ? pillOn : ""}`}
               >
                 {w}
               </button>
@@ -56,7 +56,7 @@ export function FeelingPicker({
               type="button"
               onClick={() => toggle(w)}
               aria-label={`Remove ${w}`}
-              className={`${chip} border-moody-ink bg-moody-pink font-bold text-moody-ink`}
+              className={`${chip} ${pillOn} gap-1.5`}
             >
               {w} <span aria-hidden="true">×</span>
             </button>
@@ -65,7 +65,7 @@ export function FeelingPicker({
       </ul>
 
       <form
-        className="mt-3 flex gap-2"
+        className="mt-3.5 flex gap-2"
         onSubmit={(e) => {
           e.preventDefault();
           add();
@@ -80,9 +80,9 @@ export function FeelingPicker({
           onChange={(e) => setDraft(e.target.value)}
           maxLength={40}
           placeholder="Add your own word"
-          className={`min-w-0 flex-1 rounded-full border-2 border-moody-ink bg-white px-4 py-2 text-sm text-moody-ink placeholder:text-moody-muted ${focusRing}`}
+          className={`${field} min-h-11 min-w-0 flex-1 rounded-full px-4.5 text-[15px]`}
         />
-        <button type="submit" disabled={!draft.trim()} className={`rounded-full border-2 border-moody-ink bg-white px-4 py-2 text-sm font-semibold text-moody-ink disabled:opacity-40 ${focusRing}`}>
+        <button type="submit" disabled={!draft.trim()} className={secondaryBtn}>
           Add
         </button>
       </form>

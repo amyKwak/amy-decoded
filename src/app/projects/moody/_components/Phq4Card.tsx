@@ -1,7 +1,7 @@
 "use client";
 
 import { PHQ4_ITEMS, PHQ4_OPTIONS, PHQ4_STEM, scorePhq4, type Phq4Score } from "@/lib/moody/phq4";
-import { focusRing, label } from "./ui";
+import { focusRing, label, pill, pillChecked } from "./ui";
 
 const BAND_COPY: Record<Phq4Score["band"], string> = {
   normal: "Normal range (0 to 2)",
@@ -15,14 +15,14 @@ export function Phq4Result({ answers }: { answers: readonly number[] }) {
   return (
     <div className="text-sm leading-relaxed text-moody-ink">
       <p>
-        <strong className="text-moody-ink">Total {s.total} of 12.</strong> {BAND_COPY[s.band]}.
+        <strong>Total {s.total} of 12.</strong> {BAND_COPY[s.band]}.
       </p>
       <p>
         Anxiety {s.anxiety} of 6{s.anxietyFlag ? " (3 or more, worth following up)" : ""}. Depression{" "}
         {s.depression} of 6{s.depressionFlag ? " (3 or more, worth following up)" : ""}.
       </p>
       {s.elevated && (
-        <p className="mt-2 text-moody-ink">
+        <p className="mt-2">
           This score is in a range worth paying attention to. It is a screening signal, not a diagnosis. Consider
           talking with a doctor or therapist about how you&apos;ve been feeling.
         </p>
@@ -44,22 +44,22 @@ export function Phq4Card({
   const complete = answers.every((a) => a !== null);
 
   return (
-    <fieldset className="rounded-[24px] border-2 border-moody-ink bg-moody-bg p-4 tablet:p-5">
+    <fieldset className="rounded-2xl bg-moody-sky-pale/60 p-4 tablet:p-5">
       <legend className="sr-only">Weekly PHQ-4 check</legend>
       <div className={`${label} mb-2`}>Weekly check, optional</div>
-      <p className="mb-4 text-[15px] text-moody-ink">{PHQ4_STEM}</p>
+      <p className="mb-4 text-[15px]">{PHQ4_STEM}</p>
 
       <div className="space-y-5">
         {PHQ4_ITEMS.map((item, i) => (
           <div key={item} role="radiogroup" aria-labelledby={`phq4-q${i}`}>
-            <p id={`phq4-q${i}`} className="mb-2 text-sm font-semibold text-moody-ink">
+            <p id={`phq4-q${i}`} className="mb-2 text-sm font-semibold">
               {item}
             </p>
             <div className="grid grid-cols-2 gap-2 tablet:grid-cols-4">
               {PHQ4_OPTIONS.map((opt) => (
                 <label
                   key={opt.value}
-                  className="cursor-pointer rounded-2xl border-2 border-moody-ink bg-white px-3 py-2 text-[13px] text-moody-ink has-checked:bg-moody-pink has-checked:font-bold has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-moody-ink"
+                  className={`${pill} ${pillChecked} rounded-2xl px-3 py-2 text-center text-[13px]`}
                 >
                   <input
                     type="radio"
@@ -83,7 +83,7 @@ export function Phq4Card({
         </div>
       )}
 
-      <button type="button" onClick={onDismiss} className={`mt-4 text-sm text-moody-muted underline underline-offset-2 ${focusRing}`}>
+      <button type="button" onClick={onDismiss} className={`mt-4 min-h-11 rounded text-sm text-moody-muted underline underline-offset-3 hover:text-moody-ink ${focusRing}`}>
         Not this week
       </button>
     </fieldset>

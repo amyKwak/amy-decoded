@@ -1,14 +1,15 @@
-import { CELEBRITIES } from "./celebrities";
-
-export type Mode = "number" | "celeb";
 export type Role = "host" | "guest";
-export type Phase = "lobby" | "countdown" | "playing" | "done";
+/** "picking" is the wait while Claude chooses words for the prompt. */
+export type Phase = "lobby" | "picking" | "countdown" | "playing" | "done";
 
-/** Seconds between pressing Start and the words appearing: enough time to lift the phone. */
+/** Seconds between the words arriving and appearing: enough time to lift the phone. */
 export const COUNTDOWN_SECONDS = 5;
 
+export const PROMPT_MAX = 120;
+/** How many past words to remember, so Claude doesn't repeat them. */
+const RECENT_MAX = 30;
+
 export type GameState = {
-  mode: Mode;
   phase: Phase;
   players: { host: string; guest: string | null };
   /** The word shown on each player's own phone, which that player is trying to guess. */
@@ -17,46 +18,45 @@ export type GameState = {
   round: number;
   /** Rounds won by each player since the current guest joined. */
   score: Record<Role, number>;
+  /** What the words should be, typed by the room's creator, like "a celebrity born after 1995". */
+  prompt: string;
+  /** Claude's short name for the prompt's category, shown above the word. */
+  label: string | null;
+  /** Words already used in this room. */
+  recent: string[];
+  /** Why the last round couldn't start. */
+  pickError: string | null;
 };
 
 export type Action =
   | { type: "join"; name: string }
   | { type: "leave" }
-  | { type: "mode"; mode: Mode }
+  | { type: "prompt"; prompt: string }
   | { type: "start" }
+  | {
+      type: "words";
+      round: number;
+      words: { host: string; guest: string };
+      label: string;
+    }
+  | { type: "wordsFailed"; round: number; error: string }
   | { type: "go"; round: number }
   | { type: "gotIt" }
   | { type: "lobby" };
 
-export function initialState(
-  hostName: string,
-  mode: Mode = "celeb",
-): GameState {
+export function initialState(hostName: string): GameState {
   return {
-    mode,
     phase: "lobby",
     players: { host: hostName, guest: null },
     words: null,
     winner: null,
     round: 0,
     score: { host: 0, guest: 0 },
+    prompt: "",
+    label: null,
+    recent: [],
+    pickError: null,
   };
-}
-
-/** Two different words for the given mode. */
-export function pickPair(
-  mode: Mode,
-  rng: () => number = Math.random,
-): { host: string; guest: string } {
-  const pool =
-    mode === "number"
-      ? Array.from({ length: 100 }, (_, i) => String(i + 1))
-      : CELEBRITIES;
-  const a = Math.floor(rng() * pool.length);
-  // Pick from the remaining n - 1 entries so the two never match.
-  let b = Math.floor(rng() * (pool.length - 1));
-  if (b >= a) b += 1;
-  return { host: pool[a], guest: pool[b] };
 }
 
 /**
@@ -67,7 +67,6 @@ export function reduce(
   state: GameState,
   action: Action,
   from: Role,
-  rng?: () => number,
 ): GameState {
   switch (action.type) {
     case "join":
@@ -87,18 +86,42 @@ export function reduce(
         winner: null,
         score: { host: 0, guest: 0 },
       };
-    case "mode":
-      if (state.phase !== "lobby" || state.mode === action.mode) return state;
-      return { ...state, mode: action.mode };
+    case "prompt": {
+      // Only the room's creator writes the prompt.
+      if (from !== "host" || state.phase !== "lobby") return state;
+      const prompt = action.prompt.slice(0, PROMPT_MAX);
+      if (state.prompt === prompt) return state;
+      return { ...state, prompt, pickError: null };
+    }
     case "start":
       if (state.phase !== "lobby" || !state.players.guest) return state;
+      if (!state.prompt.trim()) return state;
+      // The host's phone asks Claude for words, then sends "words".
+      return {
+        ...state,
+        phase: "picking",
+        words: null,
+        winner: null,
+        pickError: null,
+        round: state.round + 1,
+      };
+    case "words":
+      // Only the host's phone fetches words, so a guest can't choose their own.
+      if (from !== "host" || state.phase !== "picking") return state;
+      if (state.round !== action.round) return state;
       return {
         ...state,
         phase: "countdown",
-        words: pickPair(state.mode, rng),
-        winner: null,
-        round: state.round + 1,
+        words: action.words,
+        label: action.label,
+        recent: [...state.recent, action.words.host, action.words.guest].slice(
+          -RECENT_MAX,
+        ),
       };
+    case "wordsFailed":
+      if (from !== "host" || state.phase !== "picking") return state;
+      if (state.round !== action.round) return state;
+      return { ...state, phase: "lobby", pickError: action.error };
     case "go":
       if (state.phase !== "countdown" || state.round !== action.round)
         return state;

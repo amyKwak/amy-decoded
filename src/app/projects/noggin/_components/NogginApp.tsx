@@ -10,8 +10,8 @@ import {
 import {
   COUNTDOWN_SECONDS,
   normalizeRoomCode,
+  PROMPT_MAX,
   type GameState,
-  type Mode,
   type Role,
 } from "@/lib/noggin/game";
 import { NogginRoom, type RoomSnapshot } from "@/lib/noggin/room";
@@ -309,8 +309,8 @@ const STEPS: { title: string; body: string; chip: string; tilt: string }[] = [
     tilt: "-rotate-4",
   },
   {
-    title: "Pick a deck",
-    body: "Numbers from 1 to 100, or celebrities. Then hit Start.",
+    title: "Pick the words",
+    body: "Whoever made the room types what the words should be, like “Disney movies” or “a number from 1 to 100”. Claude picks one for each of you. Then hit Start.",
     chip: "bg-noggin-tomato",
     tilt: "rotate-3",
   },
@@ -473,6 +473,7 @@ function RoomView({
   }
 
   const { state } = snap;
+  if (state.phase === "picking") return <Picking prompt={state.prompt} />;
   if (state.phase === "countdown") return <Countdown key={state.round} />;
   if (state.phase === "playing")
     return (
@@ -527,6 +528,8 @@ function Lobby({
   const me = snap.role;
   const them: Role = me === "host" ? "guest" : "host";
   const ready = state.players.guest !== null;
+  const needsPrompt = !state.prompt.trim();
+  const hostName = state.players.host;
 
   const share = async () => {
     const url = `${window.location.origin}/projects/noggin?room=${snap.code}`;
@@ -620,35 +623,38 @@ function Lobby({
         </span>
       </div>
 
-      <fieldset className="mt-7">
-        <legend className={`${label} mb-2.5`}>What&apos;s on your head?</legend>
-        <div className="grid grid-cols-2 gap-3">
-          <ModeOption
-            mode="number"
-            current={state.mode}
-            title="Numbers"
-            detail="1 to 100"
-            onPick={(mode) => room.dispatch({ type: "mode", mode })}
-          />
-          <ModeOption
-            mode="celeb"
-            current={state.mode}
-            title="Celebs"
-            detail="Famous faces"
-            onPick={(mode) => room.dispatch({ type: "mode", mode })}
-          />
-        </div>
-      </fieldset>
+      {me === "host" ? (
+        <PromptField
+          value={state.prompt}
+          onChange={(prompt) => room.dispatch({ type: "prompt", prompt })}
+        />
+      ) : (
+        <PromptPreview prompt={state.prompt} hostName={hostName} />
+      )}
+      {state.pickError && (
+        <p
+          role="alert"
+          className="bg-noggin-tomato/15 mt-3 rounded-2xl border-2 border-[#b3311a]/30 px-4 py-3 text-[15px] font-semibold text-[#9c2a14]"
+        >
+          {state.pickError}
+        </p>
+      )}
 
       <VoiceToggle voice={voice} />
 
       <button
         type="button"
         className={`${hugeBtn} bg-noggin-tomato mt-auto`}
-        disabled={!ready}
+        disabled={!ready || needsPrompt}
         onClick={() => room.dispatch({ type: "start" })}
       >
-        {ready ? "Start!" : "Waiting for a friend…"}
+        {!ready
+          ? "Waiting for a friend…"
+          : needsPrompt
+            ? me === "host"
+              ? "Type what to guess"
+              : `Waiting for ${hostName}…`
+            : "Start!"}
       </button>
     </main>
   );
@@ -766,54 +772,78 @@ function PlayerCard({
   );
 }
 
-function ModeOption({
-  mode,
-  current,
-  title,
-  detail,
-  onPick,
+const PROMPT_IDEAS = [
+  "A number from 1 to 100",
+  "Celebs born after 1995",
+  "Disney movies",
+  "Animals",
+  "Foods",
+];
+
+/** The room creator's prompt box: what kind of words Claude should pick. */
+function PromptField({
+  value,
+  onChange,
 }: {
-  mode: Mode;
-  current: Mode;
-  title: string;
-  detail: string;
-  onPick: (mode: Mode) => void;
+  value: string;
+  onChange: (prompt: string) => void;
 }) {
-  const selected = mode === current;
   return (
-    <label
-      className={`has-focus-visible:outline-noggin-cobalt flex min-h-32 cursor-pointer flex-col justify-end gap-1 rounded-[22px] border-3 p-3.5 transition has-focus-visible:outline-3 has-focus-visible:outline-offset-3 ${
-        selected
-          ? "border-noggin-ink bg-noggin-sun shadow-[0_5px_0_var(--color-noggin-ink)]"
-          : "border-[#c9b994] bg-white shadow-[0_2px_0_var(--color-noggin-ink)]"
-      }`}
-    >
+    <div className="mt-7">
+      <label htmlFor="noggin-prompt" className={`${label} mb-2`}>
+        What kind of words should you guess?
+      </label>
       <input
-        type="radio"
-        name="noggin-mode"
-        className="sr-only"
-        checked={selected}
-        onChange={() => onPick(mode)}
+        id="noggin-prompt"
+        className={input}
+        value={value}
+        maxLength={PROMPT_MAX}
+        autoComplete="off"
+        enterKeyHint="done"
+        placeholder="Type any topic or category"
+        onChange={(e) => onChange(e.target.value)}
       />
-      {mode === "number" ? (
-        <span
-          className="text-[30px] leading-none font-extrabold"
-          aria-hidden="true"
-        >
-          67
-        </span>
-      ) : (
-        <svg
-          viewBox="0 0 24 24"
-          className="fill-noggin-ink h-7.5 w-7.5"
-          aria-hidden="true"
-        >
-          <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z" />
-        </svg>
-      )}
-      <span className="text-lg font-extrabold">{title}</span>
-      <span className="text-noggin-muted text-sm font-semibold">{detail}</span>
-    </label>
+      <div className="mt-2.5 flex flex-wrap gap-2">
+        {PROMPT_IDEAS.map((idea) => (
+          <button
+            key={idea}
+            type="button"
+            className={`border-noggin-line h-9 rounded-full border-2 bg-white px-3.5 text-sm font-bold transition active:scale-95 ${focusRing}`}
+            onClick={() => onChange(idea)}
+          >
+            {idea}
+          </button>
+        ))}
+      </div>
+      <p className="text-noggin-muted mt-3 text-sm leading-snug font-semibold">
+        Claude picks a different word for each of you.
+      </p>
+    </div>
+  );
+}
+
+/** What the guest sees while the room's creator writes the prompt. */
+function PromptPreview({
+  prompt,
+  hostName,
+}: {
+  prompt: string;
+  hostName: string;
+}) {
+  return (
+    <div className="mt-7">
+      <p className={`${label} mb-2`}>Words you&apos;ll guess</p>
+      <p
+        aria-live="polite"
+        className={`flex min-h-15 items-center rounded-[18px] border-3 px-4.5 py-3 text-xl leading-snug font-bold ${
+          prompt.trim()
+            ? "border-noggin-ink bg-white"
+            : "border-noggin-line text-noggin-muted border-dashed"
+        }`}
+      >
+        {prompt.trim() || `${hostName} is choosing…`}
+      </p>
+    </div>
   );
 }
 
@@ -832,6 +862,23 @@ function Fullscreen({
     >
       {children}
     </div>
+  );
+}
+
+function Picking({ prompt }: { prompt: string }) {
+  return (
+    <Fullscreen className="bg-noggin-sun text-noggin-ink text-center">
+      <Mascot className="h-28 w-28 animate-[noggin-bob_1.2s_ease-in-out_infinite]" />
+      <p
+        className="mt-5 text-[32px] leading-[1.05] font-extrabold tracking-[-0.02em]"
+        role="status"
+      >
+        Thinking up words…
+      </p>
+      <p className="text-noggin-ink/80 mt-3 max-w-72 text-lg leading-snug font-semibold text-balance">
+        “{prompt}”
+      </p>
+    </Fullscreen>
   );
 }
 
@@ -975,7 +1022,7 @@ function Playing({
   // Numbers are short, so they can go even bigger.
   const fitRef = useFitText<HTMLParagraphElement>(
     word,
-    state.mode === "number" ? "min(60vmin, 40vmax)" : "min(13vmax, 24vmin)",
+    /^\d{1,3}$/.test(word) ? "min(60vmin, 40vmax)" : "min(13vmax, 24vmin)",
     rotated,
   );
 
@@ -994,7 +1041,7 @@ function Playing({
       >
         <div className="flex items-center gap-3">
           <p className="text-sm font-extrabold tracking-[0.18em] uppercase">
-            Noggin · {state.mode === "number" ? "Number" : "Celebrity"}
+            Noggin · {state.label ?? "Guess it"}
           </p>
           {hearing !== "off" && (
             <span

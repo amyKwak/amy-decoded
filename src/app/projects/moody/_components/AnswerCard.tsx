@@ -17,10 +17,10 @@ function ToneIcon({ tone }: { tone: Finding["tone"] }) {
   return (
     <span
       aria-hidden="true"
-      className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-moody-ink"
-      style={{ backgroundColor: TONE_STYLES[tone].accent }}
+      className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+      style={{ backgroundColor: TONE_STYLES[tone].soft, color: TONE_STYLES[tone].ink }}
     >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
         {tone === "positive" && <path d="M12 19V5M5 12l7-7 7 7" />}
         {tone === "negative" && <path d="M12 5v14M5 12l7 7 7-7" />}
         {tone === "neutral" && <path d="M5 12h14" />}
@@ -38,20 +38,20 @@ function StatBar({ stat, tone }: { stat: ResolvedStat; tone: Finding["tone"] }) 
   return (
     <div className="mt-3" title={summary}>
       <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 text-[13px]">
-        <span className="text-moody-ink">
+        <span>
           With {stat.group.key}: <strong className="text-base">{stat.group.mean}</strong>
         </span>
         <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-moody-muted">
-          <span aria-hidden="true" className="h-3 w-[3px] rounded-full bg-moody-ink" />
+          <span aria-hidden="true" className="h-3 w-0.5 rounded-full bg-moody-ink" />
           Your usual: {stat.overall}
         </span>
       </div>
-      <div role="img" aria-label={summary} className="relative h-3.5 rounded-full border-2 border-moody-ink bg-white">
+      <div role="img" aria-label={summary} className="relative h-2.5 rounded-full bg-moody-track">
         <div
           className="absolute inset-y-0 left-0 rounded-full"
           style={{ width: pct(stat.group.mean), backgroundColor: TONE_STYLES[tone].accent }}
         />
-        <div className="absolute -top-1.5 -bottom-1.5 w-[3px] -translate-x-1/2 rounded-full bg-moody-ink" style={{ left: pct(stat.overall) }} />
+        <div className="absolute -top-1 -bottom-1 w-0.5 -translate-x-1/2 rounded-full bg-moody-ink" style={{ left: pct(stat.overall) }} />
       </div>
       <p className="mt-1.5 text-xs text-moody-muted">
         {s.label}, {s.scale}. Based on {stat.group.n} {stat.group.n === 1 ? "day" : "days"}.
@@ -76,10 +76,10 @@ export function AnswerCard({
   const conf = CONFIDENCE[answer.confidence];
 
   return (
-    <article className="overflow-hidden rounded-[24px] border-2 border-moody-ink bg-white shadow-[0_10px_30px_rgba(91,91,208,0.12)]">
-      <header className="border-b-2 border-moody-ink px-5 pt-4 pb-5 tablet:px-6" style={{ backgroundColor: tone.soft }}>
+    <article className="overflow-hidden rounded-3xl border border-moody-line bg-white">
+      <header className="px-5 pt-5 pb-5 tablet:px-6" style={{ backgroundColor: tone.soft }}>
         <div className="mb-2.5 flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-moody-ink bg-white px-2.5 py-0.5 text-xs font-bold text-moody-ink">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-[13px] font-bold">
             <span aria-hidden="true" className="flex gap-0.5">
               {[1, 2, 3].map((i) => (
                 <span key={i} className={`h-1.5 w-1.5 rounded-full ${i <= conf.dots ? "bg-moody-ink" : "bg-moody-line"}`} />
@@ -89,7 +89,7 @@ export function AnswerCard({
           </span>
           {answer.confidence_note && <span className="text-xs text-moody-muted">{answer.confidence_note}</span>}
         </div>
-        <h3 className="text-[22px] leading-snug font-bold text-moody-ink tablet:text-2xl">{answer.headline}</h3>
+        <h3 className="font-(family-name:--font-quicksand) text-[22px] leading-snug font-bold tablet:text-2xl">{answer.headline}</h3>
       </header>
 
       <div className="space-y-6 px-5 py-5 tablet:px-6">
@@ -103,7 +103,7 @@ export function AnswerCard({
                   <li key={i} className="flex gap-3">
                     <ToneIcon tone={f.tone} />
                     <div className="min-w-0 flex-1">
-                      <p className="font-bold text-moody-ink">
+                      <p className="font-bold">
                         <span className="sr-only">{FINDING_COPY[f.tone]}: </span>
                         {f.title}
                       </p>
@@ -123,11 +123,11 @@ export function AnswerCard({
             <ul className="grid gap-2.5 tablet:grid-cols-2">
               {answer.evidence.map((e) => (
                 <li key={e.date + e.quote}>
-                  <figure className="h-full rounded-[18px] bg-moody-pink-pale px-4 py-3">
-                    <blockquote className="text-[15px] leading-relaxed font-semibold text-moody-ink">
+                  <figure className="h-full rounded-2xl bg-moody-butter px-4 py-3">
+                    <blockquote className="text-[15px] leading-relaxed">
                       &ldquo;{e.quote}&rdquo;
                     </blockquote>
-                    <figcaption className="mt-1.5 text-xs font-bold text-moody-muted">
+                    <figcaption className="mt-1.5 text-[13px] text-moody-muted">
                       {formatDate(e.date, { weekday: "short", month: "short", day: "numeric" })}
                     </figcaption>
                   </figure>
@@ -138,11 +138,11 @@ export function AnswerCard({
         )}
 
         {answer.suggestion && (
-          <section className="flex gap-3 rounded-[18px] bg-moody-sky-pale px-4 py-3.5">
-            <svg aria-hidden="true" className="mt-0.5 shrink-0" width="20" height="20" viewBox="0 0 24 24" fill="#ffef8c" stroke="#3b3654" strokeWidth="2" strokeLinejoin="round">
-              <path d="M12 2l2.6 6.9L22 9.5l-5.6 4.8L18 22l-6-3.8L6 22l1.6-7.7L2 9.5l7.4-.6z" />
+          <section className="flex gap-3 rounded-2xl bg-moody-sky-pale px-4 py-3.5">
+            <svg aria-hidden="true" className="mt-0.5 shrink-0" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2f74b5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z" />
             </svg>
-            <p className="text-[15px] leading-relaxed text-moody-ink">
+            <p className="text-[15px] leading-relaxed">
               <span className="sr-only">Something to try: </span>
               {answer.suggestion}
             </p>

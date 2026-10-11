@@ -9,9 +9,17 @@ import { MAX_JOURNAL_CHARS, SLEEP_QUALITIES, type Entry, type Extraction, type S
 import { AffectGrid, type GridValue } from "./AffectGrid";
 import { FeelingPicker } from "./FeelingPicker";
 import { Phq4Card } from "./Phq4Card";
-import { card, focusRing, label, localToday, primaryBtn, secondaryBtn } from "./ui";
+import { card, field, heading, label, localToday, pill, pillChecked, primaryBtn, quietBtn, secondaryBtn } from "./ui";
 
-type Step = "form" | "feelings" | "saved";
+/** One question at a time; "saved" is the closing screen. */
+type Step = "mood" | "sleep" | "note" | "feelings" | "saved";
+
+const STEPS: { id: Exclude<Step, "saved">; label: string }[] = [
+  { id: "mood", label: "Mood" },
+  { id: "sleep", label: "Sleep" },
+  { id: "note", label: "Note" },
+  { id: "feelings", label: "Words" },
+];
 
 const EMPTY_PHQ4 = [null, null, null, null];
 
@@ -20,17 +28,22 @@ export function CheckIn({
   onDismissPhq4,
   onSaved,
   onCrisis,
+  streak,
+  onViewPatterns,
 }: {
   phq4Due: boolean;
   onDismissPhq4: () => void;
   onSaved: () => void;
   onCrisis: () => void;
+  /** Consecutive check-in days up to today, including a just-saved entry. */
+  streak: number;
+  onViewPatterns: () => void;
 }) {
   const [grid, setGrid] = useState<GridValue | null>(null);
-  const [sleepHours, setSleepHours] = useState("");
+  const [sleepHours, setSleepHours] = useState<number | null>(null);
   const [sleepQuality, setSleepQuality] = useState<SleepQuality | null>(null);
   const [journal, setJournal] = useState("");
-  const [step, setStep] = useState<Step>("form");
+  const [step, setStep] = useState<Step>("mood");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [extraction, setExtraction] = useState<Extraction | null>(null);
@@ -38,10 +51,9 @@ export function CheckIn({
   const [feelings, setFeelings] = useState<string[]>([]);
   const [phq4, setPhq4] = useState<(number | null)[]>(EMPTY_PHQ4);
 
-  async function suggestFeelings() {
+  async function suggestFeelings(text = journal.trim()) {
     if (!grid) return;
     const fallback = QUADRANT_WORDS[quadrantOf(grid.valence, grid.arousal)];
-    const text = journal.trim();
     setNotice(null);
     setExtraction(null);
 
@@ -78,14 +90,13 @@ export function CheckIn({
 
   async function save() {
     if (!grid) return;
-    const hours = parseFloat(sleepHours);
     const entry: Entry = {
       id: crypto.randomUUID(),
       date: localToday(),
       createdAt: Date.now(),
       valence: grid.valence,
       arousal: grid.arousal,
-      sleepHours: Number.isFinite(hours) ? Math.min(24, Math.max(0, hours)) : null,
+      sleepHours,
       sleepQuality,
       journal: journal.trim(),
       emotions: feelings,
@@ -109,7 +120,7 @@ export function CheckIn({
 
   function reset() {
     setGrid(null);
-    setSleepHours("");
+    setSleepHours(null);
     setSleepQuality(null);
     setJournal("");
     setExtraction(null);
@@ -117,65 +128,108 @@ export function CheckIn({
     setFeelings([]);
     setPhq4(EMPTY_PHQ4);
     setNotice(null);
-    setStep("form");
+    setStep("mood");
   }
+
+  const adjustSleep = (delta: number) =>
+    // The first tap starts from a typical 7 hours.
+    setSleepHours((h) => (h === null ? 7 : Math.min(24, Math.max(0, h + delta))));
 
   if (step === "saved") {
     return (
-      <div className={`${card} p-6 text-center`} role="status">
-        <p className="mb-1 font-bold text-2xl text-moody-ink">Saved</p>
-        <p className="mb-5 text-[15px] text-moody-muted">Your check-in is stored in this browser. You can find it in History.</p>
-        <button type="button" onClick={reset} className={secondaryBtn}>
-          Start another check-in
-        </button>
+      <div className={`${card} flex flex-col items-center gap-3.5 px-6 pt-10 pb-8 text-center`} role="status">
+        <span aria-hidden="true" className="flex h-14 w-14 items-center justify-center rounded-full bg-moody-accent-soft text-moody-accent">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12.5l4.5 4.5L19 7.5" />
+          </svg>
+        </span>
+        <p className={heading}>Thanks for checking in</p>
+        <p className="max-w-105 text-[15px] leading-relaxed text-moody-muted">
+          {streak > 1 ? `That's ${streak} days in a row. ` : "Your check-in is saved in this browser. "}
+          The more days you log, the more Moody can show you about what goes with your better days.
+        </p>
+        <div className="mt-1.5 flex flex-wrap justify-center gap-2.5">
+          <button type="button" onClick={onViewPatterns} className={primaryBtn}>
+            See your patterns
+          </button>
+          <button type="button" onClick={reset} className={secondaryBtn}>
+            Done
+          </button>
+        </div>
       </div>
     );
   }
 
-  const section = `${card} p-4 tablet:p-6`;
-  const heading = "mb-1 font-bold text-xl text-moody-ink tablet:text-[22px]";
-  const help = "mb-4 text-sm text-moody-muted";
+  const index = STEPS.findIndex((s) => s.id === step);
+  const help = "text-[15px] leading-relaxed text-moody-muted";
+
+  function next() {
+    if (step === "mood") setStep("sleep");
+    else if (step === "sleep") setStep("note");
+    else if (step === "note") suggestFeelings();
+    else save();
+  }
 
   return (
-    <div className="space-y-4">
-      <section className={`${card} px-3 py-4 tablet:p-6`} aria-labelledby="moody-grid-heading">
-        <h2 id="moody-grid-heading" className={`${heading} px-1 tablet:px-0`}>
-          How are you feeling right now?
-        </h2>
-        <p className={`${help} px-1 tablet:px-0`}>Left to right goes from unpleasant to pleasant. Bottom to top goes from low to high energy.</p>
-        <AffectGrid value={grid} onChange={setGrid} />
-      </section>
+    <section className={`${card} flex flex-col gap-5 p-5 tablet:p-7`} aria-labelledby="moody-step-heading">
+      <div className="flex flex-col gap-2.5">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+          <p className={label}>
+            Step {index + 1} of {STEPS.length} · {STEPS[index].label}
+          </p>
+          <p className="text-sm text-moody-muted">
+            {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+          </p>
+        </div>
+        <div aria-hidden="true" className="grid grid-cols-4 gap-1.5">
+          {STEPS.map((s, i) => (
+            <span key={s.id} className={`h-1 rounded-full ${i <= index ? "bg-moody-accent" : "bg-moody-track"}`} />
+          ))}
+        </div>
+      </div>
 
-      <section className={section} aria-labelledby="moody-sleep-heading">
-        <h2 id="moody-sleep-heading" className={heading}>
-          Last night&apos;s sleep
-        </h2>
-        <p className={help}>Optional. Your best guess is fine.</p>
-        <div className="flex flex-col gap-4 tablet:flex-row tablet:items-end tablet:gap-6">
+      {step === "mood" && (
+        <div className="flex flex-col gap-4">
           <div>
-            <label htmlFor="moody-sleep-hours" className="mb-1.5 block text-sm font-semibold text-moody-ink">
-              Hours slept
-            </label>
-            <input
-              id="moody-sleep-hours"
-              type="number"
-              inputMode="decimal"
-              min={0}
-              max={24}
-              step={0.5}
-              value={sleepHours}
-              onChange={(e) => setSleepHours(e.target.value)}
-              className={`w-28 rounded-2xl border-2 border-moody-ink bg-moody-bg px-3 py-2 text-moody-ink ${focusRing}`}
-            />
+            <h2 id="moody-step-heading" className={heading}>
+              How are you feeling right now?
+            </h2>
+            <p className={help}>Tap the spot that fits best. There&apos;s no wrong answer.</p>
           </div>
-          <fieldset className="flex-1">
-            <legend className="mb-1.5 text-sm font-semibold text-moody-ink">Sleep quality</legend>
+          <AffectGrid value={grid} onChange={setGrid} />
+        </div>
+      )}
+
+      {step === "sleep" && (
+        <div className="flex flex-col gap-5">
+          <div>
+            <h2 id="moody-step-heading" className={heading}>
+              How did you sleep?
+            </h2>
+            <p className={help}>Optional. A rough guess is perfect.</p>
+          </div>
+          <div role="group" aria-labelledby="moody-hours-label" className="flex flex-col gap-2">
+            <span id="moody-hours-label" className="text-sm font-bold">
+              Hours slept
+            </span>
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={() => adjustSleep(-0.5)} aria-label="Half an hour less" className={`${secondaryBtn} w-11 px-0 text-xl`}>
+                −
+              </button>
+              <output aria-live="polite" className="font-(family-name:--font-quicksand) min-w-20 text-center text-[32px] font-bold">
+                {sleepHours ?? "–"}
+              </output>
+              <button type="button" onClick={() => adjustSleep(0.5)} aria-label="Half an hour more" className={`${secondaryBtn} w-11 px-0 text-xl`}>
+                +
+              </button>
+              <span className="text-[15px] text-moody-muted">hours</span>
+            </div>
+          </div>
+          <fieldset>
+            <legend className="mb-2 text-sm font-bold">How rested do you feel?</legend>
             <div className="flex flex-wrap gap-2">
               {SLEEP_QUALITIES.map((q) => (
-                <label
-                  key={q}
-                  className="cursor-pointer rounded-full border-2 border-moody-ink bg-moody-bg px-3.5 py-1.5 text-sm text-moody-ink has-checked:bg-moody-pink has-checked:font-bold has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-moody-ink"
-                >
+                <label key={q} className={`${pill} ${pillChecked}`}>
                   <input
                     type="radio"
                     name="moody-sleep-quality"
@@ -189,68 +243,69 @@ export function CheckIn({
             </div>
           </fieldset>
         </div>
-      </section>
+      )}
 
-      <section className={section} aria-labelledby="moody-journal-heading">
-        <h2 id="moody-journal-heading" className={heading}>
-          What&apos;s going on today?
-        </h2>
-        <p className={help}>Optional. If you write something, Claude suggests feeling words that fit.</p>
-        <label htmlFor="moody-journal" className="sr-only">
-          Journal entry
-        </label>
-        <textarea
-          id="moody-journal"
-          value={journal}
-          onChange={(e) => setJournal(e.target.value)}
-          maxLength={MAX_JOURNAL_CHARS}
-          rows={5}
-          placeholder="A few sentences about your day"
-          className={`w-full resize-y rounded-2xl border-2 border-moody-ink bg-moody-bg px-3.5 py-3 text-[15px] leading-relaxed text-moody-ink placeholder:text-moody-muted ${focusRing}`}
-        />
-        <p className="mt-1 text-right font-mono text-[11px] text-moody-muted">
-          {journal.length} / {MAX_JOURNAL_CHARS}
-        </p>
-      </section>
-
-      {step === "form" && (
-        <div className="flex flex-col items-start gap-2">
-          <button type="button" onClick={suggestFeelings} disabled={!grid || busy} className={primaryBtn}>
-            {busy ? "Reading your entry..." : "Next: name your feelings"}
-          </button>
-          {!grid && <p className="text-sm text-moody-muted">Pick a square on the grid to continue.</p>}
+      {step === "note" && (
+        <div className="flex flex-col gap-3.5">
+          <div>
+            <h2 id="moody-step-heading" className={heading}>
+              Anything on your mind?
+            </h2>
+            <p className={help}>Optional. A sentence or two helps Moody suggest words that fit and spot patterns later.</p>
+          </div>
+          <label htmlFor="moody-journal" className="sr-only">
+            Journal note
+          </label>
+          <textarea
+            id="moody-journal"
+            value={journal}
+            onChange={(e) => setJournal(e.target.value)}
+            maxLength={MAX_JOURNAL_CHARS}
+            rows={5}
+            placeholder="A few sentences about your day"
+            className={`${field} w-full resize-y py-3.5 leading-relaxed`}
+          />
+          <div className="flex flex-wrap items-center justify-between gap-2 text-[13px] text-moody-muted">
+            <span className="flex items-center gap-2">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="4" y="11" width="16" height="10" rx="2" />
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+              </svg>
+              Saved only in this browser. Sent to Claude just to suggest feeling words.
+            </span>
+            <span className="font-mono text-[11px]">
+              {journal.length} / {MAX_JOURNAL_CHARS}
+            </span>
+          </div>
         </div>
       )}
 
       {step === "feelings" && (
-        <>
-          <section className={section} aria-labelledby="moody-feelings-heading">
-            <h2 id="moody-feelings-heading" className={heading}>
+        <div className="flex flex-col gap-4">
+          <div>
+            <h2 id="moody-step-heading" className={heading}>
               Which words fit?
             </h2>
-            <p className={help}>
-              Pick any that feel right, or add your own. Naming feelings precisely can make them easier to work with.
+            <p className={help}>Pick any that feel right, or add your own. Naming a feeling clearly can make it easier to hold.</p>
+          </div>
+          {notice && (
+            <p role="status" className="rounded-2xl bg-moody-butter px-4 py-3 text-sm">
+              {notice}
             </p>
-            {notice && (
-              <p role="status" className="mb-4 rounded-2xl bg-moody-cream px-3.5 py-2.5 text-sm text-moody-ink">
-                {notice}
-              </p>
-            )}
-            <FeelingPicker suggestions={suggestions} selected={feelings} onChange={setFeelings} />
-            {extraction && (extraction.people.length + extraction.activities.length + extraction.triggers.length > 0) && (
-              <dl className="mt-5 grid gap-1.5 text-sm text-moody-muted">
-                {(["people", "activities", "triggers"] as const).map((k) =>
-                  extraction[k].length ? (
-                    <div key={k} className="flex gap-2">
-                      <dt className={`${label} w-22 shrink-0 pt-0.5`}>{k}</dt>
-                      <dd className="text-moody-ink">{extraction[k].join(", ")}</dd>
-                    </div>
-                  ) : null,
-                )}
-              </dl>
-            )}
-          </section>
-
+          )}
+          <FeelingPicker suggestions={suggestions} selected={feelings} onChange={setFeelings} />
+          {extraction && extraction.people.length + extraction.activities.length + extraction.triggers.length > 0 && (
+            <dl className="grid gap-1.5 text-sm">
+              {(["people", "activities", "triggers"] as const).map((k) =>
+                extraction[k].length ? (
+                  <div key={k} className="flex gap-2">
+                    <dt className={`${label} w-24 shrink-0 pt-0.5 text-xs`}>{k}</dt>
+                    <dd>{extraction[k].join(", ")}</dd>
+                  </div>
+                ) : null,
+              )}
+            </dl>
+          )}
           {phq4Due && (
             <Phq4Card
               answers={phq4}
@@ -261,17 +316,43 @@ export function CheckIn({
               }}
             />
           )}
-
-          <div className="flex flex-wrap items-center gap-3">
-            <button type="button" onClick={save} disabled={busy} className={primaryBtn}>
-              Save check-in
-            </button>
-            <button type="button" onClick={() => setStep("form")} className={secondaryBtn}>
-              Back
-            </button>
-          </div>
-        </>
+        </div>
       )}
-    </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-moody-track pt-4.5">
+        <button
+          type="button"
+          onClick={() => setStep(STEPS[Math.max(0, index - 1)].id)}
+          className={`${quietBtn} ${index === 0 ? "invisible" : ""}`}
+        >
+          Back
+        </button>
+        <div className="flex items-center gap-2">
+          {(step === "sleep" || step === "note") && (
+            <button
+              type="button"
+              onClick={() => {
+                if (step === "sleep") {
+                  setSleepHours(null);
+                  setSleepQuality(null);
+                  setStep("note");
+                } else {
+                  setJournal("");
+                  suggestFeelings("");
+                }
+              }}
+              disabled={busy}
+              className={quietBtn}
+            >
+              Skip
+            </button>
+          )}
+          <button type="button" onClick={next} disabled={(step === "mood" && !grid) || busy} className={primaryBtn}>
+            {busy ? (step === "note" ? "Reading your note…" : "Saving…") : step === "feelings" ? "Save check-in" : "Continue"}
+          </button>
+        </div>
+      </div>
+      {step === "mood" && !grid && <p className="-mt-3 text-right text-sm text-moody-muted">Pick a spot on the grid to continue.</p>}
+    </section>
   );
 }

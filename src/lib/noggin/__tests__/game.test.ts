@@ -3,46 +3,103 @@ import {
   initialState,
   makeRoomCode,
   normalizeRoomCode,
-  pickPair,
   reduce,
+  type GameState,
+  type Role,
 } from "../game";
-import { CELEBRITIES } from "../celebrities";
 
-describe("pickPair", () => {
-  it("never gives both players the same word", () => {
-    for (const mode of ["number", "celeb"] as const) {
-      for (let i = 0; i < 500; i++) {
-        const { host, guest } = pickPair(mode);
-        expect(host).not.toBe(guest);
-      }
-    }
+const lobby = initialState("Amy");
+const full = reduce(lobby, { type: "join", name: "Sam" }, "guest");
+const prompted = reduce(
+  full,
+  { type: "prompt", prompt: "Disney movies" },
+  "host",
+);
+
+/** Start a round and hand it the words, as the host's phone does after asking Claude. */
+function startWithWords(state: GameState, host = "Frozen", guest = "Moana") {
+  const picking = reduce(state, { type: "start" }, "host");
+  return reduce(
+    picking,
+    {
+      type: "words",
+      round: picking.round,
+      words: { host, guest },
+      label: "Disney Movies",
+    },
+    "host",
+  );
+}
+
+function playRound(state: GameState, winner: Role) {
+  const counting = startWithWords(state);
+  const playing = reduce(
+    counting,
+    { type: "go", round: counting.round },
+    "host",
+  );
+  return reduce(
+    reduce(playing, { type: "gotIt" }, winner),
+    { type: "lobby" },
+    "host",
+  );
+}
+
+describe("reduce", () => {
+  it("won't start without a second player and a prompt", () => {
+    const alone = reduce(lobby, { type: "prompt", prompt: "Animals" }, "host");
+    expect(reduce(alone, { type: "start" }, "host")).toBe(alone);
+    expect(reduce(full, { type: "start" }, "host")).toBe(full);
+    expect(reduce(prompted, { type: "start" }, "guest").phase).toBe("picking");
   });
 
-  it("covers the edges of the number range", () => {
-    expect(pickPair("number", () => 0)).toEqual({ host: "1", guest: "2" });
-    expect(pickPair("number", () => 0.9999)).toEqual({
-      host: "100",
-      guest: "99",
+  it("only lets the room's creator write the prompt", () => {
+    expect(reduce(full, { type: "prompt", prompt: "Animals" }, "guest")).toBe(
+      full,
+    );
+    expect(prompted.prompt).toBe("Disney movies");
+  });
+
+  it("waits for the host's words before counting down", () => {
+    const picking = reduce(prompted, { type: "start" }, "host");
+    expect(picking).toMatchObject({ phase: "picking", words: null });
+
+    const words = {
+      type: "words" as const,
+      round: picking.round,
+      words: { host: "Frozen", guest: "Moana" },
+      label: "Disney Movies",
+    };
+    expect(reduce(picking, words, "guest")).toBe(picking);
+    expect(reduce(picking, { ...words, round: 0 }, "host")).toBe(picking);
+
+    expect(reduce(picking, words, "host")).toMatchObject({
+      phase: "countdown",
+      words: { host: "Frozen", guest: "Moana" },
+      label: "Disney Movies",
+      recent: ["Frozen", "Moana"],
     });
   });
 
-  it("has no duplicate celebrities", () => {
-    expect(new Set(CELEBRITIES).size).toBe(CELEBRITIES.length);
-  });
-});
-
-describe("reduce", () => {
-  const lobby = initialState("Amy");
-  const full = reduce(lobby, { type: "join", name: "Sam" }, "guest");
-
-  it("won't start until a second player joins", () => {
-    expect(reduce(lobby, { type: "start" }, "host")).toBe(lobby);
-    expect(reduce(full, { type: "start" }, "guest").phase).toBe("countdown");
+  it("goes back to the lobby with the reason when picking words fails", () => {
+    const picking = reduce(prompted, { type: "start" }, "host");
+    const failed = reduce(
+      picking,
+      {
+        type: "wordsFailed",
+        round: picking.round,
+        error: "Try something else.",
+      },
+      "host",
+    );
+    expect(failed).toMatchObject({
+      phase: "lobby",
+      pickError: "Try something else.",
+    });
   });
 
   it("runs a full round", () => {
-    const counting = reduce(full, { type: "start" }, "host");
-    expect(counting.words).not.toBeNull();
+    const counting = startWithWords(prompted);
     expect(
       reduce(counting, { type: "go", round: counting.round - 1 }, "host"),
     ).toBe(counting);
@@ -62,21 +119,7 @@ describe("reduce", () => {
   });
 
   it("keeps score across rounds and resets it for a new opponent", () => {
-    const playRound = (state: typeof full, winner: "host" | "guest") => {
-      const counting = reduce(state, { type: "start" }, "host");
-      const playing = reduce(
-        counting,
-        { type: "go", round: counting.round },
-        "host",
-      );
-      return reduce(
-        reduce(playing, { type: "gotIt" }, winner),
-        { type: "lobby" },
-        "host",
-      );
-    };
-
-    let state = playRound(full, "guest");
+    let state = playRound(prompted, "guest");
     state = playRound(state, "guest");
     state = playRound(state, "host");
     expect(state.score).toEqual({ host: 1, guest: 2 });
@@ -92,9 +135,10 @@ describe("reduce", () => {
   });
 
   it("goes back to the lobby when the guest leaves mid-round", () => {
+    const counting = startWithWords(prompted);
     const playing = reduce(
-      reduce(full, { type: "start" }, "host"),
-      { type: "go", round: 1 },
+      counting,
+      { type: "go", round: counting.round },
       "host",
     );
     expect(reduce(playing, { type: "leave" }, "guest")).toMatchObject({

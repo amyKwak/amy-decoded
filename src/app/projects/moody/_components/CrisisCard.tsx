@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { focusRing } from "./ui";
+import { focusRing, secondaryBtn } from "./ui";
 
 const link = `font-semibold text-moody-ink underline underline-offset-2 ${focusRing}`;
 
@@ -18,13 +18,13 @@ export function CrisisCard({ onDismiss }: { onDismiss: () => void }) {
     <section
       role="alert"
       aria-labelledby="moody-crisis-heading"
-      className="mb-6 rounded-[24px] border-2 border-moody-ink bg-moody-red-soft shadow-[0_10px_30px_rgba(91,91,208,0.12)] p-5 tablet:p-6"
+      className="mb-6 rounded-3xl bg-moody-sky-pale p-5 tablet:p-6"
     >
       <h2
         id="moody-crisis-heading"
         ref={heading}
         tabIndex={-1}
-        className="mb-2 font-bold text-xl text-moody-ink outline-none"
+        className="font-(family-name:--font-quicksand) mb-2 text-[22px] font-bold outline-none"
       >
         You don&apos;t have to carry this alone
       </h2>
@@ -49,7 +49,7 @@ export function CrisisCard({ onDismiss }: { onDismiss: () => void }) {
       <button
         type="button"
         onClick={onDismiss}
-        className={`rounded-full border-2 border-moody-ink bg-white px-4 py-2 text-sm font-bold text-moody-ink ${focusRing}`}
+        className={secondaryBtn}
       >
         Dismiss
       </button>

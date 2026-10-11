@@ -20,28 +20,27 @@
 
   --breakpoint-tablet: 768px;
 
-  /* Moody (/projects/moody), palette after Burnt Toast Creative */
-  --color-moody-ink: #3b3654;
-  --color-moody-muted: #6b6680;
-  --color-moody-bg: #fcfaff;
-  --color-moody-line: #e7e3f3;
-  --color-moody-cream: #ffeacd;
-  --color-moody-pink-pale: #ffd6ef;
-  --color-moody-pink: #ffc6e7;
-  --color-moody-hot-pink: #ffa5d6;
-  --color-moody-peach: #ffce9c;
-  --color-moody-yellow: #ffef8c;
-  --color-moody-green: #7befb5;
-  --color-moody-mint: #b5ffc6;
-  --color-moody-sky-pale: #bdefff;
-  --color-moody-sky: #9ce7ff;
-  --color-moody-blue: #84b5ff;
-  --color-moody-lavender: #c6c6ff;
-  --color-moody-periwinkle: #a5a5f7;
-  --color-moody-red: #f48198;
-  --color-moody-red-soft: #ffe4ea;
-  --color-moody-accent: #5b5bd0;
-  --color-moody-accent-soft: #ececff;
+  /* Moody (/projects/moody): calm cream ground, soft mood colors, teal accent */
+  --color-moody-ink: #2f3b39;
+  --color-moody-muted: #5d6a67;
+  --color-moody-bg: #fbf8f2;
+  --color-moody-field: #fdfbf7;
+  --color-moody-line: #e4e0d7;
+  --color-moody-line-strong: #d9d4c9;
+  --color-moody-track: #f1ebdf;
+  --color-moody-butter: #fff6d4;
+  --color-moody-accent: #2e7d6d;
+  --color-moody-accent-hover: #256a5c;
+  --color-moody-accent-soft: #ddf1e8;
+  --color-moody-mint-pale: #e9f6f0;
+  --color-moody-sky-pale: #e5f1fc;
+  --color-moody-blue: #2f74b5;
+  --color-moody-coral-pale: #fce1da;
+  --color-moody-coral-ink: #a44b37;
+  --color-moody-sun: #ffe58a;
+  --color-moody-green: #a8ddb5;
+  --color-moody-coral: #f3a898;
+  --color-moody-sky: #9ccbf0;
 
   /* Noggin (/projects/noggin) */
   --color-noggin-bg: #fff7ea;

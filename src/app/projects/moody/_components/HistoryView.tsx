@@ -1,12 +1,24 @@
 "use client";
 
-import { quadrantOf, QUADRANT_LABELS } from "@/lib/moody/affect";
+import { useState } from "react";
+import { quadrantOf, type Quadrant } from "@/lib/moody/affect";
 import { addDays } from "@/lib/moody/demo-data";
-import { computeStats } from "@/lib/moody/stats";
+import { computeStats, MIN_RELIABLE_N } from "@/lib/moody/stats";
 import type { Entry } from "@/lib/moody/types";
 import { Phq4Result } from "./Phq4Card";
-import { card, focusRing, formatDate, label, QUADRANT_COLORS } from "./ui";
+import { card, focusRing, formatDate, heading, label, MOOD_NAMES, QUADRANT_COLORS, quietBtn, secondaryBtn } from "./ui";
 
+const KEY_ORDER: Quadrant[] = ["high-pleasant", "low-pleasant", "high-unpleasant", "low-unpleasant", "neutral"];
+
+const SLEEP_BUCKETS = [
+  { label: "Under 6 hours", test: (h: number) => h < 6 },
+  { label: "6 to 7 hours", test: (h: number) => h >= 6 && h < 7 },
+  { label: "7 or more", test: (h: number) => h >= 7 },
+];
+
+const mean = (xs: number[]) => (xs.length ? Math.round((xs.reduce((a, b) => a + b, 0) / xs.length) * 10) / 10 : null);
+
+/** Patterns tab: a 30-day overview, sleep vs. mood, and the entry list. */
 export function HistoryView({
   entries,
   today,
@@ -16,6 +28,8 @@ export function HistoryView({
   today: string;
   onDelete: (id: string) => void;
 }) {
+  const [confirming, setConfirming] = useState<string | null>(null);
+
   const days = Array.from({ length: 30 }, (_, i) => addDays(today, i - 29));
   // entries are newest first, so the first match is the latest check-in that day
   const byDate = new Map<string, Entry>();
@@ -27,24 +41,66 @@ export function HistoryView({
   const sleep = computeStats(entries, "sleepHours", null, range).overall;
   const checkinDays = days.filter((d) => byDate.has(d)).length;
 
+  const recent = entries.filter((e) => e.date >= days[0] && e.date <= today);
+  const sleepRows = SLEEP_BUCKETS.map((b) => {
+    const group = recent.filter((e) => e.sleepHours !== null && b.test(e.sleepHours));
+    return { label: b.label, mean: mean(group.map((e) => e.valence)), n: group.length };
+  });
+  const [short, , long] = sleepRows;
+  const sleepInsight =
+    short.mean !== null && long.mean !== null && short.n >= MIN_RELIABLE_N && long.n >= MIN_RELIABLE_N
+      ? long.mean - short.mean >= 1
+        ? "After 7 or more hours of sleep, your days tend to feel noticeably more pleasant."
+        : short.mean - long.mean >= 1
+          ? "Interesting: your shorter nights have tended to come before more pleasant days."
+          : "So far, how long you sleep doesn't seem to change your mood much."
+      : null;
+
   if (entries.length === 0) {
     return (
-      <div className={`${card} p-6 text-[15px] text-moody-muted`}>
-        No check-ins yet. Do your first one, or load the sample data above to explore.
+      <div className={`${card} p-6 text-[15px] leading-relaxed text-moody-muted`}>
+        Your patterns will show up here after a few check-ins. Do your first one, or try the sample data above to see
+        what this looks like.
       </div>
     );
   }
 
+  const tiles = [
+    { label: "Check-ins", value: `${checkinDays} ${checkinDays === 1 ? "day" : "days"}`, note: "out of the last 30" },
+    { label: "Pleasantness", value: valence.mean ?? "–", note: "average, out of 9" },
+    { label: "Energy", value: arousal.mean ?? "–", note: "average, out of 9" },
+    { label: "Sleep", value: sleep.mean !== null ? `${sleep.mean} h` : "–", note: "average a night" },
+  ];
+
   return (
-    <div className="space-y-6">
-      <section className={`${card} p-4 tablet:p-6`} aria-labelledby="moody-30-heading">
-        <h2 id="moody-30-heading" className="mb-1 font-bold text-xl text-moody-ink">
-          Last 30 days
-        </h2>
-        <p className="mb-4 text-sm text-moody-muted">
-          {checkinDays} check-in {checkinDays === 1 ? "day" : "days"}. Average pleasantness {valence.mean ?? "n/a"}, energy {arousal.mean ?? "n/a"}
-          {sleep.mean !== null && `, sleep ${sleep.mean} hours`}.
-        </p>
+    <div className="space-y-5">
+      <section aria-labelledby="moody-30-heading" className="space-y-3.5">
+        <div>
+          <h2 id="moody-30-heading" className={heading}>
+            Your last 30 days
+          </h2>
+          <p className="text-[15px] text-moody-muted">A quick look at how things have been going.</p>
+        </div>
+        <dl className="grid grid-cols-2 gap-2.5 tablet:grid-cols-4">
+          {tiles.map((t) => (
+            <div key={t.label} className="flex flex-col rounded-[18px] border border-moody-line bg-white px-4 py-3.5">
+              <dt className="text-[13px] font-semibold text-moody-muted">{t.label}</dt>
+              <dd className="font-(family-name:--font-quicksand) text-[26px] leading-tight font-bold">{t.value}</dd>
+              <dd className="text-[13px] text-moody-muted">{t.note}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <section className={`${card} space-y-4 p-5 tablet:p-6`} aria-labelledby="moody-cal-heading">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+          <h3 id="moody-cal-heading" className="text-[17px] font-bold">
+            Mood calendar
+          </h3>
+          <span className="text-[13px] text-moody-muted">
+            {formatDate(days[0])} – {formatDate(today)}
+          </span>
+        </div>
         <ol className="grid grid-cols-6 gap-1.5 tablet:grid-cols-10">
           {days.map((d) => {
             const e = byDate.get(d);
@@ -53,96 +109,130 @@ export function HistoryView({
               <li
                 key={d}
                 aria-label={
-                  e
-                    ? `${formatDate(d)}: ${QUADRANT_LABELS[q!]}, pleasantness ${e.valence}, energy ${e.arousal}`
-                    : `${formatDate(d)}: no check-in`
+                  e ? `${formatDate(d)}: ${MOOD_NAMES[q!]}, pleasantness ${e.valence}, energy ${e.arousal}` : `${formatDate(d)}: no check-in`
                 }
                 style={q ? { backgroundColor: QUADRANT_COLORS[q] } : undefined}
-                className={`flex aspect-square flex-col items-center justify-center rounded-xl border-2 text-center ${
-                  e ? "border-moody-ink" : "border-dashed border-moody-line"
+                className={`flex aspect-square items-center justify-center rounded-[10px] text-xs font-semibold text-moody-ink/75 ${
+                  e ? "" : "border border-dashed border-moody-line-strong"
                 }`}
               >
-                <span aria-hidden="true" className="text-[10px] font-semibold text-moody-ink/70">
-                  {formatDate(d, { day: "numeric" })}
-                </span>
-                {e && (
-                  <span aria-hidden="true" className="text-sm font-semibold text-moody-ink">
-                    {e.valence}
-                  </span>
-                )}
+                <span aria-hidden="true">{formatDate(d, { day: "numeric" })}</span>
               </li>
             );
           })}
         </ol>
-        <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-moody-muted" aria-label="Color key">
-          {(["high-pleasant", "low-pleasant", "high-unpleasant", "low-unpleasant", "neutral"] as const).map((k) => (
+        <ul className="flex flex-wrap gap-x-4.5 gap-y-2 text-[13px] text-moody-muted" aria-label="Color key">
+          {KEY_ORDER.map((k) => (
             <li key={k} className="flex items-center gap-1.5">
-              <span className="h-3.5 w-3.5 rounded-full border-2 border-moody-ink" style={{ backgroundColor: QUADRANT_COLORS[k] }} />
-              {QUADRANT_LABELS[k]}
+              <span aria-hidden="true" className="h-3 w-3 rounded" style={{ backgroundColor: QUADRANT_COLORS[k] }} />
+              {k === "neutral" ? "In the middle" : MOOD_NAMES[k]}
             </li>
           ))}
         </ul>
-        <p className="mt-2 text-xs text-moody-muted">The number in each square is pleasantness, from 1 to 9.</p>
       </section>
 
-      <section aria-labelledby="moody-entries-heading">
-        <h2 id="moody-entries-heading" className="mb-3 font-bold text-xl text-moody-ink">
+      {sleepRows.some((r) => r.n > 0) && (
+        <section className={`${card} space-y-4 p-5 tablet:p-6`} aria-labelledby="moody-sleep-heading">
+          <div>
+            <h3 id="moody-sleep-heading" className="text-[17px] font-bold">
+              Sleep and mood
+            </h3>
+            <p className="text-sm text-moody-muted">Average pleasantness (1 to 9) after nights of different lengths.</p>
+          </div>
+          <dl className="space-y-3">
+            {sleepRows.map((r) => (
+              <div key={r.label} className="grid grid-cols-[110px_minmax(0,1fr)_auto] items-center gap-3 text-sm tablet:grid-cols-[130px_minmax(0,1fr)_auto]">
+                <dt className="text-moody-muted">{r.label}</dt>
+                <dd aria-hidden="true" className="h-3 overflow-hidden rounded-full bg-moody-track">
+                  {r.mean !== null && <div className="h-full rounded-full bg-[#7cc491]" style={{ width: `${(r.mean / 9) * 100}%` }} />}
+                </dd>
+                <dd className="min-w-16 text-right">
+                  <strong>{r.mean ?? "–"}</strong>{" "}
+                  <span className="text-xs text-moody-muted">
+                    {r.n} {r.n === 1 ? "day" : "days"}
+                  </span>
+                </dd>
+              </div>
+            ))}
+          </dl>
+          {sleepInsight && <p className="rounded-xl bg-moody-mint-pale px-3.5 py-3 text-sm">{sleepInsight}</p>}
+        </section>
+      )}
+
+      <section aria-labelledby="moody-entries-heading" className="space-y-3">
+        <h2 id="moody-entries-heading" className="font-(family-name:--font-quicksand) text-[22px] font-bold">
           Entries
         </h2>
-        <ul className="space-y-3">
-          {entries.map((e) => (
-            <li key={e.id} className={`${card} p-4 tablet:p-5`}>
-              <div className="mb-2 flex items-start justify-between gap-3">
-                <div>
-                  <p className="font-semibold text-moody-ink">
-                    {formatDate(e.date, { weekday: "short", month: "short", day: "numeric" })}
-                    {e.demo && <span className={`${label} ml-2`}>sample</span>}
-                  </p>
-                  <p className="text-sm text-moody-muted">
-                    {QUADRANT_LABELS[quadrantOf(e.valence, e.arousal)]}. Pleasantness {e.valence}, energy {e.arousal}.
-                    {e.sleepHours !== null && ` Slept ${e.sleepHours} hours`}
-                    {e.sleepQuality && ` (${e.sleepQuality})`}
-                    {e.sleepHours !== null || e.sleepQuality ? "." : ""}
-                  </p>
+        <ul className="space-y-2.5">
+          {entries.map((e) => {
+            const q = quadrantOf(e.valence, e.arousal);
+            const sleepText = [e.sleepHours !== null && `slept ${e.sleepHours} h`, e.sleepQuality].filter(Boolean).join(", ");
+            return (
+              <li key={e.id} className="flex gap-3.5 rounded-[18px] border border-moody-line bg-white p-4 tablet:px-5">
+                <span aria-hidden="true" className="h-10 w-10 shrink-0 rounded-xl" style={{ backgroundColor: QUADRANT_COLORS[q] }} />
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="font-bold">
+                      {formatDate(e.date, { weekday: "short", month: "short", day: "numeric" })}
+                      <span className="font-normal text-moody-muted"> · {MOOD_NAMES[q]}</span>
+                      {e.demo && <span className={`${label} ml-2 text-[11px]`}>sample</span>}
+                    </p>
+                    {confirming !== e.id && (
+                      <button
+                        type="button"
+                        onClick={() => setConfirming(e.id)}
+                        aria-label={`Delete entry from ${formatDate(e.date)}`}
+                        className={`-mt-1.5 -mr-1.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-moody-muted hover:bg-moody-bg hover:text-moody-ink ${focusRing}`}
+                      >
+                        <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                  {e.journal && <p className="text-[15px] leading-relaxed">{e.journal}</p>}
+                  {(e.emotions.length > 0 || sleepText) && (
+                    <p className="text-[13px] text-moody-muted">{[e.emotions.join(" · "), sleepText].filter(Boolean).join(" · ")}</p>
+                  )}
+                  {(e.people.length > 0 || e.activities.length > 0 || e.triggers.length > 0) && (
+                    <p className="text-[13px] text-moody-muted">
+                      {[
+                        e.people.length && `People: ${e.people.join(", ")}`,
+                        e.activities.length && `Activities: ${e.activities.join(", ")}`,
+                        e.triggers.length && `Harder because of: ${e.triggers.join(", ")}`,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  )}
+                  {e.phq4 && (
+                    <div className="mt-2 rounded-2xl bg-moody-bg p-3.5">
+                      <p className={`${label} mb-1 text-xs`}>Weekly check</p>
+                      <Phq4Result answers={e.phq4} />
+                    </div>
+                  )}
+                  {confirming === e.id && (
+                    <div role="group" aria-label="Confirm delete" className="mt-2 flex flex-wrap items-center gap-2 rounded-2xl bg-moody-coral-pale px-3.5 py-2.5 text-sm">
+                      <span className="mr-auto">Delete this entry? This can&apos;t be undone.</span>
+                      <button type="button" onClick={() => setConfirming(null)} className={quietBtn}>
+                        Keep it
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setConfirming(null);
+                          onDelete(e.id);
+                        }}
+                        className={secondaryBtn}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => onDelete(e.id)}
-                  aria-label={`Delete entry from ${formatDate(e.date)}`}
-                  className={`shrink-0 rounded-full px-2.5 py-1 text-xs text-moody-muted hover:bg-moody-cream hover:text-moody-ink ${focusRing}`}
-                >
-                  Delete
-                </button>
-              </div>
-              {e.emotions.length > 0 && (
-                <ul className="mb-2 flex flex-wrap gap-1.5" aria-label="Feelings">
-                  {e.emotions.map((w) => (
-                    <li key={w} className="rounded-full bg-moody-cream px-2.5 py-0.5 text-xs text-moody-ink">
-                      {w}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {e.journal && <p className="text-[15px] leading-relaxed text-moody-ink">{e.journal}</p>}
-              {(e.people.length > 0 || e.activities.length > 0 || e.triggers.length > 0) && (
-                <p className="mt-2 text-xs text-moody-muted">
-                  {[
-                    e.people.length && `People: ${e.people.join(", ")}`,
-                    e.activities.length && `Activities: ${e.activities.join(", ")}`,
-                    e.triggers.length && `Harder because of: ${e.triggers.join(", ")}`,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </p>
-              )}
-              {e.phq4 && (
-                <div className="mt-3 rounded-2xl bg-moody-bg p-3">
-                  <p className={`${label} mb-1`}>Weekly PHQ-4</p>
-                  <Phq4Result answers={e.phq4} />
-                </div>
-              )}
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       </section>
     </div>

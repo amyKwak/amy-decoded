@@ -8,7 +8,7 @@ import type { StatsResult } from "@/lib/moody/stats";
 import { describeToolCall, runTool } from "@/lib/moody/tools";
 import { MAX_QUESTION_CHARS, type Entry } from "@/lib/moody/types";
 import { AnswerCard } from "./AnswerCard";
-import { focusRing, primaryBtn, secondaryBtn } from "./ui";
+import { field, heading, primaryBtn, secondaryBtn } from "./ui";
 
 type MessageParam = Anthropic.Beta.BetaMessageParam;
 type ContentBlock = Anthropic.Beta.BetaContentBlock;
@@ -156,7 +156,7 @@ export function AskMoody({
 
   if (entries.length === 0) {
     return (
-      <div className="rounded-[24px] border-2 border-dashed border-moody-ink bg-white p-6 text-[15px] text-moody-muted">
+      <div className="rounded-3xl border border-dashed border-moody-line-strong bg-white p-6 text-[15px] leading-relaxed text-moody-muted">
         Ask Moody answers questions about your entries. Add a few check-ins, or load the sample data above to try it
         right away.
       </div>
@@ -166,15 +166,15 @@ export function AskMoody({
   return (
     <div className="space-y-5">
       {turns.length === 0 && (
-        <div className="rounded-[24px] bg-moody-lavender/50 p-5">
-          <p className="mb-1 text-lg font-bold text-moody-ink">Ask about your patterns</p>
-          <p className="mb-4 text-sm text-moody-muted">
+        <div>
+          <h2 className={heading}>Ask about your patterns</h2>
+          <p className="mb-4 text-[15px] text-moody-muted">
             Moody looks things up in your entries instead of guessing, then sums up what matters most.
           </p>
           <ul className="flex flex-wrap gap-2" aria-label="Suggested questions">
             {SUGGESTED.map((s) => (
               <li key={s}>
-                <button type="button" onClick={() => ask(s)} disabled={busy} className={secondaryBtn}>
+                <button type="button" onClick={() => ask(s)} disabled={busy} className={`${secondaryBtn} text-sm font-normal`}>
                   {s}
                 </button>
               </li>
@@ -186,16 +186,16 @@ export function AskMoody({
       <ol className="space-y-5" aria-live="polite">
         {turns.map((t, i) => (
           <li key={i} className="space-y-3">
-            <p className="ml-auto w-fit max-w-[85%] rounded-[20px] rounded-br-md border-2 border-moody-ink bg-moody-lavender px-4 py-2.5 font-semibold text-moody-ink">
+            <p className="ml-auto w-fit max-w-[85%] rounded-[20px] rounded-br-md bg-moody-accent-soft px-4.5 py-3 font-semibold">
               {t.question}
             </p>
 
             {t.status === "running" && (
-              <div className="rounded-[24px] border-2 border-dashed border-moody-ink bg-white p-5">
-                <p className="mb-3 flex items-center gap-2 font-bold text-moody-ink">
+              <div className="rounded-3xl border border-moody-line bg-white p-5">
+                <p className="mb-3 flex items-center gap-2 font-bold">
                   <span aria-hidden="true" className="flex gap-1">
                     {[0, 150, 300].map((d) => (
-                      <span key={d} className="h-2 w-2 animate-bounce rounded-full bg-moody-hot-pink" style={{ animationDelay: `${d}ms` }} />
+                      <span key={d} className="h-2 w-2 animate-bounce rounded-full bg-moody-accent" style={{ animationDelay: `${d}ms` }} />
                     ))}
                   </span>
                   Looking through your entries
@@ -203,7 +203,7 @@ export function AskMoody({
                 {t.lookups.length > 0 && (
                   <ul className="flex flex-wrap gap-2">
                     {t.lookups.map((l, j) => (
-                      <li key={j} className="rounded-full bg-moody-sky-pale px-3 py-1 text-xs font-semibold text-moody-ink">
+                      <li key={j} className="rounded-full bg-moody-sky-pale px-3 py-1 text-xs font-semibold">
                         {l}
                       </li>
                     ))}
@@ -218,8 +218,8 @@ export function AskMoody({
 
             {t.status !== "running" && !t.answer && (
               <p
-                className={`rounded-[20px] px-4 py-3 text-[15px] leading-relaxed text-moody-ink ${
-                  t.status === "error" ? "bg-moody-red-soft" : "bg-moody-cream"
+                className={`rounded-[20px] px-4.5 py-3.5 text-[15px] leading-relaxed ${
+                  t.status === "error" ? "bg-moody-coral-pale" : "bg-moody-butter"
                 }`}
               >
                 {t.text}
@@ -245,7 +245,7 @@ export function AskMoody({
           onChange={(e) => setQuestion(e.target.value)}
           maxLength={MAX_QUESTION_CHARS}
           placeholder={turns.length ? "Ask a follow-up" : "Ask about your mood patterns"}
-          className={`min-w-0 flex-1 rounded-full border-2 border-moody-ink bg-white px-4 py-2.5 text-[15px] text-moody-ink placeholder:text-moody-muted ${focusRing}`}
+          className={`${field} min-h-12 min-w-0 flex-1 rounded-full bg-white px-5 text-[15px]`}
         />
         <div className="flex gap-2">
           <button type="submit" disabled={busy || !question.trim()} className={primaryBtn}>
@@ -258,7 +258,7 @@ export function AskMoody({
           )}
         </div>
       </form>
-      <p className="text-xs text-moody-muted">
+      <p className="text-[13px] text-moody-muted">
         Your question and the entries Moody looks up are sent to Claude. Moody describes patterns in your own data and
         does not diagnose.
       </p>

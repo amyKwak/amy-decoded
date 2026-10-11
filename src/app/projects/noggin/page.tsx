@@ -12,7 +12,7 @@ const bricolage = Bricolage_Grotesque({
 export const metadata: Metadata = {
   title: "Noggin",
   description:
-    "A 1v1 party game. Hold your phone to your forehead and ask yes or no questions to guess the number or celebrity on it before your friend does.",
+    "A 1v1 party game. Pick any kind of word, hold your phone to your forehead, and ask yes or no questions to guess yours before your friend does.",
 };
 
 export default function NogginPage() {

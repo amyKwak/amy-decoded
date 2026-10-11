@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef, type KeyboardEvent } from "react";
-import { describeCell, quadrantOf, QUADRANT_LABELS } from "@/lib/moody/affect";
-import { QUADRANT_COLORS } from "./ui";
+import { quadrantOf } from "@/lib/moody/affect";
+import { MOOD_NAMES, QUADRANT_COLORS } from "./ui";
 
 export interface GridValue {
   valence: number;
@@ -54,39 +54,40 @@ export function AffectGrid({
     }
   }
 
-  const cornerLabel = "text-[11px] font-bold leading-tight text-moody-ink tablet:text-xs";
+  const cornerLabel = "text-[13px] font-bold leading-tight text-moody-ink";
 
   return (
     <div>
-      <div className="mx-auto w-full max-w-[400px]">
-        <div className="mb-1.5 flex justify-between gap-4 pl-6">
-          <span className={cornerLabel}>{QUADRANT_LABELS["high-unpleasant"]}</span>
-          <span className={`${cornerLabel} text-right`}>{QUADRANT_LABELS["high-pleasant"]}</span>
+      <div className="mx-auto w-full max-w-[420px]">
+        <div className="mb-2 flex justify-between gap-4 pl-6">
+          <span className={cornerLabel}>{MOOD_NAMES["high-unpleasant"]}</span>
+          <span className={`${cornerLabel} text-right`}>{MOOD_NAMES["high-pleasant"]}</span>
         </div>
 
-        <div className="flex gap-1.5">
-          <div aria-hidden="true" className="flex w-4.5 flex-col items-center justify-between py-1 text-[10px] text-moody-muted">
-            <span>High</span>
+        <div className="flex gap-2">
+          <div aria-hidden="true" className="flex w-4 flex-col items-center justify-between py-1 text-[11px] text-moody-muted">
+            <span>More</span>
             <span className="[writing-mode:vertical-rl] rotate-180 tracking-wide">Energy</span>
-            <span>Low</span>
+            <span>Less</span>
           </div>
 
           <div
             role="radiogroup"
-            aria-label="Affect Grid. Left to right is unpleasant to pleasant. Bottom to top is low to high energy."
+            aria-label="Mood grid. Left to right is unpleasant to pleasant. Bottom to top is low to high energy."
             onKeyDown={onKeyDown}
-            className="grid aspect-square flex-1 grid-cols-9 gap-[3px] rounded-[14px] border-2 border-moody-ink bg-white p-1"
+            className="grid aspect-square flex-1 grid-cols-9 gap-[3px] rounded-[18px] bg-moody-bg p-1.5"
           >
             {[...SCALE].reverse().map((a) =>
               SCALE.map((v) => {
                 const selected = value?.valence === v && value?.arousal === a;
                 const tabbable = current.valence === v && current.arousal === a;
-                const onAxis = v === 5 || a === 5;
+                const q = quadrantOf(v, a);
                 // Color deepens with distance from the neutral center.
                 const strength = Math.max(Math.abs(v - 5), Math.abs(a - 5));
-                const fill = onAxis
-                  ? QUADRANT_COLORS.neutral
-                  : `color-mix(in srgb, ${QUADRANT_COLORS[quadrantOf(v, a)]} ${30 + strength * 15}%, white)`;
+                const fill =
+                  q === "neutral"
+                    ? QUADRANT_COLORS.neutral
+                    : `color-mix(in srgb, ${QUADRANT_COLORS[q]} ${20 + strength * 20}%, #fbfaf7)`;
                 return (
                   <button
                     key={`${v}-${a}`}
@@ -97,15 +98,15 @@ export function AffectGrid({
                     type="button"
                     role="radio"
                     aria-checked={selected}
-                    aria-label={describeCell(v, a)}
+                    aria-label={`Pleasantness ${v} of 9, energy ${a} of 9. ${MOOD_NAMES[q]}.`}
                     tabIndex={tabbable ? 0 : -1}
                     onClick={() => select(v, a)}
                     style={{ backgroundColor: selected ? undefined : fill }}
-                    className={`relative rounded-[6px] transition-transform focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-moody-ink ${
-                      selected ? "z-10 scale-125 bg-moody-accent ring-2 ring-white shadow-[0_4px_12px_rgba(91,91,208,0.45)]" : "hover:brightness-95"
+                    className={`relative flex items-center justify-center rounded-[7px] focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-moody-accent ${
+                      selected ? "z-10 bg-moody-ink shadow-[0_0_0_3px_#fff,0_0_0_5px_#2f3b39]" : "hover:brightness-95"
                     }`}
                   >
-                    {selected && <span className="absolute inset-0 m-auto h-2 w-2 rounded-full bg-white" />}
+                    {selected && <span className="h-2.5 w-2.5 rounded-full bg-white" />}
                   </button>
                 );
               }),
@@ -113,19 +114,19 @@ export function AffectGrid({
           </div>
         </div>
 
-        <div className="mt-1.5 flex justify-between gap-4 pl-6">
-          <span className={cornerLabel}>{QUADRANT_LABELS["low-unpleasant"]}</span>
-          <span className={`${cornerLabel} text-right`}>{QUADRANT_LABELS["low-pleasant"]}</span>
+        <div className="mt-2 flex justify-between gap-4 pl-6">
+          <span className={cornerLabel}>{MOOD_NAMES["low-unpleasant"]}</span>
+          <span className={`${cornerLabel} text-right`}>{MOOD_NAMES["low-pleasant"]}</span>
         </div>
-        <div aria-hidden="true" className="mt-2 flex justify-between pl-6 text-[10px] text-moody-muted">
+        <div aria-hidden="true" className="mt-1 flex justify-between pl-6 text-[11px] text-moody-muted">
           <span>Unpleasant</span>
           <span>Pleasant</span>
         </div>
       </div>
 
-      <p aria-live="polite" className="mt-3 text-center text-sm text-moody-ink">
+      <p aria-live="polite" className="mt-4 min-h-6 text-center text-[15px]">
         {value
-          ? `${QUADRANT_LABELS[quadrantOf(value.valence, value.arousal)]} (pleasantness ${value.valence}, energy ${value.arousal})`
+          ? `${MOOD_NAMES[quadrantOf(value.valence, value.arousal)]} · pleasantness ${value.valence}, energy ${value.arousal}`
           : "Tap a square, or use the arrow keys."}
       </p>
     </div>

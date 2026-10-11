@@ -9,14 +9,28 @@ import { AskMoody } from "./AskMoody";
 import { CheckIn } from "./CheckIn";
 import { CrisisCard } from "./CrisisCard";
 import { HistoryView } from "./HistoryView";
-import { focusRing, localToday, secondaryBtn } from "./ui";
+import { addDays } from "@/lib/moody/demo-data";
+import { focusRing, localToday } from "./ui";
+
+const ICONS = {
+  checkin: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8.5 14.5c1 1.2 2.2 1.8 3.5 1.8s2.5-.6 3.5-1.8M9 9.5h.01M15 9.5h.01" />
+    </>
+  ),
+  patterns: <path d="M3 17l5-5 4 3 8-8M3 21h18" />,
+  ask: <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" />,
+};
 
 const TABS = [
   { id: "checkin", label: "Check in" },
-  { id: "history", label: "History" },
-  { id: "ask", label: "Ask Moody" },
+  { id: "patterns", label: "Patterns" },
+  { id: "ask", label: "Ask" },
 ] as const;
 type TabId = (typeof TABS)[number]["id"];
+
+const sampleLink = "rounded font-semibold text-moody-ink underline underline-offset-3";
 
 const PHQ4_DISMISSED_KEY = "moody:phq4-dismissed";
 
@@ -94,6 +108,14 @@ export function MoodyApp() {
     tabRefs.current.get(TABS[next].id)?.focus();
   }
 
+  // Consecutive days with a check-in, counting back from today.
+  function streak(list: Entry[]) {
+    const dates = new Set(list.map((e) => e.date));
+    let n = 0;
+    while (dates.has(addDays(today, -n))) n++;
+    return n;
+  }
+
   if (entries === null || !today) {
     return <p className="py-10 text-center text-sm text-moody-muted">Opening your journal...</p>;
   }
@@ -105,27 +127,17 @@ export function MoodyApp() {
       {crisis && <CrisisCard onDismiss={() => setCrisis(false)} />}
 
       {loadError && (
-        <p role="status" className="mb-4 rounded-2xl bg-moody-cream px-4 py-3 text-sm text-moody-ink">
+        <p role="status" className="mb-4 rounded-2xl bg-moody-butter px-4 py-3 text-sm text-moody-ink">
           This browser is blocking local storage, so entries can&apos;t be saved here. Private browsing is a common cause.
         </p>
       )}
 
-      <div className="mb-5 flex flex-wrap items-center gap-3">
-        {hasDemo ? (
-          <button type="button" onClick={removeSample} className={secondaryBtn}>
-            Remove sample data
-          </button>
-        ) : (
-          <button type="button" onClick={loadSample} className={secondaryBtn}>
-            Load 30 days of sample data
-          </button>
-        )}
-        <span className="text-xs text-moody-muted">
-          {entries.length} {entries.length === 1 ? "entry" : "entries"} in this browser
-        </span>
-      </div>
-
-      <div role="tablist" aria-label="Moody" onKeyDown={onTabKey} className="mb-6 grid grid-cols-3 gap-1 rounded-full border-2 border-moody-ink bg-white p-1">
+      <div
+        role="tablist"
+        aria-label="Moody"
+        onKeyDown={onTabKey}
+        className="mb-4 grid grid-cols-3 gap-1 rounded-full bg-moody-track p-1"
+      >
         {TABS.map((t) => {
           const selected = t.id === tab;
           return (
@@ -141,14 +153,37 @@ export function MoodyApp() {
               aria-controls={`moody-panel-${t.id}`}
               tabIndex={selected ? 0 : -1}
               onClick={() => setTab(t.id)}
-              className={`rounded-full px-2 py-2 text-[15px] font-bold transition-colors ${focusRing} ${
-                selected ? "bg-moody-lavender text-moody-ink" : "text-moody-muted hover:bg-moody-pink-pale hover:text-moody-ink"
+              className={`flex min-h-11 items-center justify-center gap-2 rounded-full px-2 text-[15px] transition-colors ${focusRing} ${
+                selected
+                  ? "bg-white font-bold text-moody-ink shadow-[0_1px_2px_rgba(47,59,57,0.08)]"
+                  : "font-semibold text-moody-muted hover:text-moody-ink"
               }`}
             >
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                {ICONS[t.id]}
+              </svg>
               {t.label}
             </button>
           );
         })}
+      </div>
+
+      <div className="mb-5 flex min-h-11 flex-wrap items-center justify-between gap-x-3 rounded-2xl px-1 text-sm text-moody-muted">
+        {hasDemo ? (
+          <>
+            <span>You&apos;re viewing sample data.</span>
+            <button type="button" onClick={removeSample} className={`${sampleLink} ${focusRing}`}>
+              Clear sample data
+            </button>
+          </>
+        ) : (
+          <span>
+            {entries.length === 0 ? "Just looking around? " : `${entries.length} ${entries.length === 1 ? "entry" : "entries"} saved in this browser. `}
+            <button type="button" onClick={loadSample} className={`${sampleLink} ${focusRing}`}>
+              Try it with 30 days of sample data
+            </button>
+          </span>
+        )}
       </div>
 
       {TABS.map((t) => (
@@ -166,9 +201,11 @@ export function MoodyApp() {
               onDismissPhq4={dismissPhq4}
               onSaved={refresh}
               onCrisis={showCrisis}
+              streak={streak(entries)}
+              onViewPatterns={() => setTab("patterns")}
             />
           )}
-          {t.id === "history" && <HistoryView entries={entries} today={today} onDelete={remove} />}
+          {t.id === "patterns" && <HistoryView entries={entries} today={today} onDelete={remove} />}
           {t.id === "ask" && <AskMoody entries={entries} today={today} onCrisis={showCrisis} />}
         </div>
       ))}

@@ -165,12 +165,52 @@ export class NogginRoom {
     this.set({ state: next });
     this.sendState();
 
+    if (next.phase === "picking" && prev.phase !== "picking") {
+      void this.fetchWords(next);
+    }
+
     if (next.phase === "countdown" && prev.phase !== "countdown") {
       if (this.countdown) clearTimeout(this.countdown);
       this.countdown = setTimeout(
         () => this.apply({ type: "go", round: next.round }, "host"),
         COUNTDOWN_SECONDS * 1000,
       );
+    }
+  }
+
+  /** Host only: asks the server for Claude-picked words for the room's prompt. */
+  private async fetchWords(state: GameState) {
+    const { round } = state;
+    try {
+      const res = await fetch("/api/noggin/words", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: state.prompt, avoid: state.recent }),
+      });
+      const data = await res.json().catch(() => null);
+      if (this.destroyed) return;
+      if (!res.ok || !Array.isArray(data?.words) || data.words.length < 2) {
+        throw new Error(data?.error ?? "Couldn't think of words just now.");
+      }
+      // Coin flip for who gets which, so neither player always gets the first pick.
+      const [a, b] =
+        Math.random() < 0.5 ? data.words : [...data.words].reverse();
+      this.apply(
+        {
+          type: "words",
+          round,
+          words: { host: a, guest: b },
+          label: data.label,
+        },
+        "host",
+      );
+    } catch (err) {
+      if (this.destroyed) return;
+      const error =
+        err instanceof Error && err.message !== "Failed to fetch"
+          ? err.message
+          : "Couldn't reach the word picker. Check your connection.";
+      this.apply({ type: "wordsFailed", round, error }, "host");
     }
   }
 
