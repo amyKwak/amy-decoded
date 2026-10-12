@@ -56,7 +56,9 @@ export function AskMoody({
   const seenStats = useRef<StatsResult[]>([]);
 
   const update = (patch: Partial<Turn>) =>
-    setTurns((ts) => ts.map((t, i) => (i === ts.length - 1 ? { ...t, ...patch } : t)));
+    setTurns((ts) =>
+      ts.map((t, i) => (i === ts.length - 1 ? { ...t, ...patch } : t)),
+    );
 
   /**
    * The agent loop. The server is a thin proxy; this function decides when
@@ -71,13 +73,36 @@ export function AskMoody({
 
     if (detectCrisis(text)) {
       onCrisis();
-      setTurns((ts) => [...ts, { question: text, lookups: [], answer: null, stats: [], text: CRISIS_REPLY, status: "done" }]);
+      setTurns((ts) => [
+        ...ts,
+        {
+          question: text,
+          lookups: [],
+          answer: null,
+          stats: [],
+          text: CRISIS_REPLY,
+          status: "done",
+        },
+      ]);
       return;
     }
 
     setBusy(true);
-    setTurns((ts) => [...ts, { question: text, lookups: [], answer: null, stats: [], text: "", status: "running" }]);
-    const messages: MessageParam[] = [...history.current, { role: "user", content: text }];
+    setTurns((ts) => [
+      ...ts,
+      {
+        question: text,
+        lookups: [],
+        answer: null,
+        stats: [],
+        text: "",
+        status: "running",
+      },
+    ]);
+    const messages: MessageParam[] = [
+      ...history.current,
+      { role: "user", content: text },
+    ];
     const lookups: string[] = [];
 
     try {
@@ -88,7 +113,8 @@ export function AskMoody({
           body: JSON.stringify({ messages, today, final: step === MAX_STEPS }),
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error ?? "Ask Moody is unavailable right now.");
+        if (!res.ok)
+          throw new Error(data.error ?? "Ask Moody is unavailable right now.");
         if (data.crisis) {
           onCrisis();
           update({ text: CRISIS_REPLY, status: "done" });
@@ -96,7 +122,10 @@ export function AskMoody({
         }
 
         const content = data.content as ContentBlock[];
-        messages.push({ role: "assistant", content: content as Anthropic.Beta.BetaContentBlockParam[] });
+        messages.push({
+          role: "assistant",
+          content: content as Anthropic.Beta.BetaContentBlockParam[],
+        });
 
         if (data.stop_reason !== "tool_use") {
           const raw = content
@@ -105,14 +134,21 @@ export function AskMoody({
             .join("")
             .trim();
           if (data.stop_reason === "refusal") {
-            update({ text: "Moody can't help with that one. Try asking about your entries.", status: "done" });
+            update({
+              text: "Moody can't help with that one. Try asking about your entries.",
+              status: "done",
+            });
           } else {
-            const answer = data.stop_reason === "max_tokens" ? null : parseAnswer(raw);
+            const answer =
+              data.stop_reason === "max_tokens" ? null : parseAnswer(raw);
             if (answer) {
               answer.evidence = verifyEvidence(answer.evidence, entries);
               update({ answer, stats: [...seenStats.current], status: "done" });
             } else {
-              update({ text: "Moody got tangled up writing that answer. Try asking a narrower question.", status: "done" });
+              update({
+                text: "Moody got tangled up writing that answer. Try asking a narrower question.",
+                status: "done",
+              });
             }
           }
           history.current = messages; // commit only complete exchanges
@@ -126,8 +162,13 @@ export function AskMoody({
           lookups.push(describeToolCall(block.name, block.input));
           try {
             const output = runTool(block.name, block.input, entries);
-            if (block.name === "get_stats") seenStats.current.push(output as StatsResult);
-            results.push({ type: "tool_result", tool_use_id: block.id, content: JSON.stringify(output) });
+            if (block.name === "get_stats")
+              seenStats.current.push(output as StatsResult);
+            results.push({
+              type: "tool_result",
+              tool_use_id: block.id,
+              content: JSON.stringify(output),
+            });
           } catch (err) {
             results.push({
               type: "tool_result",
@@ -140,9 +181,15 @@ export function AskMoody({
         update({ lookups: [...lookups] });
         messages.push({ role: "user", content: results });
       }
-      update({ text: "I ran out of lookups for that one. Try a more specific question.", status: "done" });
+      update({
+        text: "I ran out of lookups for that one. Try a more specific question.",
+        status: "done",
+      });
     } catch (err) {
-      update({ text: err instanceof Error ? err.message : String(err), status: "error" });
+      update({
+        text: err instanceof Error ? err.message : String(err),
+        status: "error",
+      });
     } finally {
       setBusy(false);
     }
@@ -156,9 +203,9 @@ export function AskMoody({
 
   if (entries.length === 0) {
     return (
-      <div className="rounded-3xl border border-dashed border-moody-line-strong bg-white p-6 text-[15px] leading-relaxed text-moody-muted">
-        Ask Moody answers questions about your entries. Add a few check-ins, or load the sample data above to try it
-        right away.
+      <div className="border-moody-line-strong text-moody-muted rounded-3xl border border-dashed bg-white p-6 text-[15px] leading-relaxed">
+        Ask Moody answers questions about your entries. Add a few check-ins, or
+        load the sample data above to try it right away.
       </div>
     );
   }
@@ -168,13 +215,19 @@ export function AskMoody({
       {turns.length === 0 && (
         <div>
           <h2 className={heading}>Ask about your patterns</h2>
-          <p className="mb-4 text-[15px] text-moody-muted">
-            Moody looks things up in your entries instead of guessing, then sums up what matters most.
+          <p className="text-moody-muted mb-4 text-[15px]">
+            Moody looks things up in your entries instead of guessing, then sums
+            up what matters most.
           </p>
           <ul className="flex flex-wrap gap-2" aria-label="Suggested questions">
             {SUGGESTED.map((s) => (
               <li key={s}>
-                <button type="button" onClick={() => ask(s)} disabled={busy} className={`${secondaryBtn} text-sm font-normal`}>
+                <button
+                  type="button"
+                  onClick={() => ask(s)}
+                  disabled={busy}
+                  className={`${secondaryBtn} text-sm font-normal`}
+                >
                   {s}
                 </button>
               </li>
@@ -186,16 +239,20 @@ export function AskMoody({
       <ol className="space-y-5" aria-live="polite">
         {turns.map((t, i) => (
           <li key={i} className="space-y-3">
-            <p className="ml-auto w-fit max-w-[85%] rounded-[20px] rounded-br-md bg-moody-accent-soft px-4.5 py-3 font-semibold">
+            <p className="bg-moody-accent-soft ml-auto w-fit max-w-[85%] rounded-[20px] rounded-br-md px-4.5 py-3 font-semibold">
               {t.question}
             </p>
 
             {t.status === "running" && (
-              <div className="rounded-3xl border border-moody-line bg-white p-5">
+              <div className="border-moody-line rounded-3xl border bg-white p-5">
                 <p className="mb-3 flex items-center gap-2 font-bold">
                   <span aria-hidden="true" className="flex gap-1">
                     {[0, 150, 300].map((d) => (
-                      <span key={d} className="h-2 w-2 animate-bounce rounded-full bg-moody-accent" style={{ animationDelay: `${d}ms` }} />
+                      <span
+                        key={d}
+                        className="bg-moody-accent h-2 w-2 animate-bounce rounded-full"
+                        style={{ animationDelay: `${d}ms` }}
+                      />
                     ))}
                   </span>
                   Looking through your entries
@@ -203,7 +260,10 @@ export function AskMoody({
                 {t.lookups.length > 0 && (
                   <ul className="flex flex-wrap gap-2">
                     {t.lookups.map((l, j) => (
-                      <li key={j} className="rounded-full bg-moody-sky-pale px-3 py-1 text-xs font-semibold">
+                      <li
+                        key={j}
+                        className="bg-moody-sky-pale rounded-full px-3 py-1 text-xs font-semibold"
+                      >
                         {l}
                       </li>
                     ))}
@@ -213,13 +273,20 @@ export function AskMoody({
             )}
 
             {t.status !== "running" && t.answer && (
-              <AnswerCard answer={t.answer} lookups={t.lookups} stats={t.stats} entries={entries} />
+              <AnswerCard
+                answer={t.answer}
+                lookups={t.lookups}
+                stats={t.stats}
+                entries={entries}
+              />
             )}
 
             {t.status !== "running" && !t.answer && (
               <p
                 className={`rounded-[20px] px-4.5 py-3.5 text-[15px] leading-relaxed ${
-                  t.status === "error" ? "bg-moody-coral-pale" : "bg-moody-butter"
+                  t.status === "error"
+                    ? "bg-moody-coral-pale"
+                    : "bg-moody-butter"
                 }`}
               >
                 {t.text}
@@ -234,7 +301,7 @@ export function AskMoody({
           e.preventDefault();
           ask(question);
         }}
-        className="flex flex-col gap-2 tablet:flex-row"
+        className="tablet:flex-row flex flex-col gap-2"
       >
         <label htmlFor="moody-question" className="sr-only">
           Ask Moody a question
@@ -244,23 +311,34 @@ export function AskMoody({
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           maxLength={MAX_QUESTION_CHARS}
-          placeholder={turns.length ? "Ask a follow-up" : "Ask about your mood patterns"}
+          placeholder={
+            turns.length ? "Ask a follow-up" : "Ask about your mood patterns"
+          }
           className={`${field} min-h-12 min-w-0 flex-1 rounded-full bg-white px-5 text-[15px]`}
         />
         <div className="flex gap-2">
-          <button type="submit" disabled={busy || !question.trim()} className={primaryBtn}>
+          <button
+            type="submit"
+            disabled={busy || !question.trim()}
+            className={primaryBtn}
+          >
             {busy ? "Thinking..." : "Ask"}
           </button>
           {turns.length > 0 && (
-            <button type="button" onClick={reset} disabled={busy} className={secondaryBtn}>
+            <button
+              type="button"
+              onClick={reset}
+              disabled={busy}
+              className={secondaryBtn}
+            >
               New chat
             </button>
           )}
         </div>
       </form>
-      <p className="text-[13px] text-moody-muted">
-        Your question and the entries Moody looks up are sent to Claude. Moody describes patterns in your own data and
-        does not diagnose.
+      <p className="text-moody-muted text-[13px]">
+        Your question and the entries Moody looks up are sent to Claude. Moody
+        describes patterns in your own data and does not diagnose.
       </p>
     </div>
   );

@@ -21,7 +21,11 @@ export function FeelingPicker({
   const custom = selected.filter((w) => !suggestions.includes(w));
 
   function toggle(word: string) {
-    onChange(selected.includes(word) ? selected.filter((w) => w !== word) : [...selected, word]);
+    onChange(
+      selected.includes(word)
+        ? selected.filter((w) => w !== word)
+        : [...selected, word],
+    );
   }
 
   function add() {

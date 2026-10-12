@@ -1,6 +1,12 @@
 "use client";
 
-import { PHQ4_ITEMS, PHQ4_OPTIONS, PHQ4_STEM, scorePhq4, type Phq4Score } from "@/lib/moody/phq4";
+import {
+  PHQ4_ITEMS,
+  PHQ4_OPTIONS,
+  PHQ4_STEM,
+  scorePhq4,
+  type Phq4Score,
+} from "@/lib/moody/phq4";
 import { focusRing, label, pill, pillChecked } from "./ui";
 
 const BAND_COPY: Record<Phq4Score["band"], string> = {
@@ -13,18 +19,21 @@ const BAND_COPY: Record<Phq4Score["band"], string> = {
 export function Phq4Result({ answers }: { answers: readonly number[] }) {
   const s = scorePhq4(answers);
   return (
-    <div className="text-sm leading-relaxed text-moody-ink">
+    <div className="text-moody-ink text-sm leading-relaxed">
       <p>
         <strong>Total {s.total} of 12.</strong> {BAND_COPY[s.band]}.
       </p>
       <p>
-        Anxiety {s.anxiety} of 6{s.anxietyFlag ? " (3 or more, worth following up)" : ""}. Depression{" "}
-        {s.depression} of 6{s.depressionFlag ? " (3 or more, worth following up)" : ""}.
+        Anxiety {s.anxiety} of 6
+        {s.anxietyFlag ? " (3 or more, worth following up)" : ""}. Depression{" "}
+        {s.depression} of 6
+        {s.depressionFlag ? " (3 or more, worth following up)" : ""}.
       </p>
       {s.elevated && (
         <p className="mt-2">
-          This score is in a range worth paying attention to. It is a screening signal, not a diagnosis. Consider
-          talking with a doctor or therapist about how you&apos;ve been feeling.
+          This score is in a range worth paying attention to. It is a screening
+          signal, not a diagnosis. Consider talking with a doctor or therapist
+          about how you&apos;ve been feeling.
         </p>
       )}
     </div>
@@ -44,7 +53,7 @@ export function Phq4Card({
   const complete = answers.every((a) => a !== null);
 
   return (
-    <fieldset className="rounded-2xl bg-moody-sky-pale/60 p-4 tablet:p-5">
+    <fieldset className="bg-moody-sky-pale/60 tablet:p-5 rounded-2xl p-4">
       <legend className="sr-only">Weekly PHQ-4 check</legend>
       <div className={`${label} mb-2`}>Weekly check, optional</div>
       <p className="mb-4 text-[15px]">{PHQ4_STEM}</p>
@@ -55,7 +64,7 @@ export function Phq4Card({
             <p id={`phq4-q${i}`} className="mb-2 text-sm font-semibold">
               {item}
             </p>
-            <div className="grid grid-cols-2 gap-2 tablet:grid-cols-4">
+            <div className="tablet:grid-cols-4 grid grid-cols-2 gap-2">
               {PHQ4_OPTIONS.map((opt) => (
                 <label
                   key={opt.value}
@@ -67,7 +76,9 @@ export function Phq4Card({
                     name={`phq4-${i}`}
                     value={opt.value}
                     checked={answers[i] === opt.value}
-                    onChange={() => onChange(answers.map((a, j) => (j === i ? opt.value : a)))}
+                    onChange={() =>
+                      onChange(answers.map((a, j) => (j === i ? opt.value : a)))
+                    }
                   />
                   {opt.label}
                 </label>
@@ -83,7 +94,11 @@ export function Phq4Card({
         </div>
       )}
 
-      <button type="button" onClick={onDismiss} className={`mt-4 min-h-11 rounded text-sm text-moody-muted underline underline-offset-3 hover:text-moody-ink ${focusRing}`}>
+      <button
+        type="button"
+        onClick={onDismiss}
+        className={`text-moody-muted hover:text-moody-ink mt-4 min-h-11 rounded text-sm underline underline-offset-3 ${focusRing}`}
+      >
         Not this week
       </button>
     </fieldset>

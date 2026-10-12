@@ -1,7 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { deleteDemoEntries, deleteEntry, getAllEntries, putEntries } from "@/lib/moody/db";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
+import {
+  deleteDemoEntries,
+  deleteEntry,
+  getAllEntries,
+  putEntries,
+} from "@/lib/moody/db";
 import { generateDemoEntries } from "@/lib/moody/demo-data";
 import { isPhq4Due } from "@/lib/moody/phq4";
 import type { Entry } from "@/lib/moody/types";
@@ -30,7 +41,8 @@ const TABS = [
 ] as const;
 type TabId = (typeof TABS)[number]["id"];
 
-const sampleLink = "rounded font-semibold text-moody-ink underline underline-offset-3";
+const sampleLink =
+  "rounded font-semibold text-moody-ink underline underline-offset-3";
 
 const PHQ4_DISMISSED_KEY = "moody:phq4-dismissed";
 
@@ -97,11 +109,15 @@ export function MoodyApp() {
   function onTabKey(e: KeyboardEvent) {
     const i = TABS.findIndex((t) => t.id === tab);
     const next =
-      e.key === "ArrowRight" ? (i + 1) % TABS.length
-      : e.key === "ArrowLeft" ? (i - 1 + TABS.length) % TABS.length
-      : e.key === "Home" ? 0
-      : e.key === "End" ? TABS.length - 1
-      : null;
+      e.key === "ArrowRight"
+        ? (i + 1) % TABS.length
+        : e.key === "ArrowLeft"
+          ? (i - 1 + TABS.length) % TABS.length
+          : e.key === "Home"
+            ? 0
+            : e.key === "End"
+              ? TABS.length - 1
+              : null;
     if (next === null) return;
     e.preventDefault();
     setTab(TABS[next].id);
@@ -117,7 +133,11 @@ export function MoodyApp() {
   }
 
   if (entries === null || !today) {
-    return <p className="py-10 text-center text-sm text-moody-muted">Opening your journal...</p>;
+    return (
+      <p className="text-moody-muted py-10 text-center text-sm">
+        Opening your journal...
+      </p>
+    );
   }
 
   const hasDemo = entries.some((e) => e.demo);
@@ -127,8 +147,12 @@ export function MoodyApp() {
       {crisis && <CrisisCard onDismiss={() => setCrisis(false)} />}
 
       {loadError && (
-        <p role="status" className="mb-4 rounded-2xl bg-moody-butter px-4 py-3 text-sm text-moody-ink">
-          This browser is blocking local storage, so entries can&apos;t be saved here. Private browsing is a common cause.
+        <p
+          role="status"
+          className="bg-moody-butter text-moody-ink mb-4 rounded-2xl px-4 py-3 text-sm"
+        >
+          This browser is blocking local storage, so entries can&apos;t be saved
+          here. Private browsing is a common cause.
         </p>
       )}
 
@@ -136,7 +160,7 @@ export function MoodyApp() {
         role="tablist"
         aria-label="Moody"
         onKeyDown={onTabKey}
-        className="mb-4 grid grid-cols-3 gap-1 rounded-full bg-moody-track p-1"
+        className="bg-moody-track mb-4 grid grid-cols-3 gap-1 rounded-full p-1"
       >
         {TABS.map((t) => {
           const selected = t.id === tab;
@@ -155,11 +179,21 @@ export function MoodyApp() {
               onClick={() => setTab(t.id)}
               className={`flex min-h-11 items-center justify-center gap-2 rounded-full px-2 text-[15px] transition-colors ${focusRing} ${
                 selected
-                  ? "bg-white font-bold text-moody-ink shadow-[0_1px_2px_rgba(47,59,57,0.08)]"
-                  : "font-semibold text-moody-muted hover:text-moody-ink"
+                  ? "text-moody-ink bg-white font-bold shadow-[0_1px_2px_rgba(47,59,57,0.08)]"
+                  : "text-moody-muted hover:text-moody-ink font-semibold"
               }`}
             >
-              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                aria-hidden="true"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 {ICONS[t.id]}
               </svg>
               {t.label}
@@ -168,18 +202,28 @@ export function MoodyApp() {
         })}
       </div>
 
-      <div className="mb-5 flex min-h-11 flex-wrap items-center justify-between gap-x-3 rounded-2xl px-1 text-sm text-moody-muted">
+      <div className="text-moody-muted mb-5 flex min-h-11 flex-wrap items-center justify-between gap-x-3 rounded-2xl px-1 text-sm">
         {hasDemo ? (
           <>
             <span>You&apos;re viewing sample data.</span>
-            <button type="button" onClick={removeSample} className={`${sampleLink} ${focusRing}`}>
+            <button
+              type="button"
+              onClick={removeSample}
+              className={`${sampleLink} ${focusRing}`}
+            >
               Clear sample data
             </button>
           </>
         ) : (
           <span>
-            {entries.length === 0 ? "Just looking around? " : `${entries.length} ${entries.length === 1 ? "entry" : "entries"} saved in this browser. `}
-            <button type="button" onClick={loadSample} className={`${sampleLink} ${focusRing}`}>
+            {entries.length === 0
+              ? "Just looking around? "
+              : `${entries.length} ${entries.length === 1 ? "entry" : "entries"} saved in this browser. `}
+            <button
+              type="button"
+              onClick={loadSample}
+              className={`${sampleLink} ${focusRing}`}
+            >
               Try it with 30 days of sample data
             </button>
           </span>
@@ -205,8 +249,12 @@ export function MoodyApp() {
               onViewPatterns={() => setTab("patterns")}
             />
           )}
-          {t.id === "patterns" && <HistoryView entries={entries} today={today} onDelete={remove} />}
-          {t.id === "ask" && <AskMoody entries={entries} today={today} onCrisis={showCrisis} />}
+          {t.id === "patterns" && (
+            <HistoryView entries={entries} today={today} onDelete={remove} />
+          )}
+          {t.id === "ask" && (
+            <AskMoody entries={entries} today={today} onCrisis={showCrisis} />
+          )}
         </div>
       ))}
     </div>

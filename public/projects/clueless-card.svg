@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" font-family="ui-sans-serif, system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif">
+  <rect width="800" height="380" fill="#f5f2ff"/>
+  <g transform="translate(96 84)">
+    <rect x="0" y="0" width="236" height="132" rx="22" fill="#1fc58e" stroke="#1d1638" stroke-width="5" transform="rotate(-8 118 66)"/>
+    <text x="118" y="78" text-anchor="middle" font-size="30" font-weight="800" fill="#1d1638" transform="rotate(-8 118 66)">Got it!</text>
+  </g>
+  <g transform="translate(130 176)">
+    <rect x="0" y="0" width="236" height="132" rx="22" fill="#6a4cff" stroke="#1d1638" stroke-width="5" transform="rotate(5 118 66)"/>
+    <text x="118" y="78" text-anchor="middle" font-size="30" font-weight="800" fill="#fff" transform="rotate(5 118 66)">Moana</text>
+  </g>
+  <text x="420" y="204" font-size="72" font-weight="800" letter-spacing="-2.5" fill="#1d1638">Clueless</text>
+  <path d="M700 108h44a7 7 0 017 7v24a7 7 0 01-7 7h-24l-12 11v-11h-8a7 7 0 01-7-7v-24a7 7 0 017-7z" fill="#6a4cff" stroke="#1d1638" stroke-width="3"/>
+  <text x="722" y="137" text-anchor="middle" font-size="24" font-weight="800" fill="#fff">?</text>
+  <text x="424" y="244" font-size="22" font-weight="500" fill="#5f5878">Tilt up to score. Tilt down to pass.</text>
+</svg>

@@ -50,6 +50,16 @@
   --color-noggin-sun: #ffd23f;
   --color-noggin-tomato: #ff5a36;
   --color-noggin-cobalt: #2f54eb;
+
+  /* Clueless (/projects/clueless) */
+  --color-clue-bg: #f5f2ff;
+  --color-clue-ink: #1d1638;
+  --color-clue-muted: #5f5878;
+  --color-clue-line: #e3ddf6;
+  --color-clue-grape: #6a4cff;
+  --color-clue-mint: #1fc58e;
+  --color-clue-tangerine: #ff8a3d;
+  --color-clue-lemon: #ffe45c;
 }
 
 html,
@@ -114,6 +124,31 @@ a {
   }
 }
 
+/* Clueless: a sideways phone rocking toward the ceiling or the floor. */
+@keyframes clue-rock-up {
+  0%,
+  25%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  55%,
+  80% {
+    transform: translateY(-3px) scaleY(0.55);
+  }
+}
+
+@keyframes clue-rock-down {
+  0%,
+  25%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  55%,
+  80% {
+    transform: translateY(3px) scaleY(0.55);
+  }
+}
+
 @keyframes noggin-fade {
   from {
     opacity: 0;
@@ -124,7 +159,8 @@ a {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [class*="animate-[noggin-"] {
+  [class*="animate-[noggin-"],
+  [class*="animate-[clue-"] {
     animation: none;
   }
 }

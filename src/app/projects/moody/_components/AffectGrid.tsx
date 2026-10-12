@@ -61,13 +61,20 @@ export function AffectGrid({
       <div className="mx-auto w-full max-w-[420px]">
         <div className="mb-2 flex justify-between gap-4 pl-6">
           <span className={cornerLabel}>{MOOD_NAMES["high-unpleasant"]}</span>
-          <span className={`${cornerLabel} text-right`}>{MOOD_NAMES["high-pleasant"]}</span>
+          <span className={`${cornerLabel} text-right`}>
+            {MOOD_NAMES["high-pleasant"]}
+          </span>
         </div>
 
         <div className="flex gap-2">
-          <div aria-hidden="true" className="flex w-4 flex-col items-center justify-between py-1 text-[11px] text-moody-muted">
+          <div
+            aria-hidden="true"
+            className="text-moody-muted flex w-4 flex-col items-center justify-between py-1 text-[11px]"
+          >
             <span>More</span>
-            <span className="[writing-mode:vertical-rl] rotate-180 tracking-wide">Energy</span>
+            <span className="rotate-180 tracking-wide [writing-mode:vertical-rl]">
+              Energy
+            </span>
             <span>Less</span>
           </div>
 
@@ -75,7 +82,7 @@ export function AffectGrid({
             role="radiogroup"
             aria-label="Mood grid. Left to right is unpleasant to pleasant. Bottom to top is low to high energy."
             onKeyDown={onKeyDown}
-            className="grid aspect-square flex-1 grid-cols-9 gap-[3px] rounded-[18px] bg-moody-bg p-1.5"
+            className="bg-moody-bg grid aspect-square flex-1 grid-cols-9 gap-[3px] rounded-[18px] p-1.5"
           >
             {[...SCALE].reverse().map((a) =>
               SCALE.map((v) => {
@@ -102,11 +109,15 @@ export function AffectGrid({
                     tabIndex={tabbable ? 0 : -1}
                     onClick={() => select(v, a)}
                     style={{ backgroundColor: selected ? undefined : fill }}
-                    className={`relative flex items-center justify-center rounded-[7px] focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-moody-accent ${
-                      selected ? "z-10 bg-moody-ink shadow-[0_0_0_3px_#fff,0_0_0_5px_#2f3b39]" : "hover:brightness-95"
+                    className={`focus-visible:outline-moody-accent relative flex items-center justify-center rounded-[7px] focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-1 ${
+                      selected
+                        ? "bg-moody-ink z-10 shadow-[0_0_0_3px_#fff,0_0_0_5px_#2f3b39]"
+                        : "hover:brightness-95"
                     }`}
                   >
-                    {selected && <span className="h-2.5 w-2.5 rounded-full bg-white" />}
+                    {selected && (
+                      <span className="h-2.5 w-2.5 rounded-full bg-white" />
+                    )}
                   </button>
                 );
               }),
@@ -116,9 +127,14 @@ export function AffectGrid({
 
         <div className="mt-2 flex justify-between gap-4 pl-6">
           <span className={cornerLabel}>{MOOD_NAMES["low-unpleasant"]}</span>
-          <span className={`${cornerLabel} text-right`}>{MOOD_NAMES["low-pleasant"]}</span>
+          <span className={`${cornerLabel} text-right`}>
+            {MOOD_NAMES["low-pleasant"]}
+          </span>
         </div>
-        <div aria-hidden="true" className="mt-1 flex justify-between pl-6 text-[11px] text-moody-muted">
+        <div
+          aria-hidden="true"
+          className="text-moody-muted mt-1 flex justify-between pl-6 text-[11px]"
+        >
           <span>Unpleasant</span>
           <span>Pleasant</span>
         </div>

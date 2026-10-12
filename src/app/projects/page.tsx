@@ -2,6 +2,14 @@ import { SiteHeader } from "../../components/SiteHeader";
 
 const PROJECTS = [
   {
+    name: "Clueless",
+    description:
+      "A party game for one phone. Pick any topic and Claude builds a deck, then hold the phone to your forehead while friends give clues. Tilt up to score, tilt down to pass.",
+    url: "/projects/clueless",
+    image: "/projects/clueless-card.svg",
+    alt: "Clueless wordmark beside a purple speech bubble logo and two tilted word cards",
+  },
+  {
     name: "Noggin",
     description:
       "A 1v1 party game for two phones. Hold yours to your forehead and ask yes or no questions to guess your number or celebrity first. Peer-to-peer over WebRTC, no game server.",
@@ -37,7 +45,9 @@ const PROJECTS = [
 
 // Projects hosted on this site open in the same tab.
 const linkProps = (url: string) =>
-  url.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {};
+  url.startsWith("http")
+    ? { target: "_blank", rel: "noopener noreferrer" }
+    : {};
 
 export default function ProjectsPage() {
   return (
