@@ -46,7 +46,6 @@ type Sensor = "unknown" | "on" | "off";
 type Phase =
   | { name: "setup"; error: string | null }
   | { name: "loading" }
-  | { name: "ready" }
   | { name: "countdown" }
   | { name: "playing" }
   | { name: "results"; results: Result[] };
@@ -103,7 +102,8 @@ function Game() {
         throw new Error(data?.error ?? "Couldn't build a deck just now.");
       }
       setDeck({ label: data.label, words: data.words });
-      setPhase({ name: "ready" });
+      // Straight into the countdown: no extra tap between the deck and the round.
+      setPhase({ name: "countdown" });
     } catch (err) {
       const error =
         err instanceof Error && err.message !== "Failed to fetch"
@@ -132,18 +132,15 @@ function Game() {
       );
     case "loading":
       return <Loading topic={topic} />;
-    case "ready":
+    case "countdown":
       return (
-        <Ready
+        <Countdown
           label={deck?.label ?? topic}
-          duration={duration}
           sensor={sensor}
-          onReady={() => setPhase({ name: "countdown" })}
-          onBack={() => setPhase({ name: "setup", error: null })}
+          onDone={() => setPhase({ name: "playing" })}
+          onCancel={() => setPhase({ name: "setup", error: null })}
         />
       );
-    case "countdown":
-      return <Countdown onDone={() => setPhase({ name: "playing" })} />;
     case "playing":
       return (
         <Playing
@@ -318,98 +315,10 @@ function Loading({ topic }: { topic: string }) {
 
 // ---- Before the round ----
 
-function Ready({
-  label: deckLabel,
-  duration,
-  sensor,
-  onReady,
-  onBack,
-}: {
-  label: string;
-  duration: Duration;
-  sensor: Sensor;
-  onReady: () => void;
-  onBack: () => void;
-}) {
-  return (
-    <main className={screen}>
-      <div className="flex items-center justify-between">
-        <button
-          type="button"
-          className={iconBtn}
-          aria-label="Change topic"
-          onClick={onBack}
-        >
-          <Icon d="M15 5l-7 7 7 7" />
-        </button>
-        <HelpButton />
-      </div>
-
-      <div className="flex flex-1 flex-col items-center justify-center py-2 text-center">
-        <p className="bg-clue-grape rounded-full px-3.5 py-1.5 text-sm font-extrabold text-white">
-          {deckLabel} · {duration} sec
-        </p>
-        <h1
-          className={`${display} mt-4 text-[34px] leading-tight font-extrabold tracking-[-0.02em]`}
-        >
-          Get ready!
-        </h1>
-        <p className="text-clue-muted mt-2 max-w-72 text-[17px] leading-snug text-balance">
-          Turn your phone sideways and hold it to your forehead, screen facing
-          your friends.
-        </p>
-
-        <ul className="mt-5 grid w-full grid-cols-2 gap-3">
-          <TiltCard move="correct" title="Tilt up" detail="Got it! +1 point" />
-          <TiltCard move="pass" title="Tilt down" detail="Pass, next word" />
-        </ul>
-
-        {sensor === "off" && (
-          <p className="bg-clue-lemon/50 mt-3 rounded-2xl px-4 py-2.5 text-[15px] leading-snug font-semibold">
-            Tilt isn&apos;t available here, so tap Got it and Pass on screen
-            instead.
-          </p>
-        )}
-      </div>
-
-      <button
-        type="button"
-        className={`${bigBtn} bg-clue-grape text-white`}
-        onClick={onReady}
-      >
-        I&apos;m ready
-      </button>
-    </main>
-  );
-}
-
-function TiltCard({
-  move,
-  title,
-  detail,
-}: {
-  move: Move;
-  title: string;
-  detail: string;
-}) {
-  const up = move === "correct";
-  return (
-    <li
-      className={`border-clue-ink flex flex-col items-center gap-2 rounded-[20px] border-3 px-3 py-4 shadow-[0_4px_0_var(--color-clue-ink)] ${
-        up ? "bg-clue-mint" : "bg-clue-tangerine"
-      }`}
-    >
-      <TiltPhone up={up} />
-      <span className="text-lg leading-tight font-extrabold">{title}</span>
-      <span className="text-sm leading-tight font-bold">{detail}</span>
-    </li>
-  );
-}
-
 /** A sideways phone rocking up or down, to show which way each move goes. */
 function TiltPhone({ up }: { up: boolean }) {
   return (
-    <svg viewBox="0 0 64 48" className="h-12 w-16" aria-hidden="true">
+    <svg viewBox="0 0 64 48" className="h-9 w-12 shrink-0" aria-hidden="true">
       <path
         d={up ? "M32 4l-6 7h12z" : "M32 44l-6-7h12z"}
         className="fill-clue-ink"
@@ -439,7 +348,17 @@ function TiltPhone({ up }: { up: boolean }) {
   );
 }
 
-function Countdown({ onDone }: { onDone: () => void }) {
+function Countdown({
+  label: deckLabel,
+  sensor,
+  onDone,
+  onCancel,
+}: {
+  label: string;
+  sensor: Sensor;
+  onDone: () => void;
+  onCancel: () => void;
+}) {
   const [n, setN] = useState(COUNTDOWN_SECONDS);
   const onDoneRef = useRef(onDone);
   useEffect(() => {
@@ -466,20 +385,57 @@ function Countdown({ onDone }: { onDone: () => void }) {
 
   return (
     <Fullscreen className="bg-clue-lemon text-clue-ink">
-      <Sideways className="items-center justify-center gap-2 text-center">
-        <p
-          className={`${display} text-[min(7vmax,32px)] leading-tight font-extrabold`}
-        >
-          Phone to your forehead!
-        </p>
-        <p className="text-lg font-bold opacity-80">Screen facing out</p>
-        <p
-          key={n}
-          className={`${display} animate-[noggin-pop_0.5s_ease-out] text-[min(42vmin,30vmax)] leading-none font-extrabold tabular-nums`}
-          aria-live="assertive"
-        >
-          {n}
-        </p>
+      <Sideways className="px-6 py-4">
+        <div className="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            className={`border-clue-ink h-10 rounded-full border-[2.5px] bg-white px-4 text-sm font-extrabold ${press} shadow-[0_3px_0_var(--color-clue-ink)] ${focusRing}`}
+          >
+            Cancel
+          </button>
+          <p className="bg-clue-grape min-w-0 truncate rounded-full px-3.5 py-1.5 text-sm font-extrabold text-white">
+            {deckLabel}
+          </p>
+        </div>
+
+        <div className="flex min-h-0 flex-1 items-center justify-center gap-[6vmax]">
+          <div className="text-left">
+            <p
+              className={`${display} text-[min(6vmax,30px)] leading-tight font-extrabold`}
+            >
+              Phone to your forehead!
+            </p>
+            <p className="mt-1 text-base font-bold opacity-80">
+              Screen facing your friends
+            </p>
+          </div>
+          <p
+            key={n}
+            className={`${display} animate-[noggin-pop_0.5s_ease-out] text-[min(38vmin,26vmax)] leading-none font-extrabold tabular-nums`}
+            aria-live="assertive"
+          >
+            {n}
+          </p>
+        </div>
+
+        {/* The two moves, so everyone knows them before the first word. */}
+        {sensor === "off" ? (
+          <p className="text-center text-[15px] font-bold">
+            Tilt isn&apos;t available here, so tap Got it and Pass on screen.
+          </p>
+        ) : (
+          <ul className="grid grid-cols-2 gap-3">
+            <li className="bg-clue-mint border-clue-ink flex h-14 items-center justify-center gap-2 rounded-2xl border-[2.5px] text-base font-extrabold">
+              <TiltPhone up />
+              Tilt up: Got it
+            </li>
+            <li className="bg-clue-tangerine border-clue-ink flex h-14 items-center justify-center gap-2 rounded-2xl border-[2.5px] text-base font-extrabold">
+              <TiltPhone up={false} />
+              Tilt down: Pass
+            </li>
+          </ul>
+        )}
       </Sideways>
     </Fullscreen>
   );
@@ -614,9 +570,6 @@ function Playing({
           >
             Pass
           </button>
-          <p className="hidden text-center text-sm font-semibold opacity-75 min-[560px]:block">
-            Tilt up: got it · Tilt down: pass
-          </p>
           <button
             type="button"
             onClick={() => move("correct")}
