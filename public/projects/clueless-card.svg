@@ -11,5 +11,5 @@
   <text x="420" y="204" font-size="72" font-weight="800" letter-spacing="-2.5" fill="#1d1638">Clueless</text>
   <path d="M700 108h44a7 7 0 017 7v24a7 7 0 01-7 7h-24l-12 11v-11h-8a7 7 0 01-7-7v-24a7 7 0 017-7z" fill="#6a4cff" stroke="#1d1638" stroke-width="3"/>
   <text x="722" y="137" text-anchor="middle" font-size="24" font-weight="800" fill="#fff">?</text>
-  <text x="424" y="244" font-size="22" font-weight="500" fill="#5f5878">Tilt up to score. Tilt down to pass.</text>
+  <text x="424" y="244" font-size="22" font-weight="500" fill="#5f5878">Tilt down to score. Tilt up to pass.</text>
 </svg>

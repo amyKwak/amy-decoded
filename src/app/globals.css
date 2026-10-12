@@ -51,6 +51,18 @@
   --color-noggin-tomato: #ff5a36;
   --color-noggin-cobalt: #2f54eb;
 
+  /* Nat 20 (/projects/nat20), a candlelit tavern */
+  --color-nat-bg: #17121f;
+  --color-nat-panel: #241c31;
+  --color-nat-line: #3b3050;
+  --color-nat-text: #f5ead6;
+  --color-nat-muted: #b8a88e;
+  --color-nat-gold: #f2b84b;
+  --color-nat-ember: #ef6a45;
+  --color-nat-emerald: #3cc391;
+  --color-nat-mage: #8a96ff;
+  --color-nat-bard: #f283bd;
+
   /* Clueless (/projects/clueless) */
   --color-clue-bg: #f5f2ff;
   --color-clue-ink: #1d1638;
@@ -149,6 +161,25 @@ a {
   }
 }
 
+/* Nat 20: the die tumbling, and the cursor while the game master speaks. */
+@keyframes nat-tumble {
+  0% {
+    transform: rotate(0deg) scale(0.6);
+  }
+  70% {
+    transform: rotate(600deg) scale(1.08);
+  }
+  100% {
+    transform: rotate(720deg) scale(1);
+  }
+}
+
+@keyframes nat-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
 @keyframes noggin-fade {
   from {
     opacity: 0;
@@ -160,7 +191,8 @@ a {
 
 @media (prefers-reduced-motion: reduce) {
   [class*="animate-[noggin-"],
-  [class*="animate-[clue-"] {
+  [class*="animate-[clue-"],
+  [class*="animate-[nat-"] {
     animation: none;
   }
 }

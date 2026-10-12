@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" font-family="ui-sans-serif, system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif">
+  <rect width="800" height="380" fill="#17121f"/>
+  <circle cx="230" cy="190" r="130" fill="#f2b84b" opacity="0.08"/>
+  <g transform="translate(130 90)" fill="none" stroke="#f2b84b" stroke-width="6" stroke-linejoin="round">
+    <path d="M100 0l87 50v100l-87 50-87-50V50z"/>
+    <path d="M100 0L55 82h90zM55 82L13 150M145 82l42 68M55 82l45 118 45-118M13 50l42 32M187 50l-42 32" opacity="0.5"/>
+  </g>
+  <text x="230" y="205" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="40" font-weight="700" fill="#f5ead6">20</text>
+  <text x="420" y="200" font-family="Georgia, 'Times New Roman', serif" font-size="78" font-weight="700" letter-spacing="2" fill="#f2b84b">Nat 20</text>
+  <text x="424" y="242" font-size="22" font-weight="500" fill="#b8a88e">Your AI game master awaits.</text>
+</svg>

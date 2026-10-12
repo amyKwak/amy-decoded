@@ -2,9 +2,17 @@ import { SiteHeader } from "../../components/SiteHeader";
 
 const PROJECTS = [
   {
+    name: "Nat 20",
+    description:
+      "A fantasy adventure for a party on one phone, run by an AI game master. Pick any quest, roll a d20 for risky moves, and watch the story stream in live.",
+    url: "/projects/nat20",
+    image: "/projects/nat20-card.svg",
+    alt: "Nat 20 wordmark in gold beside a glowing twenty-sided die",
+  },
+  {
     name: "Clueless",
     description:
-      "A party game for one phone. Pick any topic and Claude builds a deck, then hold the phone to your forehead while friends give clues. Tilt up to score, tilt down to pass.",
+      "A party game for one phone. Pick any topic and Claude builds a deck, then hold the phone to your forehead while friends give clues. Tilt down to score, tilt up to pass.",
     url: "/projects/clueless",
     image: "/projects/clueless-card.svg",
     alt: "Clueless wordmark beside a purple speech bubble logo and two tilted word cards",

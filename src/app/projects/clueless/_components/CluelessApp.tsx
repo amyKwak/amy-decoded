@@ -427,12 +427,12 @@ function Countdown({
         ) : (
           <ul className="grid grid-cols-2 gap-3">
             <li className="bg-clue-mint border-clue-ink flex h-14 items-center justify-center gap-2 rounded-2xl border-[2.5px] text-base font-extrabold">
-              <TiltPhone up />
-              Tilt up: Got it
+              <TiltPhone up={false} />
+              Tilt down: Got it
             </li>
             <li className="bg-clue-tangerine border-clue-ink flex h-14 items-center justify-center gap-2 rounded-2xl border-[2.5px] text-base font-extrabold">
-              <TiltPhone up={false} />
-              Tilt down: Pass
+              <TiltPhone up />
+              Tilt up: Pass
             </li>
           </ul>
         )}
@@ -730,7 +730,7 @@ const STEPS: { title: string; body: string; chip: string }[] = [
   },
   {
     title: "Tilt to answer",
-    body: "Tilt up when you get it for a point. Tilt down to pass. Beat the clock!",
+    body: "Tilt down when you get it for a point. Tilt up to pass. Beat the clock!",
     chip: "bg-clue-mint",
   },
 ];

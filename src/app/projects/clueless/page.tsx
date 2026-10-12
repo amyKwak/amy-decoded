@@ -12,7 +12,7 @@ const unbounded = Unbounded({
 export const metadata: Metadata = {
   title: "Clueless",
   description:
-    "A party game for one phone. Pick any topic, hold the phone to your forehead, and guess as many words as you can from your friends' clues. Tilt up when you get it, tilt down to pass.",
+    "A party game for one phone. Pick any topic, hold the phone to your forehead, and guess as many words as you can from your friends' clues. Tilt down when you get it, tilt up to pass.",
 };
 
 export default function CluelessPage() {

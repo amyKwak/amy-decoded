@@ -35,9 +35,9 @@ describe("readTilt", () => {
     return out;
   }
 
-  it("scores tilting up and passes tilting down", () => {
-    expect(moves([0, 50])).toEqual(["correct"]);
-    expect(moves([0, -50])).toEqual(["pass"]);
+  it("scores tilting down and passes tilting up", () => {
+    expect(moves([0, -50])).toEqual(["correct"]);
+    expect(moves([0, 50])).toEqual(["pass"]);
   });
 
   it("needs the phone upright first, so lifting it into place doesn't count", () => {
@@ -45,12 +45,8 @@ describe("readTilt", () => {
   });
 
   it("counts a held tilt once, then again only after coming back upright", () => {
-    expect(moves([0, 50, 60, 55, 30, 50])).toEqual(["correct"]);
-    expect(moves([0, 50, 5, -50, 0, 50])).toEqual([
-      "correct",
-      "pass",
-      "correct",
-    ]);
+    expect(moves([0, 50, 60, 55, 30, 50])).toEqual(["pass"]);
+    expect(moves([0, 50, 5, -50, 0, 50])).toEqual(["pass", "correct", "pass"]);
   });
 
   it("ignores small wobbles", () => {

@@ -1,7 +1,8 @@
 /**
  * Turning phone tilt into game moves. The phone is held on your forehead with
  * the screen facing out (straight up and down). Tilting it so the screen faces
- * the ceiling scores a point; tilting it so the screen faces the floor passes.
+ * the floor (a nod down) scores a point; tilting it so the screen faces the
+ * ceiling passes, like Heads Up.
  */
 
 export type Move = "correct" | "pass";
@@ -44,7 +45,7 @@ export function readTilt(
   if (state.armed && Math.abs(elevation) > TRIGGER_DEG) {
     return {
       state: { armed: false },
-      move: elevation > 0 ? "correct" : "pass",
+      move: elevation < 0 ? "correct" : "pass",
     };
   }
   return { state, move: null };
