@@ -51,6 +51,15 @@
   --color-noggin-tomato: #ff5a36;
   --color-noggin-cobalt: #2f54eb;
 
+  /* Meme This! (/projects/meme) */
+  --color-meme-bg: #fafaf5;
+  --color-meme-ink: #141414;
+  --color-meme-muted: #5c5c57;
+  --color-meme-line: #e4e4dc;
+  --color-meme-pink: #ff3d7f;
+  --color-meme-lime: #c8f169;
+  --color-meme-yellow: #ffd84d;
+
   /* Nat 20 (/projects/nat20), a candlelit tavern */
   --color-nat-bg: #17121f;
   --color-nat-panel: #241c31;

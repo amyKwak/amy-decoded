@@ -2,6 +2,14 @@ import { SiteHeader } from "../../components/SiteHeader";
 
 const PROJECTS = [
   {
+    name: "Meme This!",
+    description:
+      "Snap or upload a photo and Claude looks at it, then writes meme captions to match. Pick one, tweak it, and share. Built to learn Claude's vision.",
+    url: "/projects/meme",
+    image: "/projects/meme-card.svg",
+    alt: "Meme This! wordmark beside a photo frame with bold white meme text on top and bottom",
+  },
+  {
     name: "Nat 20",
     description:
       "A fantasy adventure for a party on one phone, run by an AI game master. Pick any quest, roll a d20 for risky moves, and watch the story stream in live.",

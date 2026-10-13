@@ -11,6 +11,7 @@ import {
   MAX_HP,
   NAME_MAX,
   nextHero,
+  parseScript,
   QUEST_MAX,
   rollCheck,
   type Choice,
@@ -420,19 +421,43 @@ function Adventure({
     choice: Choice;
     roll: Roll;
   } | null>(null);
+  // Which script line is being read aloud in the newest game master turn.
+  const [cursor, setCursor] = useState(0);
   const abort = useRef<AbortController | null>(null);
 
   const active = nextHero(heroes, turn);
+  const names = heroes.map((h) => h.name);
+  const latest = entries.at(-1);
+  const latestGm = latest?.kind === "gm" ? latest : null;
+  const lines = latestGm
+    ? parseScript(latestGm.text, names, !latestGm.live)
+    : [];
+  // The choices (or the ending) wait until the whole script has been read.
+  const doneReading = !latestGm || (!latestGm.live && cursor >= lines.length);
+  const nextLine = lines[cursor + 1];
+  const reading = doneReading
+    ? null
+    : cursor >= lines.length
+      ? { waiting: true, label: "", onNext: () => {} }
+      : {
+          waiting: false,
+          label: nextLine
+            ? `Next line · ${nextLine.reader} reads`
+            : latestGm?.live
+              ? "Next line"
+              : "Done reading",
+          onNext: () => setCursor((c) => c + 1),
+        };
 
   // The choice panel is taller than the "telling the story" bar, so when it
   // appears, scroll again to keep the end of the story above it.
   useEffect(() => {
-    if (status === "choose" || status === "over")
+    if (doneReading && (status === "choose" || status === "over"))
       window.scrollTo({
         top: document.documentElement.scrollHeight,
         behavior: "smooth",
       });
-  }, [status]);
+  }, [status, doneReading]);
 
   /** Asks the game master for the next bit of story and streams it in. */
   const callGm = async (
@@ -452,6 +477,7 @@ function Adventure({
     setStatus("gm");
     setError(null);
     setEntries(log);
+    setCursor(0);
     const setLast = (patch: Partial<Extract<Entry, { kind: "gm" }>>) => {
       log = [
         ...log.slice(0, -1),
@@ -584,7 +610,7 @@ function Adventure({
         onLeave={onNewQuest}
       />
 
-      <Story entries={entries} />
+      <Story entries={entries} heroes={heroes} cursor={cursor} />
 
       {status === "error" && error && (
         <div className="px-5 pb-4">
@@ -604,7 +630,7 @@ function Adventure({
         </div>
       )}
 
-      {status === "over" && ending && (
+      {status === "over" && ending && doneReading && (
         <Ending
           ending={ending}
           heroes={heroes}
@@ -613,9 +639,14 @@ function Adventure({
         />
       )}
 
-      {(status === "gm" || status === "choose" || status === "rolling") && (
+      {(reading ||
+        status === "gm" ||
+        status === "choose" ||
+        status === "rolling") && (
         <ActionPanel
           hero={active}
+          heroes={heroes}
+          reading={reading}
           choices={choices}
           waiting={status !== "choose"}
           onPick={pick}
@@ -717,7 +748,16 @@ function PartyBar({
   );
 }
 
-function Story({ entries }: { entries: Entry[] }) {
+function Story({
+  entries,
+  heroes,
+  cursor,
+}: {
+  entries: Entry[];
+  heroes: Hero[];
+  /** The line being read in the newest game master turn. */
+  cursor: number;
+}) {
   const following = useRef(true);
   const last = entries.at(-1);
   const liveText = last?.kind === "gm" ? last.text : null;
@@ -738,7 +778,7 @@ function Story({ entries }: { entries: Entry[] }) {
         top: document.documentElement.scrollHeight,
         behavior: "smooth",
       });
-  }, [entries.length, liveText]);
+  }, [entries.length, liveText, cursor]);
 
   return (
     <div
@@ -747,7 +787,12 @@ function Story({ entries }: { entries: Entry[] }) {
     >
       {entries.map((e, i) =>
         e.kind === "gm" ? (
-          <GmCard key={i} entry={e} />
+          <GmCard
+            key={i}
+            entry={e}
+            heroes={heroes}
+            cursor={i === entries.length - 1 ? cursor : null}
+          />
         ) : (
           <PlayerCard key={i} entry={e} />
         ),
@@ -756,40 +801,110 @@ function Story({ entries }: { entries: Entry[] }) {
   );
 }
 
-function GmCard({ entry }: { entry: Extract<Entry, { kind: "gm" }> }) {
+function GmCard({
+  entry,
+  heroes,
+  cursor,
+}: {
+  entry: Extract<Entry, { kind: "gm" }>;
+  heroes: Hero[];
+  /** The line being read aloud, or null for earlier turns (shown in full). */
+  cursor: number | null;
+}) {
+  const lines = parseScript(
+    entry.text,
+    heroes.map((h) => h.name),
+    !entry.live,
+  );
+  // Only the lines read so far, so nobody reads ahead.
+  const shown = cursor === null ? lines : lines.slice(0, cursor + 1);
+  const finished = cursor === null || (!entry.live && cursor >= lines.length);
+  const clsOf = (name: string) =>
+    heroes.find((h) => h.name === name)?.cls ?? "warrior";
+  const dots = (
+    <span className="flex gap-1" aria-hidden="true">
+      {[0, 1, 2].map((d) => (
+        <span
+          key={d}
+          className="bg-nat-gold h-1.5 w-1.5 animate-bounce rounded-full"
+          style={{ animationDelay: `${d * 0.15}s` }}
+        />
+      ))}
+    </span>
+  );
+
   return (
     <article className="bg-nat-panel border-nat-line animate-[noggin-pop_0.3s_ease-out] rounded-[18px] border-2 px-4 pt-3 pb-3.5">
       <header className="text-nat-gold flex items-center gap-1.5">
         <D20 className="h-4.5 w-4.5" />
         <h3 className="text-xs font-extrabold tracking-[0.12em] uppercase">
-          Game master
+          Scene
         </h3>
       </header>
-      {entry.live && !entry.text ? (
+
+      {lines.length === 0 && entry.live ? (
         <p className="text-nat-muted mt-2 flex items-center gap-2 text-[15px] italic">
-          <span className="flex gap-1" aria-hidden="true">
-            {[0, 1, 2].map((d) => (
-              <span
-                key={d}
-                className="bg-nat-gold h-1.5 w-1.5 animate-bounce rounded-full"
-                style={{ animationDelay: `${d * 0.15}s` }}
-              />
-            ))}
-          </span>
-          The game master is plotting…
+          {dots}
+          The game master is writing the script…
         </p>
       ) : (
-        <p className="mt-1.5 text-[16.5px] leading-relaxed">
-          {entry.text}
-          {entry.live && (
-            <span
-              className="bg-nat-gold ml-0.5 inline-block h-[1.05em] w-[3px] translate-y-[3px] animate-[nat-blink_0.9s_steps(1)_infinite]"
-              aria-hidden="true"
-            />
+        <ol className="mt-2 flex flex-col gap-2">
+          {shown.map((line, i) => {
+            const current = cursor !== null && i === cursor;
+            const style = CLASS_STYLE[clsOf(line.reader)];
+            if (current) {
+              // The teleprompter: one big line for one reader.
+              return (
+                <li
+                  key={i}
+                  aria-current="true"
+                  className="border-nat-gold animate-[noggin-pop_0.25s_ease-out] rounded-2xl border-2 bg-[#2c2340] px-4 pt-3 pb-4"
+                >
+                  <p className="flex items-center gap-2">
+                    <HeroBadge cls={clsOf(line.reader)} small />
+                    <span
+                      className={`text-[13px] font-extrabold tracking-[0.1em] uppercase ${style.text}`}
+                    >
+                      {line.reader}, read this aloud
+                    </span>
+                  </p>
+                  <p className="text-nat-muted mt-1.5 text-sm">
+                    as{" "}
+                    <span className="text-nat-text font-bold">
+                      {line.speaker}
+                    </span>
+                    {line.direction && (
+                      <span className="italic"> · {line.direction}</span>
+                    )}
+                  </p>
+                  <p className="mt-1 text-[21px] leading-snug font-semibold">
+                    {line.text}
+                  </p>
+                </li>
+              );
+            }
+            return (
+              <li key={i} className="text-nat-text/75 text-[15px] leading-snug">
+                <span className={`font-bold ${style.text}`}>
+                  {line.speaker}
+                </span>
+                {line.speaker !== line.reader && (
+                  <span className="text-nat-muted"> ({line.reader})</span>
+                )}
+                : {line.text}
+              </li>
+            );
+          })}
+          {cursor !== null && cursor >= lines.length && entry.live && (
+            <li className="text-nat-muted flex items-center gap-2 text-[15px] italic">
+              {dots}
+              Writing the next line…
+            </li>
           )}
-        </p>
+        </ol>
       )}
-      {entry.turn &&
+      {finished &&
+        entry.turn &&
         (entry.turn.hpChanges.length > 0 ||
           entry.turn.itemsGained.length > 0) && (
           <ul className="mt-2.5 flex flex-wrap gap-1.5">
@@ -864,12 +979,17 @@ function PlayerCard({ entry }: { entry: Extract<Entry, { kind: "player" }> }) {
 
 function ActionPanel({
   hero,
+  heroes,
+  reading,
   choices,
   waiting,
   onPick,
   onCustom,
 }: {
   hero: Hero | null;
+  heroes: Hero[];
+  /** Set while the party is reading the script aloud. */
+  reading: { waiting: boolean; label: string; onNext: () => void } | null;
   choices: Choice[];
   waiting: boolean;
   onPick: (choice: Choice) => void;
@@ -881,13 +1001,24 @@ function ActionPanel({
 
   return (
     <div className="bg-nat-bg/95 border-nat-line sticky bottom-0 z-20 border-t-2 px-5 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur">
-      {waiting ? (
+      {reading && !reading.waiting ? (
+        <button
+          type="button"
+          className={`${goldBtn} h-14 gap-1.5`}
+          onClick={reading.onNext}
+        >
+          {reading.label}
+          <Icon d="M9 5l7 7-7 7" size={18} />
+        </button>
+      ) : waiting || reading ? (
         <p
           className="text-nat-muted flex h-12 items-center justify-center gap-2 text-[15px] font-semibold"
           role="status"
         >
           <D20 className="text-nat-gold h-5 w-5 animate-spin [animation-duration:2.5s]" />
-          The game master is telling the story…
+          {heroes.length > 1
+            ? "The game master is writing your script…"
+            : "The game master is writing…"}
         </p>
       ) : (
         <>
@@ -1151,15 +1282,15 @@ const STEPS: { title: string; body: string }[] = [
   },
   {
     title: "Pick a quest",
-    body: "Anything you like, from “steal the moon” to “find the king's lost sock”. Claude is your game master.",
+    body: "Anything you like, from “steal the moon” to “find the king's lost sock”. Claude writes the story.",
   },
   {
-    title: "Take turns",
-    body: "On your turn, pick a choice or type anything you want to do. Pass the phone to the next hero.",
+    title: "Read the script aloud",
+    body: "Each scene is a script. The phone shows one line at a time and who reads it, with a hint like “whispering”. Ham it up, then tap Next line.",
   },
   {
-    title: "Roll the dice",
-    body: "Risky moves need a d20 roll. Beat the number to succeed. Your class adds +3 to its stat. A natural 20 is legendary; a natural 1 is a disaster.",
+    title: "Take your turn",
+    body: "When the scene ends, pick a choice or type anything you want to do. Risky moves need a d20 roll: beat the number to succeed. Your class adds +3 to its stat.",
   },
 ];
 

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" font-family="Impact, 'Arial Narrow Bold', 'Arial Black', sans-serif">
+  <rect width="800" height="380" fill="#fafaf5"/>
+  <g transform="rotate(-4 220 190)">
+    <rect x="80" y="70" width="280" height="240" rx="18" fill="#c8f169" stroke="#141414" stroke-width="6"/>
+    <circle cx="220" cy="196" r="52" fill="#ffd84d" stroke="#141414" stroke-width="5"/>
+    <path d="M196 182q8-10 16 0M228 182q8-10 16 0" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/>
+    <path d="M190 204h60q-3 28-30 28t-30-28z" fill="#141414"/>
+    <text x="220" y="118" text-anchor="middle" font-size="34" fill="#fff" stroke="#000" stroke-width="5" paint-order="stroke">WHEN THE APP</text>
+    <text x="220" y="292" text-anchor="middle" font-size="34" fill="#fff" stroke="#000" stroke-width="5" paint-order="stroke">WRITES THE JOKE</text>
+  </g>
+  <text x="430" y="200" font-size="80" fill="#141414" transform="rotate(-2 430 200)">MEME <tspan fill="#ff3d7f">THIS!</tspan></text>
+  <text x="434" y="244" font-family="ui-sans-serif, system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="22" font-weight="500" fill="#5c5c57">Snap a photo. Claude writes the joke.</text>
+</svg>

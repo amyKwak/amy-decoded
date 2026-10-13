@@ -8,6 +8,8 @@ import {
   describeRoll,
   gmMessages,
   nextHero,
+  parseScript,
+  parseScriptLine,
   rollCheck,
   type Hero,
 } from "../game";
@@ -152,6 +154,52 @@ describe("cleaning", () => {
     ).toEqual([
       { role: "gm", text: "Hi" },
       { role: "player", text: "Go" },
+    ]);
+  });
+});
+
+describe("script", () => {
+  const names = ["Mira", "Bo"];
+
+  it("reads who reads, who speaks, how, and what", () => {
+    expect(
+      parseScriptLine(
+        "bo | Grumpy Owl | (grumpy) | Who goes there?",
+        names,
+        "Mira",
+      ),
+    ).toEqual({
+      reader: "Bo",
+      speaker: "Grumpy Owl",
+      direction: "grumpy",
+      text: "Who goes there?",
+    });
+  });
+
+  it("gives lines with an unknown reader, or no format, to someone in the party", () => {
+    expect(
+      parseScriptLine("Zed | Narrator | | The door creaks.", names, "Mira")
+        ?.reader,
+    ).toBe("Mira");
+    expect(parseScriptLine("Just some prose.", names, "Bo")).toEqual({
+      reader: "Bo",
+      speaker: "Narrator",
+      direction: "",
+      text: "Just some prose.",
+    });
+    expect(parseScriptLine("   ", names, "Bo")).toBeNull();
+    expect(parseScriptLine("Bo | Owl | grumpy |  ", names, "Bo")).toBeNull();
+  });
+
+  it("holds back a line that's still streaming in", () => {
+    const text =
+      "Mira | Narrator | spooky | The candles flicker.\nBo | Owl | | Who go";
+    expect(parseScript(text, names, false).map((l) => l.text)).toEqual([
+      "The candles flicker.",
+    ]);
+    expect(parseScript(text, names, true).map((l) => l.text)).toEqual([
+      "The candles flicker.",
+      "Who go",
     ]);
   });
 });

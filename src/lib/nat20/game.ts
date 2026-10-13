@@ -107,21 +107,92 @@ export function applyTurn(heroes: Hero[], turn: GmTurn): Hero[] {
 
 // ---- What the game master is told ----
 
-export const GM_SYSTEM = `You are the game master of Nat 20, a lighthearted fantasy tabletop adventure, like a cozy game of Dungeons & Dragons played on one phone. You narrate the world, play every character the heroes meet, and keep the story moving.
+export const GM_SYSTEM = `You are the game master of Nat 20, a lighthearted fantasy tabletop adventure, like a cozy game of Dungeons & Dragons played on one phone. You write the story, but the players perform it: each turn you write a short script that the friends read aloud to each other, like a table read of a play.
 
-How to narrate:
-- Write 60 to 110 words of vivid, fun narration per turn, in second person to the party. Spoken prose only: no headings, lists, markdown, or game numbers in the story.
+How to write the script:
+- Write 4 to 8 lines. Put each line on its own line, in exactly this format:
+  Reader | Speaker | direction | Words to read aloud
+  - Reader: the name of the player who reads this line. Use only the party's hero names.
+  - Speaker: who is talking: Narrator, a character the heroes meet (like Grumpy Owl), or a hero by name.
+  - direction: a 1 to 3 word hint for how to read it (like whispering, booming, nervous), or leave it empty.
+  - Words: what they say, 8 to 30 words, written to be fun to say out loud.
+  For example:
+  Mira | Narrator | spooky | The candles flicker as the door creaks open on its own.
+  Bo | Grumpy Owl | grumpy | Who goes there? Nobody gets past me without the password.
+- Share the reading around: rotate the Narrator between players, and give the characters' voices to players other than the hero whose turn is next, so everyone gets to perform. A hero's own lines are read by that hero's player. If there's one player, they read everything.
+- No other text: no headings, markdown, blank commentary, or game numbers.
 - React to what the hero just did. If they rolled, the roll decides how it went: success means it works (a natural 20 is spectacular), failure means a fun complication (a natural 1 is a hilarious disaster). Never ignore a roll.
 - Keep it family friendly: danger and peril, but no gore. Humor is welcome.
-- End by turning to the hero whose turn is next, by name, and asking what they do.
+- End with a Narrator line that turns to the hero whose turn is next, by name, and asks what they do.
 
 After narrating, always call the set_scene tool exactly once:
 - choices: 2 or 3 short, distinct actions (under 8 words each) for the next hero. Give risky actions a stat check (STR for force, DEX for agility or stealth, INT for magic or knowledge, CHA for talking) and a difficulty from 8 (easy) to 18 (very hard); safe actions use stat "none" and dc 0. Offer at least one choice that suits the next hero's class.
 - hp_changes: damage (negative) or healing (positive) from this turn, usually 1 to 4. Heroes have 10 HP.
 - items_gained: anything a hero picked up this turn.
-- ending: "none" while the quest continues. Build to a finale around turn ${QUEST_TURNS}, then end with "victory" or, if the party truly failed, "defeat". When you end the quest, write a satisfying final scene instead of asking what they do, and give no choices.
+- ending: "none" while the quest continues. Build to a finale around turn ${QUEST_TURNS}, then end with "victory" or, if the party truly failed, "defeat". When you end the quest, write a satisfying final scene (still as a script) instead of asking what they do, and give no choices.
 
 If the quest asks for something hateful, sexual, or about real private people, steer the story to a safe, fun version instead.`;
+
+// ---- The script ----
+
+export type ScriptLine = {
+  /** The hero whose player reads this line aloud. */
+  reader: string;
+  /** Who is talking in the story: Narrator, a character, or a hero. */
+  speaker: string;
+  /** How to read it, like "whispering". Empty when there's no hint. */
+  direction: string;
+  text: string;
+};
+
+/**
+ * Parses one script line, "Reader | Speaker | direction | Words". A reader
+ * who isn't in the party falls back to `fallback`, so every line has someone
+ * to read it. Lines without the pipes are read by the fallback as narration.
+ */
+export function parseScriptLine(
+  raw: string,
+  heroNames: string[],
+  fallback: string,
+): ScriptLine | null {
+  const line = raw.trim().replace(/^[-*]\s+/, "");
+  if (!line) return null;
+  const parts = line.split("|").map((p) => p.trim());
+  const match = (name: string) =>
+    heroNames.find((h) => h.toLowerCase() === name.toLowerCase());
+  if (parts.length < 4) {
+    return { reader: fallback, speaker: "Narrator", direction: "", text: line };
+  }
+  const [reader, speaker, direction, ...words] = parts;
+  const text = words.join(" | ").trim();
+  if (!text) return null;
+  return {
+    reader: match(reader) ?? fallback,
+    speaker: speaker || "Narrator",
+    direction: direction.replace(/^\(|\)$/g, "").slice(0, 30),
+    text,
+  };
+}
+
+/**
+ * Splits a game master turn into script lines. While the text is still
+ * streaming, the last line may be cut off; `complete` says whether to keep it.
+ */
+export function parseScript(
+  text: string,
+  heroNames: string[],
+  complete: boolean,
+): ScriptLine[] {
+  const rows = text.split("\n");
+  if (!complete) rows.pop();
+  const lines: ScriptLine[] = [];
+  for (const row of rows) {
+    const fallback = heroNames[lines.length % Math.max(1, heroNames.length)];
+    const line = parseScriptLine(row, heroNames, fallback ?? "Narrator");
+    if (line) lines.push(line);
+  }
+  return lines;
+}
 
 export const SET_SCENE_TOOL = {
   name: "set_scene",
