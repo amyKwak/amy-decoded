@@ -1,5 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" font-family="Impact, 'Arial Narrow Bold', 'Arial Black', sans-serif">
   <rect width="800" height="380" fill="#fafaf5"/>
+  <!-- Everything below is shifted so the design sits centered in the card. -->
+  <g transform="translate(45 0)">
   <g transform="rotate(-4 220 190)">
     <rect x="80" y="70" width="280" height="240" rx="18" fill="#c8f169" stroke="#141414" stroke-width="6"/>
     <circle cx="220" cy="196" r="52" fill="#ffd84d" stroke="#141414" stroke-width="5"/>
@@ -8,6 +10,11 @@
     <text x="220" y="118" text-anchor="middle" font-size="34" fill="#fff" stroke="#000" stroke-width="5" paint-order="stroke">WHEN THE APP</text>
     <text x="220" y="292" text-anchor="middle" font-size="34" fill="#fff" stroke="#000" stroke-width="5" paint-order="stroke">WRITES THE JOKE</text>
   </g>
-  <text x="430" y="200" font-size="80" fill="#141414" transform="rotate(-2 430 200)">MEME <tspan fill="#ff3d7f">THIS!</tspan></text>
-  <text x="434" y="244" font-family="ui-sans-serif, system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="22" font-weight="500" fill="#5c5c57">Snap a photo. Claude writes the joke.</text>
+  <!-- Stacked so it stays clear of the right edge, even in wider fallback fonts. -->
+  <g transform="rotate(-3 520 200)">
+    <text x="420" y="178" font-size="82" fill="#141414">MEME</text>
+    <text x="420" y="258" font-size="82" fill="#ff3d7f">THIS!</text>
+  </g>
+  <text x="424" y="302" font-family="ui-sans-serif, system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="22" font-weight="500" fill="#5c5c57">Claude writes the joke.</text>
+  </g>
 </svg>
