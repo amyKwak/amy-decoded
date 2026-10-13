@@ -191,6 +191,37 @@ a {
   }
 }
 
+/* Nat 20 teleprompter: words light up as they are read, a bar fills while the
+   line is held, and the "Pass the phone" tag shows during the handoff. Named
+   outside the nat- prefix so they keep running under reduced motion: they are
+   the reading clock, and only fade or fill. */
+@keyframes tele-word {
+  from {
+    opacity: 0.32;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes tele-line {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes tele-handoff {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes noggin-fade {
   from {
     opacity: 0;

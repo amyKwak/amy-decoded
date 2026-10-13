@@ -10,12 +10,12 @@ const PROJECTS = [
     alt: "Meme This! wordmark beside a photo frame with bold white meme text on top and bottom",
   },
   {
-    name: "Nat 20",
+    name: "The Lucky Goose",
     description:
       "A fantasy adventure for a party on one phone, run by an AI game master. Pick any quest, roll a d20 for risky moves, and watch the story stream in live.",
     url: "/projects/nat20",
     image: "/projects/nat20-card.svg",
-    alt: "Nat 20 wordmark in gold beside a glowing twenty-sided die",
+    alt: "The Lucky Goose wordmark in candle gold beside a glowing twenty-sided die showing 20, with four class-coloured hero discs",
   },
   {
     name: "Clueless",

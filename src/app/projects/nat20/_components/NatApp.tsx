@@ -19,6 +19,7 @@ import {
   type Hero,
   type LogEntry,
   type Roll,
+  type ScriptLine,
   type Stat,
 } from "@/lib/nat20/game";
 import { Button } from "./Button";
@@ -44,6 +45,7 @@ const screen =
   "relative mx-auto flex w-full max-w-130 flex-1 flex-col px-5 pt-5 pb-5 tablet:pt-10";
 
 const PARTY_KEY = "nat20:party";
+const PACE_KEY = "nat20:pace";
 const QUEST_KEY = "nat20:quest";
 
 const CLASS_STYLE: Record<ClassId, { bg: string; text: string; ring: string }> =
@@ -83,6 +85,26 @@ type Entry =
 type Status = "gm" | "choose" | "rolling" | "over" | "error";
 
 const noopSubscribe = () => () => {};
+
+/** Reading-aloud speeds for the teleprompter, in words per second. */
+const PACES = { slow: 1.8, normal: 2.4, fast: 3.1 } as const;
+type Pace = keyof typeof PACES;
+/** A beat to breathe before each line, and longer when the phone changes hands. */
+const LINE_PAUSE_MS = 900;
+const HANDOFF_MS = 1600;
+
+/** How long the teleprompter holds a line: when its words light up, and the total. */
+function lineTiming(text: string, pace: Pace, handoff: boolean) {
+  const words = text.split(/\s+/).filter(Boolean);
+  const perWord = 1000 / PACES[pace];
+  const start = handoff ? HANDOFF_MS : 0;
+  return {
+    words,
+    start,
+    perWord,
+    total: start + words.length * perWord + LINE_PAUSE_MS,
+  };
+}
 
 export function NatApp() {
   const hydrated = useSyncExternalStore(
@@ -446,6 +468,15 @@ function Adventure({
   } | null>(null);
   // Which script line is being read aloud in the newest game master turn.
   const [cursor, setCursor] = useState(0);
+  // The teleprompter moves on by itself; the table can pause or change pace.
+  const [paused, setPaused] = useState(false);
+  const [pace, setPace] = useState<Pace>(() => {
+    try {
+      const saved = localStorage.getItem(PACE_KEY);
+      if (saved && saved in PACES) return saved as Pace;
+    } catch {}
+    return "normal";
+  });
   const abort = useRef<AbortController | null>(null);
 
   const active = nextHero(heroes, turn);
@@ -457,20 +488,23 @@ function Adventure({
     : [];
   // The choices (or the ending) wait until the whole script has been read.
   const doneReading = !latestGm || (!latestGm.live && cursor >= lines.length);
-  const nextLine = lines[cursor + 1];
-  const reading = doneReading
+  const nextLine = () => setCursor((c) => c + 1);
+  const reading: Reading | null = doneReading
     ? null
-    : cursor >= lines.length
-      ? { waiting: true, label: "", onNext: () => {} }
-      : {
-          waiting: false,
-          label: nextLine
-            ? `Next line · ${nextLine.reader} reads`
-            : latestGm?.live
-              ? "Next line"
-              : "Done reading",
-          onNext: () => setCursor((c) => c + 1),
-        };
+    : {
+        // Caught up with the game master, who is still writing.
+        waiting: cursor >= lines.length,
+        paused,
+        pace,
+        onPause: () => setPaused((p) => !p),
+        onSkip: nextLine,
+        onPace: (next) => {
+          setPace(next);
+          try {
+            localStorage.setItem(PACE_KEY, next);
+          } catch {}
+        },
+      };
 
   // The choice panel is taller than the "telling the story" bar, so when it
   // appears, scroll again to keep the end of the story above it.
@@ -501,6 +535,7 @@ function Adventure({
     setError(null);
     setEntries(log);
     setCursor(0);
+    setPaused(false);
     const setLast = (patch: Partial<Extract<Entry, { kind: "gm" }>>) => {
       log = [
         ...log.slice(0, -1),
@@ -633,7 +668,14 @@ function Adventure({
         onLeave={onNewQuest}
       />
 
-      <Story entries={entries} heroes={heroes} cursor={cursor} />
+      <Story
+        entries={entries}
+        heroes={heroes}
+        cursor={cursor}
+        pace={pace}
+        paused={paused}
+        onLineDone={nextLine}
+      />
 
       {status === "error" && error && (
         <div className="px-5 pb-4">
@@ -775,11 +817,17 @@ function Story({
   entries,
   heroes,
   cursor,
+  pace,
+  paused,
+  onLineDone,
 }: {
   entries: Entry[];
   heroes: Hero[];
   /** The line being read in the newest game master turn. */
   cursor: number;
+  pace: Pace;
+  paused: boolean;
+  onLineDone: () => void;
 }) {
   const following = useRef(true);
   const last = entries.at(-1);
@@ -815,6 +863,9 @@ function Story({
             entry={e}
             heroes={heroes}
             cursor={i === entries.length - 1 ? cursor : null}
+            pace={pace}
+            paused={paused}
+            onLineDone={onLineDone}
           />
         ) : (
           <PlayerCard key={i} entry={e} />
@@ -828,11 +879,17 @@ function GmCard({
   entry,
   heroes,
   cursor,
+  pace,
+  paused,
+  onLineDone,
 }: {
   entry: Extract<Entry, { kind: "gm" }>;
   heroes: Hero[];
   /** The line being read aloud, or null for earlier turns (shown in full). */
   cursor: number | null;
+  pace: Pace;
+  paused: boolean;
+  onLineDone: () => void;
 }) {
   const lines = parseScript(
     entry.text,
@@ -876,34 +933,20 @@ function GmCard({
             const current = cursor !== null && i === cursor;
             const style = CLASS_STYLE[clsOf(line.reader)];
             if (current) {
-              // The teleprompter: one big line for one reader.
+              // A new reader gets a beat to take the phone (not in a party of one).
+              const handoff =
+                heroes.length > 1 &&
+                (i === 0 || shown[i - 1].reader !== line.reader);
               return (
-                <li
+                <Teleprompter
                   key={i}
-                  aria-current="true"
-                  className="border-nat-gold animate-[noggin-pop_0.25s_ease-out] rounded-2xl border-2 bg-[#2c2340] px-4 pt-3 pb-4"
-                >
-                  <p className="flex items-center gap-2">
-                    <HeroBadge cls={clsOf(line.reader)} small />
-                    <span
-                      className={`text-[13px] font-extrabold tracking-[0.1em] uppercase ${style.text}`}
-                    >
-                      {line.reader}, read this aloud
-                    </span>
-                  </p>
-                  <p className="text-nat-muted mt-1.5 text-sm">
-                    as{" "}
-                    <span className="text-nat-text font-bold">
-                      {line.speaker}
-                    </span>
-                    {line.direction && (
-                      <span className="italic"> · {line.direction}</span>
-                    )}
-                  </p>
-                  <p className="mt-1 text-[21px] leading-snug font-semibold">
-                    {line.text}
-                  </p>
-                </li>
+                  line={line}
+                  cls={clsOf(line.reader)}
+                  handoff={handoff}
+                  pace={pace}
+                  paused={paused}
+                  onDone={onLineDone}
+                />
               );
             }
             return (
@@ -1012,7 +1055,7 @@ function ActionPanel({
   hero: Hero | null;
   heroes: Hero[];
   /** Set while the party is reading the script aloud. */
-  reading: { waiting: boolean; label: string; onNext: () => void } | null;
+  reading: Reading | null;
   choices: Choice[];
   waiting: boolean;
   onPick: (choice: Choice) => void;
@@ -1025,14 +1068,7 @@ function ActionPanel({
   return (
     <div className="bg-nat-bg/95 border-nat-line sticky bottom-0 z-20 border-t-2 px-5 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur">
       {reading && !reading.waiting ? (
-        <button
-          type="button"
-          className={`${goldBtn} h-14 gap-1.5`}
-          onClick={reading.onNext}
-        >
-          {reading.label}
-          <Icon d="M9 5l7 7-7 7" size={18} />
-        </button>
+        <ReadingControls reading={reading} />
       ) : waiting || reading ? (
         <p
           className="text-nat-muted flex h-12 items-center justify-center gap-2 text-[15px] font-semibold"
@@ -1128,6 +1164,163 @@ function ActionPanel({
           )}
         </>
       )}
+    </div>
+  );
+}
+
+type Reading = {
+  waiting: boolean;
+  paused: boolean;
+  pace: Pace;
+  onPause: () => void;
+  onSkip: () => void;
+  onPace: (pace: Pace) => void;
+};
+
+/**
+ * The line being read aloud. Its words light up at reading pace and a bar
+ * fills underneath; when the bar ends, the story moves to the next line.
+ * One CSS clock drives all three, so pausing holds them together.
+ */
+function Teleprompter({
+  line,
+  cls,
+  handoff,
+  pace,
+  paused,
+  onDone,
+}: {
+  line: ScriptLine;
+  cls: ClassId;
+  handoff: boolean;
+  pace: Pace;
+  paused: boolean;
+  onDone: () => void;
+}) {
+  const style = CLASS_STYLE[cls];
+  const { words, start, perWord, total } = lineTiming(line.text, pace, handoff);
+  const playState = paused ? "paused" : "running";
+
+  return (
+    <li
+      aria-current="true"
+      className="border-nat-gold animate-[noggin-pop_0.25s_ease-out] overflow-hidden rounded-2xl border-2 bg-[#2c2340]"
+    >
+      <div className="px-4 pt-3 pb-4">
+        <p className="flex items-center gap-2">
+          <HeroBadge cls={cls} small />
+          <span
+            className={`text-[13px] font-extrabold tracking-[0.1em] uppercase ${style.text}`}
+          >
+            {line.reader}, read this aloud
+          </span>
+          {handoff && (
+            <span
+              className="bg-nat-gold text-nat-bg ml-auto animate-[tele-handoff_1s_steps(1,end)_both] rounded-full px-2.5 py-0.5 text-xs font-extrabold"
+              style={{
+                animationDuration: `${start}ms`,
+                animationPlayState: playState,
+              }}
+            >
+              Pass the phone
+            </span>
+          )}
+        </p>
+        <p className="text-nat-muted mt-1.5 text-sm">
+          as <span className="text-nat-text font-bold">{line.speaker}</span>
+          {line.direction && (
+            <span className="italic"> · {line.direction}</span>
+          )}
+        </p>
+        <p className="mt-1 text-[23px] leading-[1.4] font-semibold">
+          <span className="sr-only">{line.text}</span>
+          <span aria-hidden="true">
+            {words.map((word, w) => (
+              <span
+                key={w}
+                className="animate-[tele-word_160ms_ease-out_both]"
+                style={{
+                  animationDelay: `${start + w * perWord}ms`,
+                  animationPlayState: playState,
+                }}
+              >
+                {word}{" "}
+              </span>
+            ))}
+          </span>
+        </p>
+      </div>
+      <span
+        aria-hidden="true"
+        className="bg-nat-gold block h-1 origin-left animate-[tele-line_1s_linear_both]"
+        style={{
+          animationDuration: `${total}ms`,
+          animationPlayState: playState,
+        }}
+        onAnimationEnd={(e) => {
+          if (e.animationName === "tele-line") onDone();
+        }}
+      />
+    </li>
+  );
+}
+
+/** Pause, skip and pace for the teleprompter, in thumb reach. */
+function ReadingControls({ reading }: { reading: Reading }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-2">
+        <button
+          type="button"
+          className={`${reading.paused ? goldBtn : ghostBtn} h-14 flex-1 gap-2`}
+          aria-pressed={reading.paused}
+          onClick={reading.onPause}
+        >
+          <Icon
+            d={reading.paused ? "M7 5l12 7-12 7z" : "M8 5v14M16 5v14"}
+            size={18}
+          />
+          {reading.paused ? "Keep reading" : "Pause"}
+        </button>
+        <button
+          type="button"
+          className={`${ghostBtn} h-14 w-auto! gap-1.5 px-4`}
+          onClick={reading.onSkip}
+        >
+          Skip line
+          <Icon d="M6 5l8 7-8 7M18 5v14" size={18} />
+        </button>
+      </div>
+      <fieldset className="flex items-center gap-2">
+        <legend className="sr-only">Reading pace</legend>
+        <span
+          className="text-nat-muted text-[13px] font-extrabold tracking-[0.12em] uppercase"
+          aria-hidden="true"
+        >
+          Pace
+        </span>
+        <div className="grid flex-1 grid-cols-3 gap-1.5">
+          {(Object.keys(PACES) as Pace[]).map((p) => (
+            <label
+              key={p}
+              className={`has-focus-visible:outline-nat-gold flex h-11 cursor-pointer items-center justify-center rounded-xl border-2 text-sm font-bold capitalize has-focus-visible:outline-3 ${
+                reading.pace === p
+                  ? "border-nat-gold bg-nat-panel text-nat-text"
+                  : "border-nat-line text-nat-muted"
+              }`}
+            >
+              <input
+                type="radio"
+                name="nat-pace"
+                className="sr-only"
+                checked={reading.pace === p}
+                onChange={() => reading.onPace(p)}
+              />
+              {p}
+            </label>
+          ))}
+        </div>
+      </fieldset>
     </div>
   );
 }
