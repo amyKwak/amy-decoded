@@ -7,21 +7,21 @@ const EXPERIENCE = [
     title: "Software Engineer",
     company: "KiwiCo",
     highlights: [
-      "Replaced a fragile, one-off landing page setup with a CMS-driven platform, so marketing could launch campaigns on their own without waiting on engineering.",
-      "Built a new subscription signup flow end to end, from the platform APIs to the Next.js landing pages, which grew subscription revenue by 20%.",
-      "Rebuilt the baby subscription line in React. Deluxe plan adoption doubled and average order value went up 25%.",
-      "Reworked site-wide search with a dedicated results page and Mixpanel tracking, raising search-to-click conversion by 15%.",
-      "Ran A/B tests on the homepage and product pages with Optimizely and helped lead launches during our busiest traffic seasons, growing product sales 20%.",
-      "Led a frontend redesign across six core parts of the store, building shared components that brought several subscription lines onto one system for 100K+ monthly users.",
+      "Replaced one-off landing pages with a CMS-driven marketing platform with dynamic routing and internal tooling, so marketing could launch campaigns faster with zero engineering involvement.",
+      "Launched a new subscription acquisition flow end to end, from extending core platform APIs for product-specific purchases to the Next.js landing pages, growing subscription revenue 20%.",
+      "Ran rapid A/B tests on the homepage and product pages with Optimizely and led marketing campaign launches during peak traffic, growing product sales 20%.",
+      "Reworked site-wide search with new interactions and a dedicated results page, and added Mixpanel tracking that raised search-to-click conversion 15%.",
+      "Rewrote the baby subscription line frontend in React, doubling deluxe-plan adoption and lifting average order value 25%.",
+      "Led a frontend architecture redesign across six core e-commerce pages, creating reusable components that brought multiple subscription lines together for 100K+ monthly active users.",
     ],
   },
   {
     range: "May 2022 — Aug 2022",
-    title: "Software Engineering TA",
+    title: "Software Engineer Teaching Assistant",
     company: "Galvanize",
     highlights: [
-      "Mentored 30+ students through a full-time JavaScript bootcamp, from the fundamentals all the way to shipped projects.",
-      "Ran office hours, lectures, and pair programming sessions, and helped students get their full-stack capstone projects across the finish line.",
+      "Mentored 30+ students through a full-time JavaScript software engineering curriculum, guiding them from first principles to shipped projects.",
+      "Led office hours, lectures, and pair programming sessions, supporting capstone projects built on full-stack technologies and relational databases.",
     ],
   },
   {
@@ -29,8 +29,8 @@ const EXPERIENCE = [
     title: "UX Designer",
     company: "Lavelle & Associates",
     highlights: [
-      "Created the firm's first design system in Figma, setting the type, color, and component standards used across their platforms.",
-      "Designed the core pages and inquiry flows, then paired them with SEO, email, and ad improvements that grew the firm's online visibility 5x.",
+      "Designed and implemented the firm's first design system in Figma, establishing typography, color, and component standards across platforms.",
+      "Designed core pages and inquiry flows, improving digital visibility 5x through SEO audits, email campaign optimization, and targeted ads.",
     ],
   },
 ];
@@ -52,18 +52,25 @@ export default function AboutPage() {
       <section className="max-w-280 mx-auto w-full px-6 tablet:px-10 pt-5 tablet:pt-6 pb-2">
         <div className="flex flex-col gap-4 tablet:gap-5 max-w-170 text-[15px] tablet:text-[17px] leading-relaxed tablet:leading-[1.7] text-body">
           <p>
-            I&apos;m a software engineer based in Seattle who cares about the
+            📍 I&apos;m a software engineer based in Seattle who cares about the
             details: frontend architecture, clean code, and interfaces that work
             the way people expect.
           </p>
           <p>
-            I studied at UC San Diego and started out in UX design before
-            moving into engineering through Hack Reactor. After a summer as a
-            teaching assistant, I spent a little over two years at KiwiCo
-            building subscription products end to end, from technical design
-            through production, working closely with product and design teams.
+            🌱 I studied biology at UC San Diego and started out in UX design
+            before moving into engineering through Hack Reactor, where I later
+            came back as a teaching assistant. After that, I spent a little over
+            two years at KiwiCo building subscription products end to end, from
+            technical design through production, working closely with product
+            and design teams.
           </p>
-          <p>Outside of work: video games, golf, cooking, and dancing.</p>
+          <p>
+            🎮{" "}
+            <strong className="font-semibold text-ink">Outside of work:</strong>{" "}
+            golf, cooking, dancing, and video games: Marvel Rivals (top 2%),
+            League of Legends, Valorant, CS:GO, TFT, Overwatch, Mario Kart, and
+            Smash.
+          </p>
         </div>
       </section>
 
