@@ -1109,9 +1109,9 @@ function Playing({
 const CONFETTI = [
   "top-[9%] left-[9%] h-5.5 w-5.5 rotate-20 rounded bg-noggin-sun",
   "top-[15%] right-[10%] h-4.5 w-4.5 rounded-full bg-noggin-tomato",
-  "top-[7%] right-[25%] h-2.5 w-7 -rotate-24 rounded-md bg-[#6d8bff]",
+  "top-[7%] right-[25%] h-2.5 w-7 -rotate-24 rounded-[6px] bg-[#6d8bff]",
   "top-[25%] left-[14%] h-3 w-3 rounded-full bg-[#6d8bff]",
-  "top-[28%] right-[15%] h-2.5 w-6 rotate-34 rounded-md bg-noggin-sun",
+  "top-[28%] right-[15%] h-2.5 w-6 rotate-34 rounded-[6px] bg-noggin-sun",
 ];
 
 function Result({

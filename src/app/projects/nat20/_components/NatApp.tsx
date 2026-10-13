@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   applyTurn,
   bonusFor,
-  CLASS_BONUS,
   CLASSES,
   describeRoll,
   MAX_HEROES,
@@ -22,6 +21,10 @@ import {
   type Roll,
   type Stat,
 } from "@/lib/nat20/game";
+import { Button } from "./Button";
+import { ClassPicker } from "./ClassPicker";
+import { AddHeroSlot, HeroSlot } from "./HeroSlot";
+import { TextField } from "./TextField";
 
 // ---- Shared styles ----
 
@@ -32,7 +35,7 @@ const press =
   "transition-[translate,box-shadow] duration-75 active:translate-y-1 active:shadow-none disabled:cursor-not-allowed disabled:opacity-40 disabled:active:translate-y-0";
 const goldBtn = `inline-flex h-15 w-full shrink-0 items-center justify-center rounded-[16px] bg-nat-gold px-6 text-lg font-extrabold text-nat-bg shadow-[0_5px_0_#a8761c] ${press} ${focusRing}`;
 const ghostBtn = `inline-flex h-13 w-full shrink-0 items-center justify-center rounded-[16px] border-2 border-nat-line bg-nat-panel px-5 text-base font-bold ${press} ${focusRing}`;
-const iconBtn = `flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-nat-line bg-nat-panel ${press} ${focusRing}`;
+const iconBtn = `flex h-(--tap-min) w-(--tap-min) shrink-0 items-center justify-center rounded-(--radius-pill) bg-(--oak-700) text-(--cream) shadow-[inset_0_0_0_2px_var(--edge)] ${press} ${focusRing}`;
 const input =
   "h-13 w-full rounded-[14px] border-2 border-nat-line bg-nat-panel px-4 text-lg font-semibold outline-none placeholder:text-nat-muted/70 focus:border-nat-gold";
 const label =
@@ -96,12 +99,13 @@ function Game() {
   const [party, setParty] = useState<Hero[]>(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(PARTY_KEY) ?? "null");
-      if (Array.isArray(saved) && saved.length) return saved;
+      if (Array.isArray(saved) && saved.length)
+        return (saved as Hero[]).map((h, i) => ({
+          ...h,
+          name: h.name.trim() || `Hero ${i + 1}`,
+        }));
     } catch {}
-    return [
-      { name: "", cls: "warrior", hp: MAX_HP, items: [] },
-      { name: "", cls: "mage", hp: MAX_HP, items: [] },
-    ];
+    return [];
   });
   const [quest, setQuest] = useState(() => {
     try {
@@ -121,10 +125,11 @@ function Game() {
       <PartySetup
         party={party}
         onChange={setParty}
-        onNext={() => {
+        onNext={(seated) => {
           try {
-            localStorage.setItem(PARTY_KEY, JSON.stringify(party));
+            localStorage.setItem(PARTY_KEY, JSON.stringify(seated));
           } catch {}
+          setParty(seated);
           setStep("quest");
         }}
       />
@@ -181,118 +186,136 @@ function PartySetup({
 }: {
   party: Hero[];
   onChange: (party: Hero[]) => void;
-  onNext: () => void;
+  onNext: (party: Hero[]) => void;
 }) {
-  const update = (i: number, patch: Partial<Hero>) =>
-    onChange(party.map((h, j) => (j === i ? { ...h, ...patch } : h)));
+  const [name, setName] = useState("");
+  const [cls, setCls] = useState<ClassId>(() => suggestClass(party));
+  const full = party.length >= MAX_HEROES;
+  const taken = party.some(
+    (h) => h.name.toLowerCase() === name.trim().toLowerCase(),
+  );
+
+  /** Adds the hero being made, and returns the party with them in it. */
+  const add = () => {
+    if (full || taken) return party;
+    const next = [
+      ...party,
+      {
+        name: name.trim() || freeName(party),
+        cls,
+        hp: MAX_HP,
+        items: [],
+      },
+    ];
+    onChange(next);
+    setName("");
+    setCls(suggestClass(next));
+    return next;
+  };
+
+  // A typed name counts: "Pick a quest" seats that hero first.
+  const ready = !taken && (party.length > 0 || name.trim() !== "");
 
   return (
-    <main className={`${screen} pb-4!`}>
-      <div className="tablet:top-10 absolute top-5 right-5">
+    <main className="mx-auto flex w-full max-w-(--screen-max) flex-1 flex-col px-(--space-4) pt-(--space-5) pb-(--space-4)">
+      <div className="flex items-start justify-between gap-(--space-3)">
+        <div>
+          <p className="title-md text-(--candle-500)">The Lucky Goose</p>
+          <h1 className="title-lg mt-(--space-1) text-(--cream)">
+            Gather the party
+          </h1>
+        </div>
         <HelpButton />
       </div>
-      <Header compact />
 
-      <h2 className={`${label} mt-4 mb-2`}>Who&apos;s playing?</h2>
-      <ol className="flex flex-col gap-3">
-        {party.map((hero, i) => (
-          <li
-            key={i}
-            className="group border-nat-line bg-nat-panel/60 focus-within:border-nat-gold/60 rounded-[18px] border-2 p-2.5"
-          >
-            <div className="flex items-center gap-2">
-              <label htmlFor={`nat-hero-${i}`} className="sr-only">
-                Hero {i + 1} name
-              </label>
-              <input
-                id={`nat-hero-${i}`}
-                className={`${input} h-11 text-base`}
-                value={hero.name}
-                maxLength={NAME_MAX}
-                autoComplete="off"
-                placeholder={`Hero ${i + 1} name`}
-                onChange={(e) => update(i, { name: e.target.value })}
-              />
-              {party.length > 1 && (
-                <button
-                  type="button"
-                  className={iconBtn}
-                  aria-label={`Remove ${hero.name || `hero ${i + 1}`}`}
-                  onClick={() => onChange(party.filter((_, j) => j !== i))}
-                >
-                  <Icon d="M6 6l12 12M18 6L6 18" size={16} />
-                </button>
-              )}
-            </div>
-            <fieldset className="mt-2">
-              <legend className="sr-only">
-                {hero.name || `Hero ${i + 1}`}&apos;s class
-              </legend>
-              <div className="grid grid-cols-4 gap-1.5">
-                {(Object.keys(CLASSES) as ClassId[]).map((cls) => {
-                  const picked = hero.cls === cls;
-                  return (
-                    <label
-                      key={cls}
-                      className={`has-focus-visible:outline-nat-gold flex h-12 cursor-pointer flex-col items-center justify-center rounded-xl border-2 text-center transition has-focus-visible:outline-3 ${
-                        picked
-                          ? `${CLASS_STYLE[cls].bg} text-nat-bg border-transparent`
-                          : "border-nat-line text-nat-muted"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name={`nat-class-${i}`}
-                        className="sr-only"
-                        checked={picked}
-                        onChange={() => update(i, { cls })}
-                      />
-                      <ClassIcon cls={cls} className="h-4 w-4" />
-                      <span className="mt-0.5 text-[12px] font-extrabold">
-                        {CLASSES[cls].name}
-                      </span>
-                    </label>
-                  );
-                })}
-              </div>
-              <p className="text-nat-muted mt-1.5 hidden pl-1 text-[13px] group-focus-within:block">
-                {CLASSES[hero.cls].blurb} +{CLASS_BONUS} to{" "}
-                {CLASSES[hero.cls].stat} rolls.
-              </p>
-            </fieldset>
-          </li>
-        ))}
-      </ol>
-
-      {party.length < MAX_HEROES && (
-        <button
-          type="button"
-          className={`${ghostBtn} mt-2.5 h-11 border-dashed!`}
-          onClick={() =>
-            onChange([
-              ...party,
-              {
-                name: "",
-                cls: (["rogue", "bard", "warrior", "mage"] as ClassId[])[
-                  party.length % 4
-                ],
-                hp: MAX_HP,
-                items: [],
-              },
-            ])
-          }
+      {party.length > 0 && (
+        <ul
+          className="mt-(--space-5) flex flex-col gap-(--space-3)"
+          aria-label="Your party"
         >
-          + Add a hero
-        </button>
+          {party.map((hero, i) => (
+            <li key={i}>
+              <HeroSlot
+                name={hero.name}
+                cls={hero.cls}
+                onRemove={() => {
+                  const next = party.filter((_, j) => j !== i);
+                  onChange(next);
+                  if (!name.trim()) setCls(suggestClass(next));
+                }}
+              />
+            </li>
+          ))}
+        </ul>
       )}
 
-      <div className="mt-auto pt-2">
-        <button type="button" className={goldBtn} onClick={onNext}>
-          Choose a quest
-        </button>
+      {!full && (
+        <form
+          className="mt-(--space-5) flex flex-col gap-(--space-3)"
+          onSubmit={(e) => {
+            e.preventDefault();
+            add();
+          }}
+        >
+          <TextField
+            id="nat-hero-name"
+            label={
+              party.length ? "Who else is joining?" : "What's your hero called?"
+            }
+            placeholder={PLACEHOLDER_NAMES[party.length % 4]}
+            value={name}
+            maxLength={NAME_MAX}
+            enterKeyHint="done"
+            hint={
+              taken ? "Someone already has that name. Try another." : undefined
+            }
+            onChange={setName}
+          />
+          <ClassPicker
+            value={cls}
+            onChange={setCls}
+            showBlurb={party.length === 0}
+            label={`${name.trim() || "Your hero"}'s class`}
+          />
+          <AddHeroSlot count={party.length} max={MAX_HEROES} onAdd={add} />
+        </form>
+      )}
+
+      <div className="mt-auto pt-(--space-5)">
+        <Button
+          size="lg"
+          block
+          disabled={!ready}
+          onClick={() => onNext(name.trim() ? add() : party)}
+        >
+          {ready ? "Pick a quest" : "Add a hero to start"}
+        </Button>
       </div>
     </main>
   );
+}
+
+const PLACEHOLDER_NAMES = [
+  "Mira the Loud",
+  "Grub",
+  "Pip Quickfingers",
+  "Old Bramble",
+];
+
+/** The class nobody has picked yet, so a new party spreads out. */
+function suggestClass(party: Hero[]): ClassId {
+  const order: ClassId[] = ["warrior", "mage", "rogue", "bard"];
+  return (
+    order.find((c) => !party.some((h) => h.cls === c)) ??
+    order[party.length % 4]
+  );
+}
+
+/** "Hero 2" for a nameless hero, skipping names already at the table. */
+function freeName(party: Hero[]): string {
+  for (let n = party.length + 1; ; n++) {
+    if (!party.some((h) => h.name === `Hero ${n}`)) return `Hero ${n}`;
+  }
 }
 
 function QuestSetup({

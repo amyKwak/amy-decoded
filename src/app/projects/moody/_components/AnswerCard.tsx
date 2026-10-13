@@ -231,7 +231,7 @@ export function AnswerCard({
         {lookups.length > 0 && (
           <details className="group text-sm">
             <summary
-              className={`text-moody-muted hover:text-moody-ink cursor-pointer list-none rounded-md font-bold ${focusRing}`}
+              className={`text-moody-muted hover:text-moody-ink cursor-pointer list-none rounded-[6px] font-bold ${focusRing}`}
             >
               <span
                 aria-hidden="true"

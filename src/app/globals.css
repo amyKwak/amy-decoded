@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* The Lucky Goose (/projects/nat20) design tokens and type classes. */
+@import "../../design-system/tokens.css";
 
 @theme {
   --color-ink: #26232b;

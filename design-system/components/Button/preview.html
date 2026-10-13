@@ -1,0 +1,23 @@
+<!-- @dsCard group="Actions" height=230 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Button</title>
+<style>html,body{margin:0;background:var(--oak-900);} .wrap{max-width:var(--screen-max);padding:var(--space-4);box-sizing:border-box;display:flex;flex-direction:column;gap:var(--space-3);font-family:var(--font-ui);color:var(--cream);}</style>
+</head>
+<body>
+<div id="root" class="wrap"></div>
+<script>
+var T = window.LuckyGoose, h = React.createElement;
+var Demo = function () {
+  return h(React.Fragment, null,
+    h(T.Button, { variant: 'primary', size: 'lg', block: true }, 'Roll for it'),
+    h('div', { className: 'rt-row' },
+      h(T.Button, { variant: 'secondary' }, 'Type my own'),
+      h(T.Button, { variant: 'danger' }, 'Leave quest'),
+      h(T.Button, { variant: 'ghost' }, 'Skip')),
+    h(T.Button, { variant: 'primary', disabled: true, block: true }, 'Add a hero to start'));
+};
+ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>
+</body>
+</html>

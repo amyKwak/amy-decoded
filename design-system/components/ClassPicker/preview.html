@@ -1,0 +1,18 @@
+<!-- @dsCard group="Party setup" height=260 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>ClassPicker</title>
+<style>html,body{margin:0;background:var(--oak-900);} .wrap{max-width:var(--screen-max);padding:var(--space-4);box-sizing:border-box;display:flex;flex-direction:column;gap:var(--space-3);font-family:var(--font-ui);color:var(--cream);}</style>
+</head>
+<body>
+<div id="root" class="wrap"></div>
+<script>
+var T = window.LuckyGoose, h = React.createElement;
+var Demo = function () {
+  var s = React.useState('bard');
+  return h(T.ClassPicker, { value: s[0], onChange: s[1], showBlurb: true });
+};
+ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>
+</body>
+</html>
