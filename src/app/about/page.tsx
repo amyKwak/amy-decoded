@@ -7,11 +7,30 @@ const EXPERIENCE = [
     title: "Software Engineer",
     company: "KiwiCo",
     highlights: [
-      "Owned end-to-end architecture for a new subscription acquisition flow and Next.js landing pages, increasing subscription revenue 20%.",
-      "Revamped the baby subscription line with 18 new product pages, driving a 2x increase in deluxe plan adoption and a 25% lift in average order value.",
-      "Led a frontend architecture redesign across six core surfaces for 100K+ monthly users.",
-      "Reworked site-wide search for a 15% lift in search-to-click conversion.",
-      "Ran rapid A/B testing with Optimizely for a 15% conversion uplift.",
+      "Replaced a fragile, one-off landing page setup with a CMS-driven platform, so marketing could launch campaigns on their own without waiting on engineering.",
+      "Built a new subscription signup flow end to end, from the platform APIs to the Next.js landing pages, which grew subscription revenue by 20%.",
+      "Rebuilt the baby subscription line in React. Deluxe plan adoption doubled and average order value went up 25%.",
+      "Reworked site-wide search with a dedicated results page and Mixpanel tracking, raising search-to-click conversion by 15%.",
+      "Ran A/B tests on the homepage and product pages with Optimizely and helped lead launches during our busiest traffic seasons, growing product sales 20%.",
+      "Led a frontend redesign across six core parts of the store, building shared components that brought several subscription lines onto one system for 100K+ monthly users.",
+    ],
+  },
+  {
+    range: "May 2022 — Aug 2022",
+    title: "Software Engineering TA",
+    company: "Galvanize",
+    highlights: [
+      "Mentored 30+ students through a full-time JavaScript bootcamp, from the fundamentals all the way to shipped projects.",
+      "Ran office hours, lectures, and pair programming sessions, and helped students get their full-stack capstone projects across the finish line.",
+    ],
+  },
+  {
+    range: "Dec 2020 — Jun 2021",
+    title: "UX Designer",
+    company: "Lavelle & Associates",
+    highlights: [
+      "Created the firm's first design system in Figma, setting the type, color, and component standards used across their platforms.",
+      "Designed the core pages and inquiry flows, then paired them with SEO, email, and ad improvements that grew the firm's online visibility 5x.",
     ],
   },
 ];
@@ -38,10 +57,11 @@ export default function AboutPage() {
             the way people expect.
           </p>
           <p>
-            I studied at UC San Diego and trained at Hack Reactor, then spent
-            the last few years at KiwiCo building subscription products end to
-            end, from technical design through production, working closely with
-            product and design teams.
+            I studied at UC San Diego and started out in UX design before
+            moving into engineering through Hack Reactor. After a summer as a
+            teaching assistant, I spent a little over two years at KiwiCo
+            building subscription products end to end, from technical design
+            through production, working closely with product and design teams.
           </p>
           <p>Outside of work: video games, golf, cooking, and dancing.</p>
         </div>
@@ -54,7 +74,7 @@ export default function AboutPage() {
         <div className="flex flex-col">
           {EXPERIENCE.map((role) => (
             <div
-              key={role.title}
+              key={role.company}
               className="flex flex-col tablet:flex-row gap-1.5 tablet:gap-6 py-5 border-t border-border-soft"
             >
               <div className="w-full tablet:w-37.5 shrink-0 font-mono text-[13px] text-faint">
