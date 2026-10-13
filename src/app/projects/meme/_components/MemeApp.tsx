@@ -173,9 +173,11 @@ function Pick({
         </p>
       </div>
 
-      <fieldset className="mt-6">
+      {/* min-w-0: a fieldset otherwise grows to fit its contents. The chips
+          wrap so every vibe is visible without scrolling. */}
+      <fieldset className="mt-6 min-w-0">
         <legend className={`${label} mb-2`}>Pick a vibe</legend>
-        <div className="-mx-5 flex [scrollbar-width:none] gap-2 overflow-x-auto px-5 py-0.5">
+        <div className="flex flex-wrap gap-2">
           {VIBES.map((v) => (
             <label
               key={v}
@@ -306,7 +308,8 @@ function Edit({
     const file = new File([blob], "meme.jpg", { type: "image/jpeg" });
     try {
       if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: "Meme This!" });
+        // Just the image: no title or text, so it shares like a photo.
+        await navigator.share({ files: [file] });
         return;
       }
     } catch (err) {
