@@ -26,6 +26,7 @@ import { Button } from "./Button";
 import { ClassPicker } from "./ClassPicker";
 import { AddHeroSlot, HeroSlot } from "./HeroSlot";
 import { TextField } from "./TextField";
+import { CLASS_BLURB } from "./ui";
 
 // ---- Shared styles ----
 
@@ -210,111 +211,154 @@ function PartySetup({
   onChange: (party: Hero[]) => void;
   onNext: (party: Hero[]) => void;
 }) {
+  // The name field and class picker show only while a hero is being added,
+  // so the whole screen fits on a phone.
+  const [adding, setAdding] = useState(party.length === 0);
   const [name, setName] = useState("");
   const [cls, setCls] = useState<ClassId>(() => suggestClass(party));
   const full = party.length >= MAX_HEROES;
+  const composing = adding && !full;
   const taken = party.some(
     (h) => h.name.toLowerCase() === name.trim().toLowerCase(),
   );
 
-  /** Adds the hero being made, and returns the party with them in it. */
   const add = () => {
-    if (full || taken) return party;
+    if (full || taken) return;
     const next = [
       ...party,
-      {
-        name: name.trim() || freeName(party),
-        cls,
-        hp: MAX_HP,
-        items: [],
-      },
+      { name: name.trim() || freeName(party), cls, hp: MAX_HP, items: [] },
     ];
     onChange(next);
     setName("");
     setCls(suggestClass(next));
-    return next;
+    setAdding(false);
   };
 
-  // A typed name counts: "Pick a quest" seats that hero first.
-  const ready = !taken && (party.length > 0 || name.trim() !== "");
-
   return (
-    <main className="mx-auto flex w-full max-w-(--screen-max) flex-1 flex-col px-(--space-4) pt-(--space-5) pb-(--space-4)">
-      <div className="flex items-start justify-between gap-(--space-3)">
-        <div>
-          <p className="title-md text-(--candle-500)">The Lucky Goose</p>
-          <h1 className="title-lg mt-(--space-1) text-(--cream)">
-            Gather the party
-          </h1>
+    <main className="mx-auto flex w-full max-w-(--screen-max) flex-1 flex-col">
+      <div className="flex flex-1 flex-col gap-(--space-3) px-(--space-4) pt-(--space-3) pb-(--space-4)">
+        <div className="flex items-center justify-between gap-(--space-3)">
+          <h1 className="title-lg text-(--cream)">Gather the party</h1>
+          <HelpButton />
         </div>
-        <HelpButton />
+
+        {composing ? (
+          <form
+            id="nat-new-hero"
+            className="flex flex-col gap-(--space-3)"
+            onSubmit={(e) => {
+              e.preventDefault();
+              add();
+            }}
+          >
+            {party.length > 0 && (
+              <p className="caption text-(--cream-muted)">
+                {listNames(party.map((h) => h.name))}{" "}
+                {party.length === 1 ? "is" : "are"} in.
+              </p>
+            )}
+            <TextField
+              id="nat-hero-name"
+              label={
+                party.length
+                  ? "Who else is joining?"
+                  : "What's your hero called?"
+              }
+              placeholder={PLACEHOLDER_NAMES[party.length % 4]}
+              value={name}
+              maxLength={NAME_MAX}
+              enterKeyHint="done"
+              hint={
+                taken
+                  ? "Someone already has that name. Try another."
+                  : undefined
+              }
+              onChange={setName}
+            />
+            <div className="flex flex-col gap-(--space-2)">
+              <ClassPicker
+                value={cls}
+                onChange={setCls}
+                label={`${name.trim() || "Your hero"}'s class`}
+              />
+              <p className="caption text-(--cream-muted)" aria-live="polite">
+                {CLASSES[cls].name}: {CLASS_BLURB[cls].toLowerCase()}.
+              </p>
+            </div>
+          </form>
+        ) : (
+          <>
+            <ul
+              className="flex flex-col gap-(--space-3)"
+              aria-label="Your party"
+            >
+              {party.map((hero, i) => (
+                <li key={i}>
+                  <HeroSlot
+                    name={hero.name}
+                    cls={hero.cls}
+                    onRemove={() => {
+                      const next = party.filter((_, j) => j !== i);
+                      onChange(next);
+                      setCls(suggestClass(next));
+                      if (!next.length) setAdding(true);
+                    }}
+                  />
+                </li>
+              ))}
+            </ul>
+            {!full && (
+              <AddHeroSlot
+                count={party.length}
+                max={MAX_HEROES}
+                onAdd={() => setAdding(true)}
+              />
+            )}
+          </>
+        )}
       </div>
 
-      {party.length > 0 && (
-        <ul
-          className="mt-(--space-5) flex flex-col gap-(--space-3)"
-          aria-label="Your party"
-        >
-          {party.map((hero, i) => (
-            <li key={i}>
-              <HeroSlot
-                name={hero.name}
-                cls={hero.cls}
-                onRemove={() => {
-                  const next = party.filter((_, j) => j !== i);
-                  onChange(next);
-                  if (!name.trim()) setCls(suggestClass(next));
+      {/* Pinned to the bottom, in thumb reach, whatever the screen height. */}
+      <div className="sticky bottom-0 z-10 flex gap-(--space-3) bg-(--oak-900) px-(--space-4) pt-(--space-3) pb-[max(var(--space-4),env(safe-area-inset-bottom))]">
+        {composing ? (
+          <>
+            {party.length > 0 && (
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={() => {
+                  setAdding(false);
+                  setName("");
                 }}
-              />
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {!full && (
-        <form
-          className="mt-(--space-5) flex flex-col gap-(--space-3)"
-          onSubmit={(e) => {
-            e.preventDefault();
-            add();
-          }}
-        >
-          <TextField
-            id="nat-hero-name"
-            label={
-              party.length ? "Who else is joining?" : "What's your hero called?"
-            }
-            placeholder={PLACEHOLDER_NAMES[party.length % 4]}
-            value={name}
-            maxLength={NAME_MAX}
-            enterKeyHint="done"
-            hint={
-              taken ? "Someone already has that name. Try another." : undefined
-            }
-            onChange={setName}
-          />
-          <ClassPicker
-            value={cls}
-            onChange={setCls}
-            showBlurb={party.length === 0}
-            label={`${name.trim() || "Your hero"}'s class`}
-          />
-          <AddHeroSlot count={party.length} max={MAX_HEROES} onAdd={add} />
-        </form>
-      )}
-
-      <div className="mt-auto pt-(--space-5)">
-        <Button
-          size="lg"
-          block
-          disabled={!ready}
-          onClick={() => onNext(name.trim() ? add() : party)}
-        >
-          {ready ? "Pick a quest" : "Add a hero to start"}
-        </Button>
+              >
+                Cancel
+              </Button>
+            )}
+            <Button
+              type="submit"
+              form="nat-new-hero"
+              size="lg"
+              className="flex-1"
+              disabled={taken}
+            >
+              Add to the party
+            </Button>
+          </>
+        ) : (
+          <Button size="lg" block onClick={() => onNext(party)}>
+            Pick a quest
+          </Button>
+        )}
       </div>
     </main>
   );
+}
+
+/** "Mira", "Mira and Grub", "Mira, Grub and Pip". */
+function listNames(names: string[]): string {
+  return names.length < 2
+    ? (names[0] ?? "")
+    : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
 }
 
 const PLACEHOLDER_NAMES = [
@@ -354,7 +398,7 @@ function QuestSetup({
   onBegin: () => void;
 }) {
   return (
-    <main className={screen}>
+    <main className={`${screen} pb-0!`}>
       <div className="flex items-center justify-between">
         <button
           type="button"
@@ -425,13 +469,12 @@ function QuestSetup({
             </button>
           ))}
         </div>
-        <button
-          type="submit"
-          className={`${goldBtn} mt-5`}
-          disabled={!quest.trim()}
-        >
-          {quest.trim() ? "Begin the adventure" : "Pick a quest to begin"}
-        </button>
+        {/* Pinned to the bottom so it stays on screen on short phones. */}
+        <div className="bg-nat-bg sticky bottom-0 z-10 -mx-5 mt-2 px-5 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+          <button type="submit" className={goldBtn} disabled={!quest.trim()}>
+            {quest.trim() ? "Begin the adventure" : "Pick a quest to begin"}
+          </button>
+        </div>
       </form>
     </main>
   );
