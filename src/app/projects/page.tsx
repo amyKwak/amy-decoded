@@ -15,7 +15,7 @@ const PROJECTS = [
       "A fantasy adventure for a party on one phone, run by an AI game master. Pick any quest, roll a d20 for risky moves, and watch the story stream in live.",
     url: "/projects/nat20",
     image: "/projects/nat20-card.svg",
-    alt: "The Lucky Goose wordmark in candle gold beside a glowing twenty-sided die showing 20, with four class-coloured hero discs",
+    alt: "The Lucky Goose wordmark beside a candlelit twenty-sided die showing 20",
   },
   {
     name: "Clueless",
