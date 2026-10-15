@@ -1,5 +1,16 @@
 import type { DataConnection, Peer } from "peerjs";
-import type { Choice, GmTurn, Hero, Roll, Stat } from "./game";
+import {
+  CLASSES,
+  MAX_HEROES,
+  MAX_HP,
+  NAME_MAX,
+  type Choice,
+  type ClassId,
+  type GmTurn,
+  type Hero,
+  type Roll,
+  type Stat,
+} from "./game";
 
 /**
  * More phones at the table, talking directly over WebRTC (PeerJS), so there's
@@ -63,7 +74,9 @@ export type Act =
   | { kind: "retry" };
 
 type ToHost =
-  { type: "claim"; hero: string | null } | { type: "act"; act: Act };
+  | { type: "claim"; hero: string | null }
+  | { type: "add"; name: string; cls: ClassId }
+  | { type: "act"; act: Act };
 type ToGuest = { type: "table"; table: Table };
 
 export type RoomSnapshot = {
@@ -112,6 +125,32 @@ export function pruneClaims(
   );
 }
 
+/**
+ * A guest makes their own hero: it joins the party and is theirs. Null when
+ * the party is full, the quest has started, or the name is taken.
+ */
+export function addGuestHero(
+  table: Table,
+  name: string,
+  cls: ClassId,
+  from: string,
+): Table | null {
+  const clean = name.trim().slice(0, NAME_MAX);
+  if (!clean || !(cls in CLASSES) || table.play) return null;
+  if (table.heroes.length >= MAX_HEROES) return null;
+  if (table.heroes.some((h) => h.name.toLowerCase() === clean.toLowerCase()))
+    return null;
+  const claims = Object.fromEntries(
+    Object.entries(table.claims).filter(([, who]) => who !== from),
+  );
+  claims[clean] = from;
+  return {
+    ...table,
+    heroes: [...table.heroes, { name: clean, cls, hp: MAX_HP, items: [] }],
+    claims,
+  };
+}
+
 export class NatRoom {
   private snapshot: RoomSnapshot;
   private listeners = new Set<() => void>();
@@ -123,6 +162,7 @@ export class NatRoom {
   private destroyed = false;
   /** Host only: the adventure handles what guests tap. */
   onAct: ((act: Act, from: string) => void) | null = null;
+  private heroesListener: ((heroes: Hero[]) => void) | null = null;
 
   private constructor(role: "host" | "guest", code: string) {
     this.snapshot = {
@@ -156,6 +196,14 @@ export class NatRoom {
   };
 
   getSnapshot = () => this.snapshot;
+
+  /** Host only: hears when a guest makes a hero, so the party can add it. */
+  listenForHeroes(listener: (heroes: Hero[]) => void) {
+    this.heroesListener = listener;
+    return () => {
+      if (this.heroesListener === listener) this.heroesListener = null;
+    };
+  }
 
   clearNotice() {
     this.set({ notice: null });
@@ -231,6 +279,7 @@ export class NatRoom {
     conn.on("data", (raw) => {
       const msg = raw as ToHost;
       if (msg?.type === "claim") this.claim(id, msg.hero);
+      else if (msg?.type === "add") this.acceptHero(id, msg.name, msg.cls);
       else if (msg?.type === "act" && msg.act) this.onAct?.(msg.act, id);
     });
     conn.on("close", () => {
@@ -248,6 +297,16 @@ export class NatRoom {
       });
       if (theirs.length) this.claim(id, null);
     });
+  }
+
+  private acceptHero(from: string, name: unknown, cls: unknown) {
+    const table = this.snapshot.table;
+    if (!table || typeof name !== "string" || typeof cls !== "string") return;
+    const next = addGuestHero(table, name, cls as ClassId, from);
+    // Resend either way, so a guest whose name was taken sees why.
+    if (!next) return this.scheduleSend();
+    this.update(next);
+    this.heroesListener?.(next.heroes);
   }
 
   /** A guest phone takes a hero (one per phone), or lets go with null. */
@@ -285,6 +344,11 @@ export class NatRoom {
   /** Guest only: plays this hero on this phone (null to pick again). */
   claimHero(hero: string | null) {
     this.toHost({ type: "claim", hero });
+  }
+
+  /** Guest only: makes a new hero for this phone. */
+  addHero(name: string, cls: ClassId) {
+    this.toHost({ type: "add", name, cls });
   }
 
   /** Guest only: sends a tap to the host. */

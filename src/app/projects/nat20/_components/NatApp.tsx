@@ -41,6 +41,7 @@ import {
   type PlayView,
   type RoomSnapshot,
   type Status,
+  type Table,
 } from "@/lib/nat20/room";
 import { Button } from "./Button";
 import { Monogram } from "./ClassBadge";
@@ -166,6 +167,8 @@ function Game() {
 
   useEffect(() => () => room?.destroy(), [room]);
   useEffect(() => () => guestRoom?.destroy(), [guestRoom]);
+  // Friends can make their own heroes from their phones.
+  useEffect(() => room?.listenForHeroes(setParty), [room]);
 
   // Other phones see the party as it changes, and the setup screens while
   // the host is on them.
@@ -217,6 +220,9 @@ function Game() {
         party={party}
         onChange={setParty}
         onJoin={room ? undefined : () => setJoining(true)}
+        room={room}
+        onInvite={() => setRoom(NatRoom.host(named))}
+        onCloseTable={() => setRoom(null)}
         onNext={(seated) => {
           try {
             localStorage.setItem(PARTY_KEY, JSON.stringify(seated));
@@ -263,10 +269,16 @@ function PartySetup({
   party,
   onChange,
   onJoin,
+  room,
+  onInvite,
+  onCloseTable,
   onNext,
 }: {
   party: Hero[];
   onChange: (party: Hero[]) => void;
+  room: NatRoom | null;
+  onInvite: () => void;
+  onCloseTable: () => void;
   /** Joins another phone's game instead (hidden while hosting one). */
   onJoin?: () => void;
   onNext: (party: Hero[]) => void;
@@ -310,6 +322,12 @@ function PartySetup({
             Joining a friend&apos;s game?
           </Button>
         )}
+        <Invite
+          room={room}
+          party={party}
+          onInvite={onInvite}
+          onClose={onCloseTable}
+        />
 
         {composing ? (
           <form
@@ -508,14 +526,12 @@ function QuestSetup({
             master.
           </p>
 
-          {party.length > 1 && (
-            <Invite
-              room={room}
-              party={party}
-              onInvite={onInvite}
-              onClose={onCloseTable}
-            />
-          )}
+          <Invite
+            room={room}
+            party={party}
+            onInvite={onInvite}
+            onClose={onCloseTable}
+          />
 
           <ul className="flex flex-col gap-(--space-3)" aria-label="Quests">
             {QUEST_IDEAS.map((idea) => {
@@ -636,7 +652,7 @@ function Invite({
                 <>
                   <p className="sr-only">{snap.code.split("").join(" ")}</p>
                   <p
-                    className="title-xl tracking-[0.12em] text-(--candle-500)"
+                    className="font-(family-name:--font-ui) text-[40px] leading-[48px] font-extrabold tracking-[0.2em] text-(--candle-500)"
                     aria-hidden="true"
                   >
                     {snap.code}
@@ -649,8 +665,9 @@ function Invite({
             </Button>
           </div>
           <p className="caption text-(--cream-muted)">
-            On each phone, open this page, tap Join a friend&apos;s game and
-            enter the code. Heroes nobody picks stay on this phone.
+            Friends open this page on their phone, tap Joining a friend&apos;s
+            game? and enter the code. They can make their own hero. Heroes
+            nobody picks stay on this phone.
           </p>
           <Button
             variant="secondary"
@@ -833,45 +850,8 @@ function GuestGame({ room, onLeave }: { room: NatRoom; onLeave: () => void }) {
               Waiting for the host to start the quest.
             </p>
           </>
-        ) : table.heroes.length === 0 ? (
-          <p className="body text-(--cream-muted)">
-            The host is still gathering the party. Heroes show up here as they
-            join.
-          </p>
         ) : (
-          <>
-            <p className="caption text-(--cream-muted)">
-              Table {snap.code}. Pick the hero you&apos;re playing.
-            </p>
-            <ul className="flex flex-col gap-(--space-3)" aria-label="Heroes">
-              {table.heroes.map((h) => {
-                const taken = Boolean(table.claims[h.name]);
-                return (
-                  <li key={h.name}>
-                    <button
-                      type="button"
-                      disabled={taken}
-                      className={`${CLASS_VARS[h.cls]} flex min-h-(--tap-min) w-full cursor-pointer items-center gap-(--space-3) rounded-(--radius-md) border-2 border-(--edge) bg-(--oak-800) py-(--space-2) pr-(--space-4) pl-(--space-3) text-left disabled:cursor-not-allowed disabled:opacity-45 ${focusRing}`}
-                      onClick={() => room.claimHero(h.name)}
-                    >
-                      <Monogram cls={h.cls} name={h.name} large />
-                      <span className="flex min-w-0 flex-1 flex-col">
-                        <span className="truncate text-[18px] leading-6 font-extrabold text-(--cream)">
-                          {h.name}
-                        </span>
-                        <span className="tag text-(--cls-bright) uppercase">
-                          {CLASSES[h.cls].name} · {CLASSES[h.cls].stat}
-                        </span>
-                      </span>
-                      <span className="caption text-(--cream-muted)">
-                        {taken ? "Taken" : "That's me"}
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </>
+          <GuestPick room={room} table={table} />
         )}
       </div>
       {me && (
@@ -887,6 +867,105 @@ function GuestGame({ room, onLeave }: { room: NatRoom; onLeave: () => void }) {
         </div>
       )}
     </main>
+  );
+}
+
+/**
+ * A guest makes their own hero (while the host is still setting up), or
+ * picks one the host already made.
+ */
+function GuestPick({ room, table }: { room: NatRoom; table: Table }) {
+  const [name, setName] = useState("");
+  const [cls, setCls] = useState<ClassId>(() => suggestClass(table.heroes));
+  const canMake = !table.play && table.heroes.length < MAX_HEROES;
+  const free = table.heroes.filter((h) => !table.claims[h.name]);
+  const taken = table.heroes.some(
+    (h) => h.name.toLowerCase() === name.trim().toLowerCase(),
+  );
+
+  return (
+    <>
+      {canMake && (
+        <form
+          className="flex flex-col gap-(--space-3)"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (name.trim() && !taken) room.addHero(name.trim(), cls);
+          }}
+        >
+          <TextField
+            id="nat-guest-name"
+            label="What's your hero called?"
+            placeholder={PLACEHOLDER_NAMES[table.heroes.length % 4]}
+            value={name}
+            maxLength={NAME_MAX}
+            enterKeyHint="done"
+            hint={
+              taken ? "Someone already has that name. Try another." : undefined
+            }
+            onChange={setName}
+          />
+          <ClassPicker
+            value={cls}
+            onChange={setCls}
+            label={`${name.trim() || "Your hero"}'s class`}
+          />
+          <p className="caption text-(--cream-muted)" aria-live="polite">
+            {CLASSES[cls].name}: {CLASS_BLURB[cls].toLowerCase()}.
+          </p>
+          <Button
+            type="submit"
+            size="lg"
+            block
+            disabled={!name.trim() || taken}
+          >
+            Join the party
+          </Button>
+        </form>
+      )}
+
+      {free.length > 0 && (
+        <>
+          <p className="caption text-(--cream-muted)">
+            {canMake
+              ? "Or play a hero the host already made:"
+              : "Pick the hero you're playing."}
+          </p>
+          <ul className="flex flex-col gap-(--space-3)" aria-label="Heroes">
+            {free.map((h) => (
+              <li key={h.name}>
+                <button
+                  type="button"
+                  className={`${CLASS_VARS[h.cls]} flex min-h-(--tap-min) w-full cursor-pointer items-center gap-(--space-3) rounded-(--radius-md) border-2 border-(--edge) bg-(--oak-800) py-(--space-2) pr-(--space-4) pl-(--space-3) text-left ${focusRing}`}
+                  onClick={() => room.claimHero(h.name)}
+                >
+                  <Monogram cls={h.cls} name={h.name} large />
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate text-[18px] leading-6 font-extrabold text-(--cream)">
+                      {h.name}
+                    </span>
+                    <span className="tag text-(--cls-bright) uppercase">
+                      {CLASSES[h.cls].name} · {CLASSES[h.cls].stat}
+                    </span>
+                  </span>
+                  <span className="caption text-(--cream-muted)">
+                    That&apos;s me
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {!canMake && free.length === 0 && (
+        <p className="body text-(--cream-muted)">
+          {table.play
+            ? "The quest has started and every hero is taken."
+            : "The party is full."}
+        </p>
+      )}
+    </>
   );
 }
 
