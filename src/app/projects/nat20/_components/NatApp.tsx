@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import {
   applyTurn,
   bonusFor,
@@ -23,6 +30,17 @@ import {
   type ScriptLine,
   type Stat,
 } from "@/lib/nat20/game";
+import {
+  NatRoom,
+  normalizeRoomCode,
+  PACES,
+  type Act,
+  type Entry,
+  type Pace,
+  type PlayView,
+  type RoomSnapshot,
+  type Status,
+} from "@/lib/nat20/room";
 import { Button } from "./Button";
 import { Monogram } from "./ClassBadge";
 import { ClassPicker } from "./ClassPicker";
@@ -46,6 +64,8 @@ const parchment =
 const PARTY_KEY = "nat20:party";
 const PACE_KEY = "nat20:pace";
 const QUEST_KEY = "nat20:quest";
+/** The longest action a player can type. */
+const CUSTOM_MAX = 120;
 
 const QUEST_IDEAS = [
   { title: "Steal the moon", hint: "It's right there. How hard can it be?" },
@@ -67,23 +87,18 @@ const QUEST_IDEAS = [
   },
 ];
 
-/** What the story log shows: the words, plus the extras around them. */
-type Entry =
-  | { kind: "gm"; text: string; live: boolean; turn: GmTurn | null }
-  | {
-      kind: "player";
-      hero: Hero;
-      action: string;
-      roll: (Roll & { stat: Stat }) | null;
-    };
-
-type Status = "gm" | "choose" | "rolling" | "over" | "error";
-
 const noopSubscribe = () => () => {};
+const noSnapshot = () => null;
 
-/** Reading-aloud speeds for the teleprompter, in words per second. */
-const PACES = { slow: 1.8, normal: 2.4, fast: 3.1 } as const;
-type Pace = keyof typeof PACES;
+/** A room's snapshot, or null when this phone plays alone. */
+function useRoom(room: NatRoom | null): RoomSnapshot | null {
+  return useSyncExternalStore(
+    room?.subscribe ?? noopSubscribe,
+    room?.getSnapshot ?? noSnapshot,
+    noSnapshot,
+  );
+}
+
 /** A beat to breathe before each line, and longer when the phone changes hands. */
 const LINE_PAUSE_MS = 900;
 const HANDOFF_MS = 1600;
@@ -111,6 +126,14 @@ export function NatApp() {
   return <Game />;
 }
 
+/** Forgets ?join=CODE, so a reload doesn't rejoin a finished game. */
+function clearJoinLink() {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has("join")) return;
+  url.searchParams.delete("join");
+  window.history.replaceState(null, "", url);
+}
+
 function Game() {
   const [step, setStep] = useState<"party" | "quest" | "play">("party");
   const [party, setParty] = useState<Hero[]>(() => {
@@ -131,17 +154,71 @@ function Game() {
       return "";
     }
   });
+  // An invite link (?join=CODE) lands straight on the join screen.
+  const [joinCode] = useState(() =>
+    normalizeRoomCode(
+      new URLSearchParams(window.location.search).get("join") ?? "",
+    ),
+  );
+  const [joining, setJoining] = useState(joinCode.length === 4);
+  /** Another phone's game that this phone joined. */
+  const [guestRoom, setGuestRoom] = useState<NatRoom | null>(null);
+  /** This phone's table, once the host invites other phones. */
+  const [room, setRoom] = useState<NatRoom | null>(null);
+
+  useEffect(() => () => room?.destroy(), [room]);
+  useEffect(() => () => guestRoom?.destroy(), [guestRoom]);
+
+  // Other phones see the party as it changes, and the setup screens while
+  // the host is on them.
+  useEffect(() => {
+    room?.update({
+      heroes: party.map((h, i) => ({
+        ...h,
+        name: h.name.trim() || `Hero ${i + 1}`,
+      })),
+    });
+  }, [room, party]);
+  useEffect(() => {
+    if (step !== "play") room?.update({ play: null });
+  }, [room, step]);
 
   const named = party.map((h, i) => ({
     ...h,
     name: h.name.trim() || `Hero ${i + 1}`,
   }));
 
+  if (guestRoom) {
+    return (
+      <GuestGame
+        room={guestRoom}
+        onLeave={() => {
+          clearJoinLink();
+          setGuestRoom(null);
+          setJoining(false);
+        }}
+      />
+    );
+  }
+  if (joining) {
+    return (
+      <JoinScreen
+        initialCode={joinCode}
+        onJoin={(code) => setGuestRoom(NatRoom.join(code))}
+        onBack={() => {
+          clearJoinLink();
+          setJoining(false);
+        }}
+      />
+    );
+  }
+
   if (step === "party") {
     return (
       <PartySetup
         party={party}
         onChange={setParty}
+        onJoin={room ? undefined : () => setJoining(true)}
         onNext={(seated) => {
           try {
             localStorage.setItem(PARTY_KEY, JSON.stringify(seated));
@@ -157,6 +234,9 @@ function Game() {
       <QuestSetup
         quest={quest}
         party={named}
+        room={room}
+        onInvite={() => setRoom(NatRoom.host(named))}
+        onCloseTable={() => setRoom(null)}
         onQuest={setQuest}
         onBack={() => setStep("party")}
         onBegin={() => {
@@ -172,6 +252,7 @@ function Game() {
     <Adventure
       quest={quest.trim()}
       startingParty={named.map((h) => ({ ...h, hp: MAX_HP, items: [] }))}
+      room={room}
       onNewQuest={() => setStep("quest")}
       onChangeParty={() => setStep("party")}
     />
@@ -183,10 +264,13 @@ function Game() {
 function PartySetup({
   party,
   onChange,
+  onJoin,
   onNext,
 }: {
   party: Hero[];
   onChange: (party: Hero[]) => void;
+  /** Joins another phone's game instead (hidden while hosting one). */
+  onJoin?: () => void;
   onNext: (party: Hero[]) => void;
 }) {
   // The name field and class picker show only while a hero is being added,
@@ -219,6 +303,15 @@ function PartySetup({
           <h1 className="title-lg text-(--cream)">Gather the party</h1>
           <HelpButton />
         </div>
+        {onJoin && (
+          <Button
+            variant="ghost"
+            className="-mt-(--space-3) self-start px-0"
+            onClick={onJoin}
+          >
+            Joining a friend&apos;s game?
+          </Button>
+        )}
 
         {composing ? (
           <form
@@ -365,12 +458,18 @@ function freeName(party: Hero[]): string {
 function QuestSetup({
   quest,
   party,
+  room,
+  onInvite,
+  onCloseTable,
   onQuest,
   onBack,
   onBegin,
 }: {
   quest: string;
   party: Hero[];
+  room: NatRoom | null;
+  onInvite: () => void;
+  onCloseTable: () => void;
   onQuest: (q: string) => void;
   onBack: () => void;
   onBegin: () => void;
@@ -410,6 +509,15 @@ function QuestSetup({
             {party.length === 1 ? "is" : "are"} ready. Claude is your game
             master.
           </p>
+
+          {party.length > 1 && (
+            <Invite
+              room={room}
+              party={party}
+              onInvite={onInvite}
+              onClose={onCloseTable}
+            />
+          )}
 
           <ul className="flex flex-col gap-(--space-3)" aria-label="Quests">
             {QUEST_IDEAS.map((idea) => {
@@ -459,19 +567,349 @@ function QuestSetup({
   );
 }
 
+/** Opens the table to other phones: the game code, and who's on which phone. */
+function Invite({
+  room,
+  party,
+  onInvite,
+  onClose,
+}: {
+  room: NatRoom | null;
+  party: Hero[];
+  onInvite: () => void;
+  onClose: () => void;
+}) {
+  const snap = useRoom(room);
+  const [copied, setCopied] = useState(false);
+
+  if (!snap) {
+    return (
+      <Button variant="secondary" block onClick={onInvite}>
+        <Icon d="M7 3h10v18H7zM11 18h2" size={18} />
+        Play on more phones
+      </Button>
+    );
+  }
+
+  const share = async () => {
+    const url = `${window.location.origin}/projects/nat20?join=${snap.code}`;
+    try {
+      if (navigator.share)
+        await navigator.share({ title: "Join my Lucky Goose quest", url });
+      else {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch {}
+  };
+  const claims = snap.table?.claims ?? {};
+
+  return (
+    <section
+      aria-labelledby="nat-invite"
+      className="flex flex-col gap-(--space-3) rounded-(--radius-md) bg-(--oak-800) p-(--space-4)"
+    >
+      {snap.status === "failed" ? (
+        <>
+          <p role="alert" className="body text-(--wax-400)">
+            {snap.error}
+          </p>
+          <Button variant="secondary" block onClick={onInvite}>
+            Try again
+          </Button>
+        </>
+      ) : (
+        <>
+          <div className="flex items-start justify-between gap-(--space-3)">
+            <div>
+              <h2
+                id="nat-invite"
+                className="tag text-(--cream-muted) uppercase"
+              >
+                Game code
+              </h2>
+              {snap.status === "connecting" ? (
+                <p className="caption mt-(--space-2) flex items-center gap-(--space-2) text-(--cream-muted)">
+                  <Dots />
+                  Opening the table…
+                </p>
+              ) : (
+                <>
+                  <p className="sr-only">{snap.code.split("").join(" ")}</p>
+                  <p
+                    className="title-xl tracking-[0.12em] text-(--candle-500)"
+                    aria-hidden="true"
+                  >
+                    {snap.code}
+                  </p>
+                </>
+              )}
+            </div>
+            <Button variant="ghost" className="px-0" onClick={onClose}>
+              Stop
+            </Button>
+          </div>
+          <p className="caption text-(--cream-muted)">
+            On each phone, open this page, tap Join a friend&apos;s game and
+            enter the code. Heroes nobody picks stay on this phone.
+          </p>
+          <Button
+            variant="secondary"
+            block
+            disabled={snap.status !== "open"}
+            onClick={share}
+          >
+            <Icon
+              d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 002 2h10a2 2 0 002-2v-5"
+              size={18}
+            />
+            {copied ? "Link copied!" : "Share invite"}
+          </Button>
+          <ul className="flex flex-col gap-(--space-2)" aria-label="Phones">
+            {party.map((h) => (
+              <li key={h.name} className="flex items-center gap-(--space-2)">
+                <Monogram cls={h.cls} name={h.name} />
+                <span className="label flex-1 truncate text-(--cream)">
+                  {h.name}
+                </span>
+                <span
+                  className={`caption ${claims[h.name] ? "text-(--candle-500)" : "text-(--cream-muted)"}`}
+                >
+                  {claims[h.name] ? "On their phone" : "On this phone"}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </section>
+  );
+}
+
+// ---- Joining another phone's game ----
+
+function JoinScreen({
+  initialCode,
+  onJoin,
+  onBack,
+}: {
+  initialCode: string;
+  onJoin: (code: string) => void;
+  onBack: () => void;
+}) {
+  const [code, setCode] = useState(initialCode);
+  const ready = code.length === 4;
+
+  return (
+    <main className={column}>
+      <form
+        className="flex flex-1 flex-col"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (ready) onJoin(code);
+        }}
+      >
+        <div className="flex flex-1 flex-col gap-(--space-3) px-(--space-4) pt-(--space-3) pb-(--space-4)">
+          <div className="flex items-center gap-(--space-3)">
+            <button
+              type="button"
+              className={iconBtn}
+              aria-label="Back"
+              onClick={onBack}
+            >
+              <Icon d="M15 5l-7 7 7 7" size={18} />
+            </button>
+            <h1 className="title-lg flex-1 text-(--cream)">
+              Join a friend&apos;s game
+            </h1>
+          </div>
+          <TextField
+            id="nat-join-code"
+            label="Game code"
+            hint="The 4 letters on the host's phone."
+            placeholder="ABCD"
+            value={code}
+            maxLength={4}
+            autoComplete="off"
+            enterKeyHint="go"
+            onChange={(v) => setCode(normalizeRoomCode(v))}
+          />
+        </div>
+        <div className={bottomBar}>
+          <Button type="submit" size="lg" block disabled={!ready}>
+            Join the table
+          </Button>
+        </div>
+      </form>
+    </main>
+  );
+}
+
+/** A phone that joined someone else's game: pick a hero, then play along. */
+function GuestGame({ room, onLeave }: { room: NatRoom; onLeave: () => void }) {
+  const snap = useRoom(room)!;
+  const table = snap.table;
+
+  if (snap.status === "failed" || !table) {
+    return (
+      <main className={column}>
+        <div className="flex flex-1 flex-col items-center justify-center gap-(--space-4) px-(--space-4) text-center">
+          {snap.status === "failed" ? (
+            <>
+              <h1 className="title-lg text-(--cream)">Lost the table</h1>
+              <p role="alert" className="body text-(--cream-muted)">
+                {snap.error}
+              </p>
+            </>
+          ) : (
+            <p
+              role="status"
+              className="caption flex items-center gap-(--space-2) text-(--cream-muted)"
+            >
+              <D20 className="h-5 w-5 animate-spin text-(--candle-500) [animation-duration:2.5s] motion-reduce:animate-none" />
+              Joining table {snap.code}…
+            </p>
+          )}
+        </div>
+        <div className={bottomBar}>
+          <Button
+            variant={snap.status === "failed" ? "primary" : "secondary"}
+            size="lg"
+            block
+            onClick={onLeave}
+          >
+            {snap.status === "failed" ? "Back" : "Cancel"}
+          </Button>
+        </div>
+      </main>
+    );
+  }
+
+  const me = table.heroes.find((h) => table.claims[h.name] === snap.me);
+  const mine = (name: string) => table.claims[name] === snap.me;
+
+  if (me && table.play) {
+    return (
+      <AdventureView
+        view={table.play}
+        mine={mine}
+        shared
+        onAct={(act) => room.act(act)}
+        onLineDone={() => {}}
+        onLeave={onLeave}
+        ending={
+          <p className="caption text-center text-(--cream-muted)">
+            The host can start a new quest from their phone.
+          </p>
+        }
+      />
+    );
+  }
+
+  return (
+    <main className={column}>
+      <div className="flex flex-1 flex-col gap-(--space-3) px-(--space-4) pt-(--space-3) pb-(--space-4)">
+        <div className="flex items-center gap-(--space-3)">
+          <button
+            type="button"
+            className={iconBtn}
+            aria-label="Leave the game"
+            onClick={onLeave}
+          >
+            <Icon d="M6 6l12 12M18 6L6 18" size={16} />
+          </button>
+          <h1 className="title-lg flex-1 text-(--cream)">
+            {me ? `You're ${me.name}` : "Who are you?"}
+          </h1>
+        </div>
+
+        {me ? (
+          <>
+            <HeroSlot name={me.name} cls={me.cls} />
+            <p
+              role="status"
+              className="caption flex items-center gap-(--space-2) text-(--cream-muted)"
+            >
+              <Dots />
+              Waiting for the host to start the quest.
+            </p>
+          </>
+        ) : table.heroes.length === 0 ? (
+          <p className="body text-(--cream-muted)">
+            The host is still gathering the party. Heroes show up here as they
+            join.
+          </p>
+        ) : (
+          <>
+            <p className="caption text-(--cream-muted)">
+              Table {snap.code}. Pick the hero you&apos;re playing.
+            </p>
+            <ul className="flex flex-col gap-(--space-3)" aria-label="Heroes">
+              {table.heroes.map((h) => {
+                const taken = Boolean(table.claims[h.name]);
+                return (
+                  <li key={h.name}>
+                    <button
+                      type="button"
+                      disabled={taken}
+                      className={`${CLASS_VARS[h.cls]} flex min-h-(--tap-min) w-full cursor-pointer items-center gap-(--space-3) rounded-(--radius-md) border-2 border-(--edge) bg-(--oak-800) py-(--space-2) pr-(--space-4) pl-(--space-3) text-left disabled:cursor-not-allowed disabled:opacity-45 ${focusRing}`}
+                      onClick={() => room.claimHero(h.name)}
+                    >
+                      <Monogram cls={h.cls} name={h.name} large />
+                      <span className="flex min-w-0 flex-1 flex-col">
+                        <span className="truncate text-[18px] leading-6 font-extrabold text-(--cream)">
+                          {h.name}
+                        </span>
+                        <span className="tag text-(--cls-bright) uppercase">
+                          {CLASSES[h.cls].name} · {CLASSES[h.cls].stat}
+                        </span>
+                      </span>
+                      <span className="caption text-(--cream-muted)">
+                        {taken ? "Taken" : "That's me"}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
+      </div>
+      {me && (
+        <div className={bottomBar}>
+          <Button
+            variant="secondary"
+            size="lg"
+            block
+            onClick={() => room.claimHero(null)}
+          >
+            Switch hero
+          </Button>
+        </div>
+      )}
+    </main>
+  );
+}
+
 // ---- The adventure ----
 
+/** The host's adventure: runs the game master and shares the table. */
 function Adventure({
   quest,
   startingParty,
+  room,
   onNewQuest,
   onChangeParty,
 }: {
   quest: string;
   startingParty: Hero[];
+  room: NatRoom | null;
   onNewQuest: () => void;
   onChangeParty: () => void;
 }) {
+  const snap = useRoom(room);
+  const claims = snap?.table?.claims ?? {};
   const [heroes, setHeroes] = useState(startingParty);
   // Starts with the game master's first card already "plotting", so the
   // opening request only has to fill it in.
@@ -483,11 +921,7 @@ function Adventure({
   const [turn, setTurn] = useState(0);
   const [ending, setEnding] = useState<"victory" | "defeat" | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState<{
-    hero: Hero;
-    choice: Choice;
-    roll: Roll;
-  } | null>(null);
+  const [pending, setPending] = useState<PlayView["pending"]>(null);
   // Which script line is being read aloud in the newest game master turn.
   const [cursor, setCursor] = useState(0);
   // The teleprompter moves on by itself; the table can pause or change pace.
@@ -502,41 +936,40 @@ function Adventure({
   const abort = useRef<AbortController | null>(null);
 
   const active = nextHero(heroes, turn);
-  const names = heroes.map((h) => h.name);
-  const latest = entries.at(-1);
-  const latestGm = latest?.kind === "gm" ? latest : null;
-  const lines = latestGm
-    ? parseScript(latestGm.text, names, !latestGm.live)
-    : [];
-  // The choices (or the ending) wait until the whole script has been read.
-  const doneReading = !latestGm || (!latestGm.live && cursor >= lines.length);
-  const nextLine = () => setCursor((c) => c + 1);
-  const reading: Reading | null = doneReading
-    ? null
-    : {
-        // Caught up with the game master, who is still writing.
-        waiting: cursor >= lines.length,
-        paused,
-        pace,
-        onPause: () => setPaused((p) => !p),
-        onSkip: nextLine,
-        onPace: (next) => {
-          setPace(next);
-          try {
-            localStorage.setItem(PACE_KEY, next);
-          } catch {}
-        },
-      };
 
-  // The choice panel is taller than the "telling the story" bar, so when it
-  // appears, scroll again to keep the end of the story above it.
+  const view: PlayView = useMemo(
+    () => ({
+      heroes,
+      entries,
+      status,
+      choices,
+      ending,
+      error,
+      pending,
+      cursor,
+      paused,
+      pace,
+      active: active?.name ?? null,
+    }),
+    [
+      heroes,
+      entries,
+      status,
+      choices,
+      ending,
+      error,
+      pending,
+      cursor,
+      paused,
+      pace,
+      active,
+    ],
+  );
+
+  // Every other phone draws from this.
   useEffect(() => {
-    if (doneReading && (status === "choose" || status === "over"))
-      window.scrollTo({
-        top: document.documentElement.scrollHeight,
-        behavior: "smooth",
-      });
-  }, [status, doneReading]);
+    room?.update({ play: view });
+  }, [room, view]);
 
   /** Asks the game master for the next bit of story and streams it in. */
   const callGm = async (
@@ -666,29 +1099,179 @@ function Adventure({
     void callGm(heroes, story, next.name, nextTurn);
   };
 
-  const pick = (choice: Choice) => {
-    if (!active || status !== "choose") return;
-    if (choice.stat === "none") {
-      commit(active, choice.label, null);
-      return;
+  /** Which phone plays a hero: a guest's peer id, or "" for this one. */
+  const phoneOf = (name: string) => claims[name] ?? "";
+
+  /** What any phone tapped; from is "" for this phone. */
+  const handle = (act: Act, from: string) => {
+    switch (act.kind) {
+      case "pick": {
+        const choice = choices.find((c) => c.label === act.label);
+        if (!active || status !== "choose" || !choice) return;
+        if (phoneOf(active.name) !== from) return;
+        if (choice.stat === "none") return commit(active, choice.label, null);
+        const roll = rollCheck(bonusFor(active.cls, choice.stat), choice.dc);
+        setPending({ hero: active, choice, roll });
+        setStatus("rolling");
+        return;
+      }
+      case "custom": {
+        const text = act.text.trim().slice(0, CUSTOM_MAX);
+        if (!active || status !== "choose" || !text) return;
+        if (phoneOf(active.name) !== from) return;
+        return commit(active, text, null);
+      }
+      case "rolled": {
+        if (!pending || phoneOf(pending.hero.name) !== from) return;
+        const { hero, choice, roll } = pending;
+        setPending(null);
+        return commit(hero, choice.label, {
+          ...roll,
+          stat: choice.stat as Stat,
+        });
+      }
+      case "pause":
+        return setPaused((p) => !p);
+      case "skip":
+        return setCursor((c) => (c === act.cursor ? c + 1 : c));
+      case "pace":
+        if (!(act.pace in PACES)) return;
+        setPace(act.pace);
+        try {
+          localStorage.setItem(PACE_KEY, act.pace);
+        } catch {}
+        return;
+      case "retry": {
+        if (status !== "error") return;
+        const nextName = active?.name ?? heroes[0].name;
+        void callGm(heroes, entries, nextName, turn);
+        return;
+      }
     }
-    const roll = rollCheck(bonusFor(active.cls, choice.stat), choice.dc);
-    setPending({ hero: active, choice, roll });
-    setStatus("rolling");
   };
 
-  const retry = () => {
-    const nextName = active?.name ?? heroes[0].name;
-    void callGm(heroes, entries, nextName, turn);
-  };
+  // Guests' taps arrive here; a ref keeps the handler current.
+  const handleRef = useRef(handle);
+  useEffect(() => {
+    handleRef.current = handle;
+  });
+  useEffect(() => {
+    if (!room) return;
+    room.onAct = (act, from) => handleRef.current(act, from);
+    return () => {
+      room.onAct = null;
+    };
+  }, [room]);
+
+  return (
+    <AdventureView
+      view={view}
+      mine={(name) => !claims[name]}
+      shared={Boolean(snap && snap.guests > 0)}
+      notice={snap?.notice ?? null}
+      onDismissNotice={() => room?.clearNotice()}
+      onAct={(act) => handle(act, "")}
+      onLineDone={(i) => setCursor((c) => (c === i ? c + 1 : c))}
+      onLeave={onNewQuest}
+      ending={
+        <>
+          <Button size="lg" block onClick={onNewQuest}>
+            {ending === "defeat" ? "Try again" : "New quest"}
+          </Button>
+          <Button variant="secondary" block onClick={onChangeParty}>
+            New party
+          </Button>
+        </>
+      }
+    />
+  );
+}
+
+/**
+ * The adventure as one phone sees it, drawn from the table. On a phone that
+ * doesn't play a hero, that hero's lines and choices stay on their phone.
+ */
+function AdventureView({
+  view,
+  mine,
+  shared,
+  notice,
+  onDismissNotice,
+  onAct,
+  onLineDone,
+  onLeave,
+  ending,
+}: {
+  view: PlayView;
+  /** Whether a hero is played on this phone. */
+  mine: (name: string) => boolean;
+  /** Whether other phones are at the table. */
+  shared: boolean;
+  notice?: string | null;
+  onDismissNotice?: () => void;
+  onAct: (act: Act) => void;
+  /** The teleprompter finished line i (only the host moves the story on). */
+  onLineDone: (i: number) => void;
+  onLeave: () => void;
+  /** What to do next, under the ending. */
+  ending: ReactNode;
+}) {
+  const { heroes, entries, status, cursor, paused, pace, pending } = view;
+  const active = heroes.find((h) => h.name === view.active) ?? null;
+  const names = heroes.map((h) => h.name);
+  const latest = entries.at(-1);
+  const latestGm = latest?.kind === "gm" ? latest : null;
+  const lines = latestGm
+    ? parseScript(latestGm.text, names, !latestGm.live)
+    : [];
+  // The choices (or the ending) wait until the whole script has been read.
+  const doneReading = !latestGm || (!latestGm.live && cursor >= lines.length);
+  const reading: Reading | null = doneReading
+    ? null
+    : {
+        // Caught up with the game master, who is still writing.
+        waiting: cursor >= lines.length,
+        paused,
+        pace,
+        onPause: () => onAct({ kind: "pause" }),
+        onSkip: () => onAct({ kind: "skip", cursor }),
+        onPace: (next) => onAct({ kind: "pace", pace: next }),
+      };
+
+  // The choice panel is taller than the "telling the story" bar, so when it
+  // appears, scroll again to keep the end of the story above it.
+  useEffect(() => {
+    if (doneReading && (status === "choose" || status === "over"))
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "smooth",
+      });
+  }, [status, doneReading]);
 
   return (
     <main className={column}>
       <PartyBar
         heroes={heroes}
         active={status === "over" ? null : active}
-        onLeave={onNewQuest}
+        onLeave={onLeave}
       />
+
+      {notice && (
+        <p
+          role="status"
+          className="caption mx-(--space-4) mt-(--space-2) flex items-center gap-(--space-2) rounded-(--radius-md) bg-(--oak-800) py-(--space-1) pr-(--space-1) pl-(--space-3) text-(--cream)"
+        >
+          <span className="flex-1">{notice}</span>
+          <button
+            type="button"
+            aria-label="Dismiss"
+            className={`flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-(--radius-pill) text-(--cream-muted) ${focusRing}`}
+            onClick={onDismissNotice}
+          >
+            <Icon d="M6 6l12 12M18 6L6 18" size={14} />
+          </button>
+        </p>
+      )}
 
       <Story
         entries={entries}
@@ -696,30 +1279,29 @@ function Adventure({
         cursor={cursor}
         pace={pace}
         paused={paused}
-        onLineDone={nextLine}
+        mine={mine}
+        shared={shared}
+        onLineDone={onLineDone}
       />
 
-      {status === "error" && error && (
+      {status === "error" && view.error && (
         <div className="flex flex-col gap-(--space-3) px-(--space-4) pb-(--space-4)">
           <p
             role="alert"
             className="body rounded-(--radius-md) border-2 border-(--wax-600) bg-(--oak-800) px-(--space-4) py-(--space-3) text-(--cream)"
           >
-            {error}
+            {view.error}
           </p>
-          <Button size="lg" block onClick={retry}>
+          <Button size="lg" block onClick={() => onAct({ kind: "retry" })}>
             Try again
           </Button>
         </div>
       )}
 
-      {status === "over" && ending && doneReading && (
-        <Ending
-          ending={ending}
-          heroes={heroes}
-          onNewQuest={onNewQuest}
-          onChangeParty={onChangeParty}
-        />
+      {status === "over" && view.ending && doneReading && (
+        <Ending ending={view.ending} heroes={heroes}>
+          {ending}
+        </Ending>
       )}
 
       {(reading ||
@@ -730,25 +1312,22 @@ function Adventure({
           hero={active}
           heroes={heroes}
           reading={reading}
-          choices={choices}
+          choices={view.choices}
           waiting={status !== "choose"}
-          onPick={pick}
-          onCustom={(text) =>
-            active && status === "choose" && commit(active, text, null)
-          }
+          mine={active ? mine(active.name) : false}
+          onPick={(choice) => onAct({ kind: "pick", label: choice.label })}
+          onCustom={(text) => onAct({ kind: "custom", text })}
         />
       )}
 
       {pending && (
         <DiceRoll
+          key={`${entries.length}-${pending.hero.name}`}
           hero={pending.hero}
           choice={pending.choice}
           roll={pending.roll}
-          onDone={() => {
-            const { hero, choice, roll } = pending;
-            setPending(null);
-            commit(hero, choice.label, { ...roll, stat: choice.stat as Stat });
-          }}
+          mine={mine(pending.hero.name)}
+          onDone={() => onAct({ kind: "rolled" })}
         />
       )}
     </main>
@@ -840,6 +1419,8 @@ function Story({
   cursor,
   pace,
   paused,
+  mine,
+  shared,
   onLineDone,
 }: {
   entries: Entry[];
@@ -848,7 +1429,9 @@ function Story({
   cursor: number;
   pace: Pace;
   paused: boolean;
-  onLineDone: () => void;
+  mine: (name: string) => boolean;
+  shared: boolean;
+  onLineDone: (i: number) => void;
 }) {
   const following = useRef(true);
   const last = entries.at(-1);
@@ -886,6 +1469,8 @@ function Story({
             cursor={i === entries.length - 1 ? cursor : null}
             pace={pace}
             paused={paused}
+            mine={mine}
+            shared={shared}
             onLineDone={onLineDone}
           />
         ) : (
@@ -918,6 +1503,8 @@ function Scene({
   cursor,
   pace,
   paused,
+  mine,
+  shared,
   onLineDone,
 }: {
   entry: Extract<Entry, { kind: "gm" }>;
@@ -926,7 +1513,9 @@ function Scene({
   cursor: number | null;
   pace: Pace;
   paused: boolean;
-  onLineDone: () => void;
+  mine: (name: string) => boolean;
+  shared: boolean;
+  onLineDone: (i: number) => void;
 }) {
   const lines = parseScript(
     entry.text,
@@ -957,15 +1546,20 @@ function Scene({
             const handoff =
               heroes.length > 1 &&
               (i === 0 || shown[i - 1].reader !== line.reader);
+            // With more phones, the phone only changes hands between two
+            // heroes who share it.
+            const passOn = !shared || (i > 0 && mine(shown[i - 1].reader));
             return (
               <Teleprompter
                 key={i}
                 line={line}
                 cls={clsOf(line.reader)}
                 handoff={handoff}
+                handoffLabel={passOn ? "Pass the phone" : "Your line"}
+                hidden={!mine(line.reader)}
                 pace={pace}
                 paused={paused}
-                onDone={onLineDone}
+                onDone={() => onLineDone(i)}
               />
             );
           }
@@ -1091,6 +1685,7 @@ function ActionPanel({
   reading,
   choices,
   waiting,
+  mine,
   onPick,
   onCustom,
 }: {
@@ -1100,6 +1695,8 @@ function ActionPanel({
   reading: Reading | null;
   choices: Choice[];
   waiting: boolean;
+  /** Whether the hero whose turn it is plays on this phone. */
+  mine: boolean;
   onPick: (choice: Choice) => void;
   onCustom: (text: string) => void;
 }) {
@@ -1126,6 +1723,20 @@ function ActionPanel({
           {heroes.length > 1
             ? "The game master is writing your script…"
             : "The game master is writing…"}
+        </p>
+      </div>
+    );
+  }
+
+  if (!mine) {
+    return (
+      <div className={bottomBar}>
+        <p
+          className="caption flex min-h-(--tap-min) items-center justify-center gap-(--space-2) text-(--cream-muted)"
+          role="status"
+        >
+          <Monogram cls={hero.cls} name={hero.name} />
+          {hero.name}&apos;s turn. They&apos;re choosing on their phone.
         </p>
       </div>
     );
@@ -1177,7 +1788,7 @@ function ActionPanel({
               label="What does your hero do?"
               placeholder="Juggle the goblin's keys"
               value={custom}
-              maxLength={120}
+              maxLength={CUSTOM_MAX}
               enterKeyHint="send"
               onChange={setCustom}
             />
@@ -1249,6 +1860,8 @@ function Teleprompter({
   line,
   cls,
   handoff,
+  handoffLabel,
+  hidden,
   pace,
   paused,
   onDone,
@@ -1256,12 +1869,47 @@ function Teleprompter({
   line: ScriptLine;
   cls: ClassId;
   handoff: boolean;
+  handoffLabel: string;
+  /** The reader is on another phone: say who's reading, not what. */
+  hidden: boolean;
   pace: Pace;
   paused: boolean;
   onDone: () => void;
 }) {
   const { words, start, perWord, total } = lineTiming(line.text, pace, handoff);
   const playState = paused ? "paused" : "running";
+  // The bar still runs, so every phone keeps the same clock.
+  const bar = (
+    <span
+      aria-hidden="true"
+      className="block h-1 origin-left animate-[tele-line_1s_linear_both] bg-(--candle-500)"
+      style={{
+        animationDuration: `${total}ms`,
+        animationPlayState: playState,
+      }}
+      onAnimationEnd={(e) => {
+        if (e.animationName === "tele-line") onDone();
+      }}
+    />
+  );
+
+  if (hidden) {
+    return (
+      <li
+        aria-current="true"
+        className={`${parchment} animate-[noggin-pop_0.25s_ease-out] overflow-hidden`}
+      >
+        <p className="story-lead flex items-center gap-(--space-2) px-(--space-4) py-(--space-4) text-(--ink-muted) italic">
+          <span
+            className={`${CLASS_VARS[cls]} inline-block h-2.5 w-2.5 shrink-0 rounded-(--radius-pill) bg-(--cls)`}
+            aria-hidden="true"
+          />
+          {line.reader} is reading
+        </p>
+        {bar}
+      </li>
+    );
+  }
 
   return (
     <li
@@ -1279,7 +1927,7 @@ function Teleprompter({
                 animationPlayState: playState,
               }}
             >
-              Pass the phone
+              {handoffLabel}
             </span>
           )}
         </div>
@@ -1301,17 +1949,7 @@ function Teleprompter({
           </span>
         </p>
       </div>
-      <span
-        aria-hidden="true"
-        className="block h-1 origin-left animate-[tele-line_1s_linear_both] bg-(--candle-500)"
-        style={{
-          animationDuration: `${total}ms`,
-          animationPlayState: playState,
-        }}
-        onAnimationEnd={(e) => {
-          if (e.animationName === "tele-line") onDone();
-        }}
-      />
+      {bar}
     </li>
   );
 }
@@ -1376,11 +2014,14 @@ function DiceRoll({
   hero,
   choice,
   roll,
+  mine,
   onDone,
 }: {
   hero: Hero;
   choice: Choice;
   roll: Roll;
+  /** Only the roller's phone moves the story on. */
+  mine: boolean;
   onDone: () => void;
 }) {
   const [face, setFace] = useState(1);
@@ -1471,16 +2112,22 @@ function DiceRoll({
           )}
         </div>
 
-        <Button
-          ref={button}
-          size="lg"
-          block
-          className="relative"
-          disabled={!landed}
-          onClick={onDone}
-        >
-          Keep going
-        </Button>
+        {mine ? (
+          <Button
+            ref={button}
+            size="lg"
+            block
+            className="relative"
+            disabled={!landed}
+            onClick={onDone}
+          >
+            Keep going
+          </Button>
+        ) : (
+          <p className="caption relative flex min-h-(--tap-lg) items-center text-(--cream-muted)">
+            {hero.name} taps Keep going on their phone.
+          </p>
+        )}
       </div>
     </div>
   );
@@ -1562,13 +2209,12 @@ function Rays() {
 function Ending({
   ending,
   heroes,
-  onNewQuest,
-  onChangeParty,
+  children,
 }: {
   ending: "victory" | "defeat";
   heroes: Hero[];
-  onNewQuest: () => void;
-  onChangeParty: () => void;
+  /** What to do next. */
+  children: ReactNode;
 }) {
   const victory = ending === "victory";
   return (
@@ -1611,14 +2257,7 @@ function Ending({
           </li>
         ))}
       </ul>
-      <div className="flex w-full flex-col gap-(--space-3)">
-        <Button size="lg" block onClick={onNewQuest}>
-          {victory ? "New quest" : "Try again"}
-        </Button>
-        <Button variant="secondary" block onClick={onChangeParty}>
-          New party
-        </Button>
-      </div>
+      <div className="flex w-full flex-col gap-(--space-3)">{children}</div>
     </section>
   );
 }
@@ -1628,7 +2267,7 @@ function Ending({
 const STEPS: { title: string; body: string }[] = [
   {
     title: "Gather the party",
-    body: "Up to 4 heroes share one phone. Warriors are strong, Rogues are quick, Mages are clever and Bards are charming.",
+    body: "Up to 4 heroes share one phone, or join from their own phones with the game code. Warriors are strong, Rogues are quick, Mages are clever and Bards are charming.",
   },
   {
     title: "Pick a quest",
