@@ -441,7 +441,7 @@ const PLACEHOLDER_NAMES = [
 
 /** The class nobody has picked yet, so a new party spreads out. */
 function suggestClass(party: Hero[]): ClassId {
-  const order: ClassId[] = ["warrior", "mage", "rogue", "bard"];
+  const order: ClassId[] = ["knight", "wizard", "thief", "jester"];
   return (
     order.find((c) => !party.some((h) => h.cls === c)) ??
     order[party.length % 4]
@@ -1526,7 +1526,7 @@ function Scene({
   const shown = cursor === null ? lines : lines.slice(0, cursor + 1);
   const finished = cursor === null || (!entry.live && cursor >= lines.length);
   const clsOf = (name: string) =>
-    heroes.find((h) => h.name === name)?.cls ?? "warrior";
+    heroes.find((h) => h.name === name)?.cls ?? "knight";
 
   if (lines.length === 0 && entry.live) {
     return (
@@ -2267,7 +2267,7 @@ function Ending({
 const STEPS: { title: string; body: string }[] = [
   {
     title: "Gather the party",
-    body: "Up to 4 heroes share one phone, or join from their own phones with the game code. Warriors are strong, Rogues are quick, Mages are clever and Bards are charming.",
+    body: "Up to 4 heroes share one phone, or join from their own phones with the game code. Knights are strong, Thieves are quick, Wizards are clever and Jesters are charming.",
   },
   {
     title: "Pick a quest",

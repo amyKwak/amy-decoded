@@ -15,16 +15,16 @@ export const press =
  * bg-(--cls) for fills and text-(--cls-bright) for text and rings on wood.
  */
 export const CLASS_VARS: Record<ClassId, string> = {
-  warrior: "[--cls:var(--warrior)] [--cls-bright:var(--warrior-bright)]",
-  rogue: "[--cls:var(--rogue)] [--cls-bright:var(--rogue-bright)]",
-  mage: "[--cls:var(--mage)] [--cls-bright:var(--mage-bright)]",
-  bard: "[--cls:var(--bard)] [--cls-bright:var(--bard-bright)]",
+  knight: "[--cls:var(--knight)] [--cls-bright:var(--knight-bright)]",
+  thief: "[--cls:var(--thief)] [--cls-bright:var(--thief-bright)]",
+  wizard: "[--cls:var(--wizard)] [--cls-bright:var(--wizard-bright)]",
+  jester: "[--cls:var(--jester)] [--cls-bright:var(--jester-bright)]",
 };
 
 /** Copy that only the interface shows (the game master never sees it). */
 export const CLASS_BLURB: Record<ClassId, string> = {
-  warrior: "Hits hard, lifts heavy things",
-  rogue: "Sneaky, quick, a little sticky-fingered",
-  mage: "Knows spells, reads the fine print",
-  bard: "Talks, sings and charms their way in",
+  knight: "Hits hard, lifts heavy things",
+  thief: "Sneaky, quick, a little sticky-fingered",
+  wizard: "Knows spells, reads the fine print",
+  jester: "Talks, sings and charms their way in",
 };

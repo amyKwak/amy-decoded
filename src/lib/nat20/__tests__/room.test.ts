@@ -4,7 +4,7 @@ import { makeRoomCode, normalizeRoomCode, pruneClaims } from "../room";
 
 const hero = (name: string): Hero => ({
   name,
-  cls: "rogue",
+  cls: "thief",
   hp: 10,
   items: [],
 });

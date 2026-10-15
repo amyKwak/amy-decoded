@@ -11,8 +11,8 @@ var T = window.LuckyGoose, h = React.createElement;
 var Demo = function () {
   return h(React.Fragment, null,
     h(T.StoryLine, { state: 'read' }, 'The Lucky Goose is unusually quiet tonight.'),
-    h(T.StoryLine, { state: 'earlier', reader: { name: 'Grub', heroClass: 'warrior' } }, 'A note slides under the door. It smells of cinnamon and bad decisions.'),
-    h(T.StoryLine, { state: 'current', reader: { name: 'Mira', heroClass: 'bard' }, streaming: true }, 'It says: "The wizard bake-off starts at moonrise. Bring a whisk.'));
+    h(T.StoryLine, { state: 'earlier', reader: { name: 'Grub', heroClass: 'knight' } }, 'A note slides under the door. It smells of cinnamon and bad decisions.'),
+    h(T.StoryLine, { state: 'current', reader: { name: 'Mira', heroClass: 'jester' }, streaming: true }, 'It says: "The wizard bake-off starts at moonrise. Bring a whisk.'));
 };
 ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
 </script>

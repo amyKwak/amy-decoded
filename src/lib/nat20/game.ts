@@ -12,16 +12,16 @@ export const MAX_HEROES = 4;
 export const QUEST_TURNS = 12;
 
 export type Stat = "STR" | "DEX" | "INT" | "CHA";
-export type ClassId = "warrior" | "rogue" | "mage" | "bard";
+export type ClassId = "knight" | "thief" | "wizard" | "jester";
 
 export const CLASSES: Record<
   ClassId,
   { name: string; stat: Stat; blurb: string }
 > = {
-  warrior: { name: "Warrior", stat: "STR", blurb: "Strong. Hits things." },
-  rogue: { name: "Rogue", stat: "DEX", blurb: "Quick. Sneaks and steals." },
-  mage: { name: "Mage", stat: "INT", blurb: "Clever. Casts spells." },
-  bard: { name: "Bard", stat: "CHA", blurb: "Charming. Talks their way out." },
+  knight: { name: "Knight", stat: "STR", blurb: "Strong. Hits things." },
+  thief: { name: "Thief", stat: "DEX", blurb: "Quick. Sneaks and steals." },
+  wizard: { name: "Wizard", stat: "INT", blurb: "Clever. Casts spells." },
+  jester: { name: "Jester", stat: "CHA", blurb: "Charming. Talks their way out." },
 };
 /** Your class's stat gets this bonus on rolls. */
 export const CLASS_BONUS = 3;

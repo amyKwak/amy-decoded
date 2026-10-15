@@ -1,5 +1,5 @@
 // The Lucky Goose components. Global: window.LuckyGoose. Docs only.
-export type HeroClass = 'warrior' | 'rogue' | 'mage' | 'bard';
+export type HeroClass = 'knight' | 'thief' | 'wizard' | 'jester';
 export type Stat = 'STR' | 'DEX' | 'INT' | 'CHA';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

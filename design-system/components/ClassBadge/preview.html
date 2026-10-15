@@ -10,7 +10,7 @@
 var T = window.LuckyGoose, h = React.createElement;
 var Demo = function () {
   return h('div', { className: 'rt-row' },
-    ['warrior','rogue','mage','bard'].map(function (k) { return h(T.ClassBadge, { key: k, heroClass: k }); }));
+    ['knight','thief','wizard','jester'].map(function (k) { return h(T.ClassBadge, { key: k, heroClass: k }); }));
 };
 ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
 </script>

@@ -10,9 +10,9 @@
 var T = window.LuckyGoose, h = React.createElement;
 var Demo = function () {
   return h(React.Fragment, null,
-    h(T.HeroSlot, { name: 'Mira', heroClass: 'bard', onRemove: function () {} }),
-    h(T.HeroSlot, { name: 'Grub', heroClass: 'warrior', onRemove: function () {} }),
-    h(T.HeroSlot, { name: 'Pip', heroClass: 'rogue', onRemove: function () {} }),
+    h(T.HeroSlot, { name: 'Mira', heroClass: 'jester', onRemove: function () {} }),
+    h(T.HeroSlot, { name: 'Grub', heroClass: 'knight', onRemove: function () {} }),
+    h(T.HeroSlot, { name: 'Pip', heroClass: 'thief', onRemove: function () {} }),
     h(T.HeroSlot, { onAdd: function () {}, addLabel: '+ Add a hero (3 of 4)' }));
 };
 ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));

@@ -33,7 +33,7 @@ The whole app sits on dark oak. Anything players read aloud sits on parchment.
 - Story lines, choices, quest cards and recaps are `parchment-100` cards with `ink` text and `ink-muted` secondary text. Read lines fade to `parchment-200`.
 - `candle-500` is the main action, the active hero, HP fill and success. One candle button per screen.
 - `wax-600` (red wax) means danger: low HP, defeat, Natural 1, leaving a quest. `wax-400` for danger text on wood.
-- Class colours: `warrior` (ember red), `rogue` (forest green), `mage` (arcane blue), `bard` (magenta). Use the plain token as a fill with `on-class` text; use the `-bright` token for text, rings and dots on wood.
+- Class colours: `knight` (ember red), `thief` (forest green), `wizard` (arcane blue), `jester` (magenta). Use the plain token as a fill with `on-class` text; use the `-bright` token for text, rings and dots on wood.
 - Colour never works alone. Classes always show their name and stat; HP always shows its number; results always say Success! or Miss.
 - Every text pair named in a token's usage note meets 4.5:1. Meaningful borders on wood use `edge` (3:1 or better), never `oak-600`.
 

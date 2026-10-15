@@ -4,12 +4,12 @@
   function cx() { return Array.prototype.filter.call(arguments, Boolean).join(' '); }
 
   var CLASSES = {
-    warrior: { name: 'Warrior', stat: 'STR', blurb: 'Hits hard, lifts heavy things' },
-    rogue: { name: 'Rogue', stat: 'DEX', blurb: 'Sneaky, quick, a little sticky-fingered' },
-    mage: { name: 'Mage', stat: 'INT', blurb: 'Knows spells, reads the fine print' },
-    bard: { name: 'Bard', stat: 'CHA', blurb: 'Talks, sings and charms their way in' }
+    knight: { name: 'Knight', stat: 'STR', blurb: 'Hits hard, lifts heavy things' },
+    thief: { name: 'Thief', stat: 'DEX', blurb: 'Sneaky, quick, a little sticky-fingered' },
+    wizard: { name: 'Wizard', stat: 'INT', blurb: 'Knows spells, reads the fine print' },
+    jester: { name: 'Jester', stat: 'CHA', blurb: 'Talks, sings and charms their way in' }
   };
-  var STAT_CLASS = { STR: 'warrior', DEX: 'rogue', INT: 'mage', CHA: 'bard' };
+  var STAT_CLASS = { STR: 'knight', DEX: 'thief', INT: 'wizard', CHA: 'jester' };
   var BONUS = 3;
 
   function Button(p) {
@@ -25,13 +25,13 @@
   }
 
   function ClassBadge(p) {
-    var c = CLASSES[p.heroClass] || CLASSES.warrior;
+    var c = CLASSES[p.heroClass] || CLASSES.knight;
     return h('span', { className: cx('rt-badge', 'rt-c-' + p.heroClass) },
       h(Monogram, { heroClass: p.heroClass }), c.name, h('span', { className: 'rt-tag' }, c.stat));
   }
 
   function ClassPicker(p) {
-    var keys = ['warrior', 'rogue', 'mage', 'bard'];
+    var keys = ['knight', 'thief', 'wizard', 'jester'];
     return h('div', { className: 'rt-picker', role: 'radiogroup', 'aria-label': p.label || 'Pick a class' },
       keys.map(function (k) {
         var c = CLASSES[k], on = p.value === k;

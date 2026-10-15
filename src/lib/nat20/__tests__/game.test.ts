@@ -14,14 +14,14 @@ import {
   type Hero,
 } from "../game";
 
-const mira: Hero = { name: "Mira", cls: "rogue", hp: 10, items: [] };
-const bo: Hero = { name: "Bo", cls: "warrior", hp: 10, items: [] };
+const mira: Hero = { name: "Mira", cls: "thief", hp: 10, items: [] };
+const bo: Hero = { name: "Bo", cls: "knight", hp: 10, items: [] };
 
 describe("dice", () => {
   it("adds the class bonus only for the class's stat", () => {
-    expect(bonusFor("rogue", "DEX")).toBe(3);
-    expect(bonusFor("rogue", "STR")).toBe(0);
-    expect(bonusFor("rogue", "none")).toBe(0);
+    expect(bonusFor("thief", "DEX")).toBe(3);
+    expect(bonusFor("thief", "STR")).toBe(0);
+    expect(bonusFor("thief", "none")).toBe(0);
   });
 
   it("compares the total to the difficulty", () => {
@@ -137,11 +137,11 @@ describe("cleaning", () => {
   it("keeps only valid heroes", () => {
     expect(
       cleanHeroes([
-        { name: "Mira", cls: "rogue", hp: 12, items: ["Key", 4] },
-        { name: "", cls: "mage", hp: 5 },
+        { name: "Mira", cls: "thief", hp: 12, items: ["Key", 4] },
+        { name: "", cls: "wizard", hp: 5 },
         { name: "Zed", cls: "pirate", hp: 5 },
       ]),
-    ).toEqual([{ name: "Mira", cls: "rogue", hp: 10, items: ["Key"] }]);
+    ).toEqual([{ name: "Mira", cls: "thief", hp: 10, items: ["Key"] }]);
   });
 
   it("keeps the log alternating, game master first", () => {

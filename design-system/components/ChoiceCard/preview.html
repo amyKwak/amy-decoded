@@ -11,9 +11,9 @@ var T = window.LuckyGoose, h = React.createElement;
 var Demo = function () {
   return h(React.Fragment, null,
     h('div', { className: 'rt-tag', style: { color: 'var(--cream-muted)' } }, "Mira's turn. What do you do?"),
-    h(T.ChoiceCard, { stat: 'CHA', dc: 12, heroClass: 'bard' }, 'Sweet-talk the judges with a song about pie'),
-    h(T.ChoiceCard, { stat: 'DEX', dc: 14, heroClass: 'bard' }, 'Swap the labels on the sugar and salt'),
-    h(T.ChoiceCard, { stat: 'STR', dc: 10, heroClass: 'bard' }, 'Knead the dough really, really hard'));
+    h(T.ChoiceCard, { stat: 'CHA', dc: 12, heroClass: 'jester' }, 'Sweet-talk the judges with a song about pie'),
+    h(T.ChoiceCard, { stat: 'DEX', dc: 14, heroClass: 'jester' }, 'Swap the labels on the sugar and salt'),
+    h(T.ChoiceCard, { stat: 'STR', dc: 10, heroClass: 'jester' }, 'Knead the dough really, really hard'));
 };
 ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
 </script>
