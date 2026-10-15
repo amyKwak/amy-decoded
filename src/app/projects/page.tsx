@@ -88,7 +88,7 @@ export default function ProjectsPage() {
           {PROJECTS.map((project) => (
             <div
               key={project.name}
-              className="bg-surface border-border-soft flex flex-col overflow-hidden rounded-[14px] border"
+              className="bg-surface border-border-soft tablet:has-[a:active]:scale-100 relative flex flex-col overflow-hidden rounded-[14px] border transition-transform has-[a:active]:scale-[0.99] motion-reduce:transition-none"
             >
               <a
                 href={project.url}
@@ -112,7 +112,9 @@ export default function ProjectsPage() {
                 <a
                   href={project.url}
                   {...linkProps(project.url)}
-                  className="tablet:text-sm text-ink border-border-btn inline-flex items-center gap-1.75 border-b pb-[3px] text-[13.5px] font-semibold"
+                  // On phones the link stretches over the whole card, so a
+                  // tap anywhere opens the project.
+                  className="tablet:text-sm text-ink border-border-btn tablet:after:hidden inline-flex items-center gap-1.75 border-b pb-[3px] text-[13.5px] font-semibold after:absolute after:inset-0 after:content-['']"
                 >
                   Visit
                   <svg

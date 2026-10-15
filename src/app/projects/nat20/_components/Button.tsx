@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes } from "react";
+import type { ButtonHTMLAttributes, Ref } from "react";
 import { focusRing, press } from "./ui";
 
 const VARIANT = {
@@ -18,6 +18,7 @@ export function Button({
   type = "button",
   ...rest
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
+  ref?: Ref<HTMLButtonElement>;
   variant?: keyof typeof VARIANT;
   /** lg is 64px tall, for the screen's main action at the bottom. */
   size?: "lg";

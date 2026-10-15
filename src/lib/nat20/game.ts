@@ -1,5 +1,5 @@
 /**
- * The rules of Nat 20: heroes, dice, what the AI game master is told, and the
+ * The rules of The Lucky Goose: heroes, dice, what the AI game master is told, and the
  * game data it hands back after each bit of story.
  */
 
@@ -107,7 +107,7 @@ export function applyTurn(heroes: Hero[], turn: GmTurn): Hero[] {
 
 // ---- What the game master is told ----
 
-export const GM_SYSTEM = `You are the game master of Nat 20, a lighthearted fantasy tabletop adventure, like a cozy game of Dungeons & Dragons played on one phone. You write the story, but the players perform it: each turn you write a short script that the friends read aloud to each other, like a table read of a play.
+export const GM_SYSTEM = `You are the game master of The Lucky Goose, a lighthearted fantasy tabletop adventure, like a cozy game of Dungeons & Dragons played on one phone. You write the story, but the players perform it: each turn you write a short script that the friends read aloud to each other, like a table read of a play.
 
 How to write the script:
 - Write 4 to 8 lines. Put each line on its own line, in exactly this format:

@@ -62,18 +62,6 @@
   --color-meme-lime: #c8f169;
   --color-meme-yellow: #ffd84d;
 
-  /* Nat 20 (/projects/nat20), a candlelit tavern */
-  --color-nat-bg: #17121f;
-  --color-nat-panel: #241c31;
-  --color-nat-line: #3b3050;
-  --color-nat-text: #f5ead6;
-  --color-nat-muted: #b8a88e;
-  --color-nat-gold: #f2b84b;
-  --color-nat-ember: #ef6a45;
-  --color-nat-emerald: #3cc391;
-  --color-nat-mage: #8a96ff;
-  --color-nat-bard: #f283bd;
-
   /* Clueless (/projects/clueless) */
   --color-clue-bg: #f5f2ff;
   --color-clue-ink: #1d1638;
@@ -172,26 +160,26 @@ a {
   }
 }
 
-/* Nat 20: the die tumbling, and the cursor while the game master speaks. */
+/* The Lucky Goose: the die tumbling, and the rays behind a Natural 20. */
 @keyframes nat-tumble {
   0% {
-    transform: rotate(0deg) scale(0.6);
+    transform: rotate(0deg) scale(1);
   }
-  70% {
-    transform: rotate(600deg) scale(1.08);
+  50% {
+    transform: rotate(200deg) scale(0.88);
   }
   100% {
-    transform: rotate(720deg) scale(1);
+    transform: rotate(360deg) scale(1);
   }
 }
 
-@keyframes nat-blink {
-  50% {
-    opacity: 0;
+@keyframes nat-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
-/* Nat 20 teleprompter: words light up as they are read, a bar fills while the
+/* The Lucky Goose teleprompter: words light up as they are read, a bar fills while the
    line is held, and the "Pass the phone" tag shows during the handoff. Named
    outside the nat- prefix so they keep running under reduced motion: they are
    the reading clock, and only fade or fill. */

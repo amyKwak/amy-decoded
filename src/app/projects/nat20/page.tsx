@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
-import { Alegreya, Cinzel, Nunito, Pirata_One } from "next/font/google";
+import { Alegreya, Nunito, Pirata_One } from "next/font/google";
 import { SiteHeader } from "../../../components/SiteHeader";
 import { NatApp } from "./_components/NatApp";
 
@@ -16,13 +16,6 @@ const nunito = Nunito({
   weight: ["500", "600", "700", "800"],
 });
 
-// Still used by the screens not yet moved to the design system.
-const cinzel = Cinzel({
-  variable: "--font-cinzel",
-  subsets: ["latin"],
-  weight: ["700", "900"],
-});
-
 /**
  * next/font self-hosts each face under its own family name, so point the
  * token stacks from tokens.css at those names, keeping their fallbacks.
@@ -34,9 +27,9 @@ const fonts = {
 } as CSSProperties;
 
 export const metadata: Metadata = {
-  title: "Nat 20",
+  title: "The Lucky Goose",
   description:
-    "A fantasy adventure run by an AI game master. Build a party, pick any quest, and roll the dice as the story unfolds live.",
+    "A pass-the-phone fantasy adventure run by an AI game master. Gather a party, pick any quest, and roll the dice as the story unfolds live.",
 };
 
 export default function Nat20Page() {
@@ -49,7 +42,7 @@ export default function Nat20Page() {
 
       <div
         style={fonts}
-        className={`${cinzel.variable} flex flex-1 flex-col font-(family-name:--font-ui) text-(--cream)`}
+        className="flex flex-1 flex-col font-(family-name:--font-ui) text-(--cream)"
       >
         <NatApp />
       </div>

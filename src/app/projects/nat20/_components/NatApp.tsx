@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   applyTurn,
   bonusFor,
+  CLASS_BONUS,
   CLASSES,
   describeRoll,
   MAX_HEROES,
@@ -23,54 +24,47 @@ import {
   type Stat,
 } from "@/lib/nat20/game";
 import { Button } from "./Button";
+import { Monogram } from "./ClassBadge";
 import { ClassPicker } from "./ClassPicker";
 import { AddHeroSlot, HeroSlot } from "./HeroSlot";
 import { TextField } from "./TextField";
-import { CLASS_BLURB } from "./ui";
+import { CLASS_BLURB, CLASS_VARS, focusRing } from "./ui";
 
 // ---- Shared styles ----
 
-const display = "font-(family-name:--font-cinzel)";
-const focusRing =
-  "focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-nat-gold";
-const press =
-  "transition-[translate,box-shadow] duration-75 active:translate-y-1 active:shadow-none disabled:cursor-not-allowed disabled:opacity-40 disabled:active:translate-y-0";
-const goldBtn = `inline-flex h-15 w-full shrink-0 items-center justify-center rounded-[16px] bg-nat-gold px-6 text-lg font-extrabold text-nat-bg shadow-[0_5px_0_#a8761c] ${press} ${focusRing}`;
-const ghostBtn = `inline-flex h-13 w-full shrink-0 items-center justify-center rounded-[16px] border-2 border-nat-line bg-nat-panel px-5 text-base font-bold ${press} ${focusRing}`;
-const iconBtn = `flex h-(--tap-min) w-(--tap-min) shrink-0 items-center justify-center rounded-(--radius-pill) bg-(--oak-700) text-(--cream) shadow-[inset_0_0_0_2px_var(--edge)] ${press} ${focusRing}`;
-const input =
-  "h-13 w-full rounded-[14px] border-2 border-nat-line bg-nat-panel px-4 text-lg font-semibold outline-none placeholder:text-nat-muted/70 focus:border-nat-gold";
-const label =
-  "block text-[13px] font-extrabold uppercase tracking-[0.12em] text-nat-muted";
-const screen =
-  "relative mx-auto flex w-full max-w-130 flex-1 flex-col px-5 pt-5 pb-5 tablet:pt-10";
+/** A round wooden button for back, close and help. */
+const iconBtn = `flex h-(--tap-min) w-(--tap-min) shrink-0 cursor-pointer items-center justify-center rounded-(--radius-pill) border-0 bg-(--oak-700) text-(--cream) shadow-[inset_0_0_0_2px_var(--edge),var(--shadow-press)] transition-[translate,box-shadow] duration-80 ease-out active:translate-y-0.5 active:shadow-none motion-reduce:transition-none ${focusRing}`;
+/** The one centred column every screen sits in. */
+const column = "mx-auto flex w-full max-w-(--screen-max) flex-1 flex-col";
+/** The bottom bar that keeps the main button in thumb reach. */
+const bottomBar =
+  "sticky bottom-0 z-20 bg-(--oak-900) px-(--space-4) pt-(--space-3) pb-[max(var(--space-4),env(safe-area-inset-bottom))]";
+/** Parchment: anything players read aloud or pick from. */
+const parchment =
+  "rounded-(--radius-md) bg-(--parchment-100) text-(--ink) shadow-(--shadow-card)";
 
 const PARTY_KEY = "nat20:party";
 const PACE_KEY = "nat20:pace";
 const QUEST_KEY = "nat20:quest";
 
-const CLASS_STYLE: Record<ClassId, { bg: string; text: string; ring: string }> =
-  {
-    warrior: {
-      bg: "bg-nat-ember",
-      text: "text-nat-ember",
-      ring: "ring-nat-ember",
-    },
-    rogue: {
-      bg: "bg-nat-emerald",
-      text: "text-nat-emerald",
-      ring: "ring-nat-emerald",
-    },
-    mage: { bg: "bg-nat-mage", text: "text-nat-mage", ring: "ring-nat-mage" },
-    bard: { bg: "bg-nat-bard", text: "text-nat-bard", ring: "ring-nat-bard" },
-  };
-
 const QUEST_IDEAS = [
-  "Steal the moon",
-  "Rescue a dragon from a knight",
-  "The haunted candy shop",
-  "Win the wizard bake-off",
-  "Find the king's lost sock",
+  { title: "Steal the moon", hint: "It's right there. How hard can it be?" },
+  {
+    title: "Rescue a dragon from a knight",
+    hint: "The knight is very polite and very stubborn.",
+  },
+  {
+    title: "The haunted candy shop",
+    hint: "The fudge whispers. The lollipops watch.",
+  },
+  {
+    title: "Win the wizard bake-off",
+    hint: "Your cake must survive three judges and one curse.",
+  },
+  {
+    title: "Find the king's lost sock",
+    hint: "The whole kingdom is on cold-foot alert.",
+  },
 ];
 
 /** What the story log shows: the words, plus the extras around them. */
@@ -185,22 +179,6 @@ function Game() {
 }
 
 // ---- Setup ----
-
-function Header({ compact }: { compact?: boolean }) {
-  return (
-    <div className="flex flex-col items-center text-center">
-      <D20 className={compact ? "h-10 w-10" : "h-14 w-14"} />
-      <h1
-        className={`${display} text-nat-gold mt-1 leading-none font-black tracking-[0.02em] ${compact ? "text-[32px]" : "text-[40px]"}`}
-      >
-        Nat 20
-      </h1>
-      <p className="text-nat-muted mt-1.5 text-[15px] leading-snug">
-        An AI game master runs your adventure.
-      </p>
-    </div>
-  );
-}
 
 function PartySetup({
   party,
@@ -397,83 +375,84 @@ function QuestSetup({
   onBack: () => void;
   onBegin: () => void;
 }) {
+  const picked = QUEST_IDEAS.some((q) => q.title === quest);
+
   return (
-    <main className={`${screen} pb-0!`}>
-      <div className="flex items-center justify-between">
-        <button
-          type="button"
-          className={iconBtn}
-          aria-label="Back to the party"
-          onClick={onBack}
-        >
-          <Icon d="M15 5l-7 7 7 7" size={18} />
-        </button>
-        <HelpButton />
-      </div>
-
-      <div className="flex flex-1 flex-col justify-center py-6">
-        <Header />
-        <ul
-          className="mt-5 flex flex-wrap justify-center gap-2"
-          aria-label="Your party"
-        >
-          {party.map((h) => (
-            <li
-              key={h.name}
-              className="bg-nat-panel border-nat-line flex items-center gap-1.5 rounded-full border-2 py-1 pr-3 pl-1"
-            >
-              <HeroBadge cls={h.cls} />
-              <span className="text-sm font-bold">{h.name}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
+    <main className={column}>
       <form
-        className="flex flex-col"
+        className="flex flex-1 flex-col"
         onSubmit={(e) => {
           e.preventDefault();
           if (quest.trim()) onBegin();
         }}
       >
-        <label htmlFor="nat-quest" className={`${label} mb-2`}>
-          What&apos;s the quest?
-        </label>
-        <input
-          id="nat-quest"
-          className={input}
-          value={quest}
-          maxLength={QUEST_MAX}
-          autoComplete="off"
-          enterKeyHint="go"
-          placeholder="Any adventure you like"
-          aria-describedby="nat-quest-hint"
-          onChange={(e) => onQuest(e.target.value)}
-        />
-        <p
-          id="nat-quest-hint"
-          className="text-nat-muted mt-1.5 flex items-center gap-1.5 pl-1 text-[13px] leading-snug"
-        >
-          <Sparkle className="h-3.5 w-3.5 shrink-0 fill-current" />
-          Claude is your game master.
-        </p>
-        <div className="-mx-5 mt-2.5 flex [scrollbar-width:none] gap-2 overflow-x-auto px-5 py-0.5">
-          {QUEST_IDEAS.map((idea) => (
+        <div className="flex flex-1 flex-col gap-(--space-3) px-(--space-4) pt-(--space-3) pb-(--space-4)">
+          <div className="flex items-center gap-(--space-3)">
             <button
-              key={idea}
               type="button"
-              className={`border-nat-line bg-nat-panel h-9 shrink-0 rounded-full border-2 px-3.5 text-sm font-bold whitespace-nowrap transition active:scale-95 ${focusRing}`}
-              onClick={() => onQuest(idea)}
+              className={iconBtn}
+              aria-label="Back to the party"
+              onClick={onBack}
             >
-              {idea}
+              <Icon d="M15 5l-7 7 7 7" size={18} />
             </button>
-          ))}
+            <h1 className="title-lg flex-1 text-(--cream)">Pick a quest</h1>
+            <HelpButton />
+          </div>
+
+          <p className="caption flex flex-wrap items-center gap-(--space-2) text-(--cream-muted)">
+            <span className="flex gap-(--space-1)" aria-hidden="true">
+              {party.map((h) => (
+                <Monogram key={h.name} cls={h.cls} name={h.name} />
+              ))}
+            </span>
+            {listNames(party.map((h) => h.name))}{" "}
+            {party.length === 1 ? "is" : "are"} ready. Claude is your game
+            master.
+          </p>
+
+          <ul className="flex flex-col gap-(--space-3)" aria-label="Quests">
+            {QUEST_IDEAS.map((idea) => {
+              const on = quest === idea.title;
+              return (
+                <li key={idea.title}>
+                  <button
+                    type="button"
+                    aria-pressed={on}
+                    className={`${parchment} block min-h-(--tap-min) w-full cursor-pointer border-2 p-(--space-4) text-left active:bg-(--parchment-200) ${
+                      on
+                        ? "border-(--ink-muted) shadow-(--shadow-glow)"
+                        : "border-(--parchment-300)"
+                    } ${focusRing}`}
+                    onClick={() => onQuest(idea.title)}
+                  >
+                    <span className="title-md block">{idea.title}</span>
+                    <span className="story-small mt-(--space-1) block text-(--ink-muted)">
+                      {idea.hint}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="mt-(--space-2)">
+            <TextField
+              id="nat-quest"
+              label="Or dream up your own quest"
+              placeholder="Any adventure you like"
+              value={picked ? "" : quest}
+              maxLength={QUEST_MAX}
+              enterKeyHint="go"
+              onChange={onQuest}
+            />
+          </div>
         </div>
-        {/* Pinned to the bottom so it stays on screen on short phones. */}
-        <div className="bg-nat-bg sticky bottom-0 z-10 -mx-5 mt-2 px-5 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-          <button type="submit" className={goldBtn} disabled={!quest.trim()}>
-            {quest.trim() ? "Begin the adventure" : "Pick a quest to begin"}
-          </button>
+
+        <div className={bottomBar}>
+          <Button type="submit" size="lg" block disabled={!quest.trim()}>
+            Start the quest
+          </Button>
         </div>
       </form>
     </main>
@@ -704,7 +683,7 @@ function Adventure({
   };
 
   return (
-    <main className={`${screen} px-0! pt-0! pb-0!`}>
+    <main className={column}>
       <PartyBar
         heroes={heroes}
         active={status === "over" ? null : active}
@@ -721,20 +700,16 @@ function Adventure({
       />
 
       {status === "error" && error && (
-        <div className="px-5 pb-4">
+        <div className="flex flex-col gap-(--space-3) px-(--space-4) pb-(--space-4)">
           <p
             role="alert"
-            className="bg-nat-ember/15 border-nat-ember/40 rounded-2xl border-2 px-4 py-3 text-[15px] font-semibold"
+            className="body rounded-(--radius-md) border-2 border-(--wax-600) bg-(--oak-800) px-(--space-4) py-(--space-3) text-(--cream)"
           >
             {error}
           </p>
-          <button
-            type="button"
-            className={`${goldBtn} mt-3 h-13`}
-            onClick={retry}
-          >
+          <Button size="lg" block onClick={retry}>
             Try again
-          </button>
+          </Button>
         </div>
       )}
 
@@ -802,51 +777,54 @@ function PartyBar({
   onLeave: () => void;
 }) {
   return (
-    <div className="bg-nat-bg/95 border-nat-line sticky top-0 z-20 flex items-center gap-2 border-b-2 px-3 py-2.5 backdrop-blur">
+    <div className="sticky top-0 z-20 flex items-center gap-(--space-2) bg-(--oak-900) px-(--space-4) py-(--space-2)">
       <button
         type="button"
-        className={`${iconBtn} h-10! w-10!`}
-        aria-label="End the adventure"
+        className={iconBtn}
+        aria-label="Leave the quest"
         onClick={onLeave}
       >
         <Icon d="M6 6l12 12M18 6L6 18" size={16} />
       </button>
       <ul
-        className="flex min-w-0 flex-1 [scrollbar-width:none] gap-2 overflow-x-auto"
+        className="grid min-w-0 flex-1 auto-cols-fr grid-flow-col gap-(--space-1) rounded-(--radius-lg) bg-(--oak-800) p-(--space-1)"
         aria-label="Party"
       >
         {heroes.map((h) => {
           const up = active?.name === h.name;
+          const out = h.hp === 0;
+          const low = h.hp <= 3;
           return (
             <li
               key={h.name}
-              className={`flex shrink-0 items-center gap-2 rounded-xl border-2 py-1 pr-2.5 pl-1 transition ${
-                h.hp === 0
-                  ? "border-nat-line opacity-45"
-                  : up
-                    ? "border-nat-gold bg-nat-panel"
-                    : "border-nat-line"
+              aria-current={up ? "true" : undefined}
+              className={`flex min-w-0 flex-col gap-(--space-1) rounded-(--radius-md) border-2 p-(--space-1) ${
+                up
+                  ? "border-(--candle-500) bg-(--oak-700)"
+                  : "border-transparent"
               }`}
             >
-              <HeroBadge cls={h.cls} />
-              <span className="leading-tight">
-                <span className="block max-w-20 truncate text-[13px] font-extrabold">
+              <span className="flex min-w-0 items-center gap-(--space-1)">
+                <Monogram cls={h.cls} name={h.name} />
+                <span
+                  className={`truncate text-[14px] leading-5 font-extrabold ${out ? "text-(--cream-muted)" : "text-(--cream)"}`}
+                >
                   {h.name}
                 </span>
-                <span className="flex items-center gap-1">
-                  <span
-                    className="bg-nat-line h-1.5 w-12 overflow-hidden rounded-full"
-                    aria-hidden="true"
-                  >
-                    <span
-                      className={`block h-full rounded-full transition-[width] duration-500 ${h.hp <= 3 ? "bg-nat-ember" : "bg-nat-emerald"}`}
-                      style={{ width: `${(h.hp / MAX_HP) * 100}%` }}
-                    />
-                  </span>
-                  <span className="text-nat-muted text-[11px] font-bold tabular-nums">
-                    {h.hp === 0 ? "KO" : `${h.hp} HP`}
-                  </span>
-                </span>
+              </span>
+              <span
+                className="block h-(--hp-bar) overflow-hidden rounded-(--radius-pill) bg-(--oak-900)"
+                aria-hidden="true"
+              >
+                <span
+                  className={`block h-full rounded-(--radius-pill) transition-[width] duration-500 motion-reduce:transition-none ${low ? "bg-(--wax-600)" : "bg-(--candle-500)"}`}
+                  style={{ width: `${(h.hp / MAX_HP) * 100}%` }}
+                />
+              </span>
+              <span
+                className={`truncate text-[13px] leading-4 font-extrabold tabular-nums ${low ? "text-(--wax-400)" : "text-(--cream-muted)"}`}
+              >
+                {out ? "Knocked out" : `${h.hp}/${MAX_HP} HP`}
               </span>
             </li>
           );
@@ -896,12 +874,12 @@ function Story({
 
   return (
     <div
-      className="flex flex-1 flex-col gap-3 px-5 pt-4 pb-4"
+      className="flex flex-1 flex-col gap-(--space-3) px-(--space-4) pt-(--space-3) pb-(--space-4)"
       aria-live="polite"
     >
       {entries.map((e, i) =>
         e.kind === "gm" ? (
-          <GmCard
+          <Scene
             key={i}
             entry={e}
             heroes={heroes}
@@ -918,7 +896,23 @@ function Story({
   );
 }
 
-function GmCard({
+/** Three candle dots, bouncing while the game master writes. */
+function Dots() {
+  return (
+    <span className="flex gap-(--space-1)" aria-hidden="true">
+      {[0, 1, 2].map((d) => (
+        <span
+          key={d}
+          className="h-1.5 w-1.5 animate-bounce rounded-(--radius-pill) bg-(--candle-500) motion-reduce:animate-none"
+          style={{ animationDelay: `${d * 0.15}s` }}
+        />
+      ))}
+    </span>
+  );
+}
+
+/** One game master turn: its script lines on parchment, then what changed. */
+function Scene({
   entry,
   heroes,
   cursor,
@@ -944,88 +938,68 @@ function GmCard({
   const finished = cursor === null || (!entry.live && cursor >= lines.length);
   const clsOf = (name: string) =>
     heroes.find((h) => h.name === name)?.cls ?? "warrior";
-  const dots = (
-    <span className="flex gap-1" aria-hidden="true">
-      {[0, 1, 2].map((d) => (
-        <span
-          key={d}
-          className="bg-nat-gold h-1.5 w-1.5 animate-bounce rounded-full"
-          style={{ animationDelay: `${d * 0.15}s` }}
-        />
-      ))}
-    </span>
-  );
+
+  if (lines.length === 0 && entry.live) {
+    return (
+      <p className="caption flex items-center gap-(--space-2) text-(--cream-muted)">
+        <Dots />
+        The game master is writing the script…
+      </p>
+    );
+  }
 
   return (
-    <article className="bg-nat-panel border-nat-line animate-[noggin-pop_0.3s_ease-out] rounded-[18px] border-2 px-4 pt-3 pb-3.5">
-      <header className="text-nat-gold flex items-center gap-1.5">
-        <D20 className="h-4.5 w-4.5" />
-        <h3 className="text-xs font-extrabold tracking-[0.12em] uppercase">
-          Scene
-        </h3>
-      </header>
-
-      {lines.length === 0 && entry.live ? (
-        <p className="text-nat-muted mt-2 flex items-center gap-2 text-[15px] italic">
-          {dots}
-          The game master is writing the script…
-        </p>
-      ) : (
-        <ol className="mt-2 flex flex-col gap-2">
-          {shown.map((line, i) => {
-            const current = cursor !== null && i === cursor;
-            const style = CLASS_STYLE[clsOf(line.reader)];
-            if (current) {
-              // A new reader gets a beat to take the phone (not in a party of one).
-              const handoff =
-                heroes.length > 1 &&
-                (i === 0 || shown[i - 1].reader !== line.reader);
-              return (
-                <Teleprompter
-                  key={i}
-                  line={line}
-                  cls={clsOf(line.reader)}
-                  handoff={handoff}
-                  pace={pace}
-                  paused={paused}
-                  onDone={onLineDone}
-                />
-              );
-            }
+    <section className="flex flex-col gap-(--space-3)">
+      <ol className="flex flex-col gap-(--space-3)">
+        {shown.map((line, i) => {
+          if (cursor !== null && i === cursor) {
+            // A new reader gets a beat to take the phone (not in a party of one).
+            const handoff =
+              heroes.length > 1 &&
+              (i === 0 || shown[i - 1].reader !== line.reader);
             return (
-              <li key={i} className="text-nat-text/75 text-[15px] leading-snug">
-                <span className={`font-bold ${style.text}`}>
-                  {line.speaker}
-                </span>
-                {line.speaker !== line.reader && (
-                  <span className="text-nat-muted"> ({line.reader})</span>
-                )}
-                : {line.text}
-              </li>
+              <Teleprompter
+                key={i}
+                line={line}
+                cls={clsOf(line.reader)}
+                handoff={handoff}
+                pace={pace}
+                paused={paused}
+                onDone={onLineDone}
+              />
             );
-          })}
-          {cursor !== null && cursor >= lines.length && entry.live && (
-            <li className="text-nat-muted flex items-center gap-2 text-[15px] italic">
-              {dots}
-              Writing the next line…
+          }
+          return (
+            <li
+              key={i}
+              className="story-small animate-[noggin-pop_0.25s_ease-out] rounded-(--radius-md) bg-(--parchment-200) px-(--space-4) py-(--space-3) text-(--ink)"
+            >
+              <Reader line={line} cls={clsOf(line.reader)} />
+              {line.text}
             </li>
-          )}
-        </ol>
-      )}
+          );
+        })}
+        {cursor !== null && cursor >= lines.length && entry.live && (
+          <li className="caption flex items-center gap-(--space-2) text-(--cream-muted)">
+            <Dots />
+            Writing the next line…
+          </li>
+        )}
+      </ol>
       {finished &&
         entry.turn &&
         (entry.turn.hpChanges.length > 0 ||
           entry.turn.itemsGained.length > 0) && (
-          <ul className="mt-2.5 flex flex-wrap gap-1.5">
+          <ul className="flex flex-wrap gap-(--space-2)">
             {entry.turn.hpChanges
               .filter((c) => c.amount !== 0)
               .map((c, i) => (
                 <li
                   key={`hp-${i}`}
-                  className={`rounded-full px-2.5 py-0.5 text-[13px] font-extrabold ${
+                  className={`tag rounded-(--radius-sm) px-(--space-2) py-(--space-1) ${
                     c.amount < 0
-                      ? "bg-nat-ember/20 text-nat-ember"
-                      : "bg-nat-emerald/20 text-nat-emerald"
+                      ? "bg-(--wax-600) text-(--on-wax)"
+                      : "bg-(--candle-500) text-(--on-candle)"
                   }`}
                 >
                   {c.hero} {c.amount > 0 ? "+" : "−"}
@@ -1035,54 +1009,79 @@ function GmCard({
             {entry.turn.itemsGained.map((g, i) => (
               <li
                 key={`item-${i}`}
-                className="bg-nat-gold/15 text-nat-gold rounded-full px-2.5 py-0.5 text-[13px] font-extrabold"
+                className="caption rounded-(--radius-sm) bg-(--oak-700) px-(--space-2) py-(--space-1) text-(--cream) shadow-[inset_0_0_0_2px_var(--edge)]"
               >
-                {g.hero} found: {g.item}
+                {g.hero} found {g.item}
               </li>
             ))}
           </ul>
         )}
-    </article>
+    </section>
+  );
+}
+
+/** "Mira reads, as the Goblin · whispering", with Mira's class dot. */
+function Reader({ line, cls }: { line: ScriptLine; cls: ClassId }) {
+  return (
+    <span className="mb-(--space-1) flex flex-wrap items-center gap-x-(--space-2) font-(family-name:--font-ui) text-[14px] leading-5 font-bold text-(--ink-muted)">
+      <span
+        className={`${CLASS_VARS[cls]} inline-block h-2.5 w-2.5 rounded-(--radius-pill) bg-(--cls)`}
+        aria-hidden="true"
+      />
+      {line.reader} reads
+      {line.speaker !== line.reader && (
+        <span className="font-semibold">as {line.speaker}</span>
+      )}
+      {line.direction && (
+        <span className="font-semibold italic">· {line.direction}</span>
+      )}
+    </span>
   );
 }
 
 function PlayerCard({ entry }: { entry: Extract<Entry, { kind: "player" }> }) {
-  const style = CLASS_STYLE[entry.hero.cls];
-  const roll = entry.roll;
+  const { hero, roll } = entry;
   return (
     <article
-      className={`border-nat-line max-w-[88%] animate-[noggin-pop_0.25s_ease-out] self-end rounded-[18px] border-2 bg-[#2c2340] px-3.5 py-2.5`}
+      className={`${CLASS_VARS[hero.cls]} flex max-w-[88%] animate-[noggin-pop_0.25s_ease-out] flex-col gap-(--space-2) self-end rounded-(--radius-md) border-2 border-(--cls) bg-(--oak-800) px-(--space-4) py-(--space-3)`}
     >
-      <p className="flex items-center gap-1.5">
-        <HeroBadge cls={entry.hero.cls} small />
-        <span className={`text-sm font-extrabold ${style.text}`}>
-          {entry.hero.name}
-        </span>
+      <p className="flex items-center gap-(--space-2)">
+        <Monogram cls={hero.cls} name={hero.name} />
+        <span className="label text-(--cls-bright)">{hero.name}</span>
       </p>
-      <p className="mt-1 text-[16px] leading-snug font-semibold">
-        {entry.action}
-      </p>
+      <p className="body text-(--cream)">{entry.action}</p>
       {roll && (
-        <p
-          className={`mt-1.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[13px] font-extrabold ${
-            roll.success
-              ? "bg-nat-emerald/20 text-nat-emerald"
-              : "bg-nat-ember/20 text-nat-ember"
-          }`}
-        >
-          <D20 className="h-3.5 w-3.5" />
-          {roll.stat} {roll.die}
-          {roll.bonus ? ` + ${roll.bonus}` : ""} = {roll.total} vs {roll.dc} ·{" "}
-          {roll.die === 20
-            ? "Nat 20!"
-            : roll.die === 1
-              ? "Nat 1!"
-              : roll.success
-                ? "Success"
-                : "Fail"}
+        <p className="flex flex-wrap items-center gap-(--space-2)">
+          <span className="tag rounded-(--radius-sm) bg-(--oak-700) px-(--space-2) py-(--space-1) text-(--cream) tabular-nums">
+            {roll.stat} {roll.die}
+            {roll.bonus ? ` + ${roll.bonus}` : ""} = {roll.total} vs DC{" "}
+            {roll.dc}
+          </span>
+          <Verdict roll={roll} small />
         </p>
       )}
     </article>
+  );
+}
+
+/** Success! in candle gold or Miss in red wax: never colour alone. */
+function Verdict({ roll, small }: { roll: Roll; small?: boolean }) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-(--radius-pill) font-(family-name:--font-ui) font-extrabold ${
+        small
+          ? "min-h-6 px-(--space-2) text-[13px]"
+          : "min-h-9 px-(--space-4) text-[18px]"
+      } ${roll.success ? "bg-(--candle-500) text-(--on-candle)" : "bg-(--wax-600) text-(--on-wax)"}`}
+    >
+      {roll.die === 20
+        ? "Natural 20!"
+        : roll.die === 1
+          ? "Natural 1"
+          : roll.success
+            ? "Success!"
+            : "Miss"}
+    </span>
   );
 }
 
@@ -1108,106 +1107,127 @@ function ActionPanel({
   const [writing, setWriting] = useState(false);
   if (!hero) return null;
 
-  return (
-    <div className="bg-nat-bg/95 border-nat-line sticky bottom-0 z-20 border-t-2 px-5 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur">
-      {reading && !reading.waiting ? (
+  if (reading && !reading.waiting) {
+    return (
+      <div className={bottomBar}>
         <ReadingControls reading={reading} />
-      ) : waiting || reading ? (
+      </div>
+    );
+  }
+
+  if (waiting || reading) {
+    return (
+      <div className={bottomBar}>
         <p
-          className="text-nat-muted flex h-12 items-center justify-center gap-2 text-[15px] font-semibold"
+          className="caption flex min-h-(--tap-min) items-center justify-center gap-(--space-2) text-(--cream-muted)"
           role="status"
         >
-          <D20 className="text-nat-gold h-5 w-5 animate-spin [animation-duration:2.5s]" />
+          <D20 className="h-5 w-5 animate-spin text-(--candle-500) [animation-duration:2.5s] motion-reduce:animate-none" />
           {heroes.length > 1
             ? "The game master is writing your script…"
             : "The game master is writing…"}
         </p>
+      </div>
+    );
+  }
+
+  // The choices sit at the end of the story rather than over it: three
+  // parchment cards are too tall to pin.
+  return (
+    <section
+      aria-labelledby="nat-turn"
+      className="flex flex-col gap-(--space-3) px-(--space-4) pt-(--space-2) pb-[max(var(--space-4),env(safe-area-inset-bottom))]"
+    >
+      <h2 id="nat-turn" className="flex items-center gap-(--space-2)">
+        <Monogram cls={hero.cls} name={hero.name} large />
+        <span className="flex flex-col">
+          <span className="title-md text-(--cream)">
+            {hero.name}&apos;s turn
+          </span>
+          <span className="caption text-(--cream-muted)">What do you do?</span>
+        </span>
+      </h2>
+      {choices.map((c) => (
+        <ChoiceCard
+          key={c.label}
+          choice={c}
+          cls={hero.cls}
+          onPick={() => onPick(c)}
+        />
+      ))}
+      {!writing ? (
+        <Button variant="secondary" block onClick={() => setWriting(true)}>
+          Type my own
+        </Button>
       ) : (
-        <>
-          <p className="flex items-center gap-2">
-            <HeroBadge cls={hero.cls} />
-            <span className={`${display} text-lg font-black`}>
-              {hero.name}&apos;s turn
-            </span>
-          </p>
-          <div className="mt-2.5 flex flex-col gap-2">
-            {choices.map((c) => {
-              const bonus = bonusFor(hero.cls, c.stat);
-              return (
-                <button
-                  key={c.label}
-                  type="button"
-                  className={`bg-nat-panel border-nat-line hover:border-nat-gold flex min-h-11 items-center justify-between gap-3 rounded-[14px] border-2 px-3.5 py-1.5 text-left text-[15px] font-bold transition active:scale-[0.99] ${focusRing}`}
-                  onClick={() => onPick(c)}
-                >
-                  <span>{c.label}</span>
-                  <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-extrabold ${
-                      c.stat === "none"
-                        ? "bg-nat-line text-nat-muted"
-                        : "bg-nat-gold/15 text-nat-gold"
-                    }`}
-                  >
-                    {c.stat === "none"
-                      ? "Safe"
-                      : `${c.stat} ${c.dc}${bonus ? ` · +${bonus}` : ""}`}
-                  </span>
-                </button>
-              );
-            })}
+        <form
+          className="flex items-end gap-(--space-2)"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const text = custom.trim();
+            if (!text) return;
+            setCustom("");
+            setWriting(false);
+            onCustom(text);
+          }}
+        >
+          <div className="flex-1">
+            <TextField
+              id="nat-custom"
+              label="What does your hero do?"
+              placeholder="Juggle the goblin's keys"
+              value={custom}
+              maxLength={120}
+              enterKeyHint="send"
+              onChange={setCustom}
+            />
           </div>
-          {!writing ? (
-            <button
-              type="button"
-              className={`text-nat-muted hover:text-nat-text mt-1 flex h-10 w-full items-center justify-center gap-1.5 text-[15px] font-bold ${focusRing}`}
-              onClick={() => setWriting(true)}
-            >
-              <Icon
-                d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"
-                size={16}
-              />
-              Do something else
-            </button>
-          ) : (
-            <form
-              className="mt-2 flex gap-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const text = custom.trim();
-                if (!text) return;
-                setCustom("");
-                setWriting(false);
-                onCustom(text);
-              }}
-            >
-              <label htmlFor="nat-custom" className="sr-only">
-                Or do something else
-              </label>
-              <input
-                id="nat-custom"
-                className={`${input} h-12 text-base`}
-                value={custom}
-                maxLength={120}
-                autoComplete="off"
-                enterKeyHint="send"
-                placeholder="What does your hero do?"
-                autoFocus
-                onKeyDown={(e) => e.key === "Escape" && setWriting(false)}
-                onChange={(e) => setCustom(e.target.value)}
-              />
-              <button
-                type="submit"
-                className={`${iconBtn} bg-nat-gold! text-nat-bg h-12! w-12! border-0`}
-                aria-label="Do it"
-                disabled={!custom.trim()}
-              >
-                <Icon d="M5 12h13M13 6l6 6-6 6" size={20} />
-              </button>
-            </form>
-          )}
-        </>
+          <Button type="submit" disabled={!custom.trim()}>
+            Do it
+          </Button>
+        </form>
       )}
-    </div>
+    </section>
+  );
+}
+
+/** A suggested action on parchment, tagged with its stat and DC. */
+function ChoiceCard({
+  choice,
+  cls,
+  onPick,
+}: {
+  choice: Choice;
+  cls: ClassId;
+  onPick: () => void;
+}) {
+  const bonus = bonusFor(cls, choice.stat);
+  return (
+    <button
+      type="button"
+      className={`${CLASS_VARS[cls]} ${parchment} story flex min-h-(--tap-lg) w-full cursor-pointer flex-col gap-(--space-2) border-2 border-(--parchment-300) p-(--space-4) text-left active:bg-(--parchment-200) ${focusRing}`}
+      onClick={onPick}
+    >
+      <span>{choice.label}</span>
+      <span className="flex flex-wrap items-center gap-(--space-2)">
+        <span
+          className={`tag inline-flex min-h-6 items-center rounded-(--radius-sm) px-(--space-2) ${
+            bonus
+              ? "bg-(--cls) text-(--on-class)"
+              : "bg-(--ink) text-(--parchment-100)"
+          }`}
+        >
+          {choice.stat === "none"
+            ? "No roll"
+            : `${choice.stat} · DC ${choice.dc}`}
+        </span>
+        {bonus > 0 && (
+          <span className="tag text-(--ink-muted)">
+            +{CLASS_BONUS} {CLASSES[cls].name} bonus
+          </span>
+        )}
+      </span>
+    </button>
   );
 }
 
@@ -1240,26 +1260,20 @@ function Teleprompter({
   paused: boolean;
   onDone: () => void;
 }) {
-  const style = CLASS_STYLE[cls];
   const { words, start, perWord, total } = lineTiming(line.text, pace, handoff);
   const playState = paused ? "paused" : "running";
 
   return (
     <li
       aria-current="true"
-      className="border-nat-gold animate-[noggin-pop_0.25s_ease-out] overflow-hidden rounded-2xl border-2 bg-[#2c2340]"
+      className={`${parchment} animate-[noggin-pop_0.25s_ease-out] overflow-hidden shadow-[0_0_0_3px_var(--candle-500),var(--shadow-card)]`}
     >
-      <div className="px-4 pt-3 pb-4">
-        <p className="flex items-center gap-2">
-          <HeroBadge cls={cls} small />
-          <span
-            className={`text-[13px] font-extrabold tracking-[0.1em] uppercase ${style.text}`}
-          >
-            {line.reader}, read this aloud
-          </span>
+      <div className="px-(--space-4) pt-(--space-3) pb-(--space-4)">
+        <div className="flex items-start gap-(--space-2)">
+          <Reader line={line} cls={cls} />
           {handoff && (
             <span
-              className="bg-nat-gold text-nat-bg ml-auto animate-[tele-handoff_1s_steps(1,end)_both] rounded-full px-2.5 py-0.5 text-xs font-extrabold"
+              className="tag ml-auto shrink-0 animate-[tele-handoff_1s_steps(1,end)_both] rounded-(--radius-sm) bg-(--ink) px-(--space-2) py-(--space-1) text-(--parchment-100)"
               style={{
                 animationDuration: `${start}ms`,
                 animationPlayState: playState,
@@ -1268,14 +1282,8 @@ function Teleprompter({
               Pass the phone
             </span>
           )}
-        </p>
-        <p className="text-nat-muted mt-1.5 text-sm">
-          as <span className="text-nat-text font-bold">{line.speaker}</span>
-          {line.direction && (
-            <span className="italic"> · {line.direction}</span>
-          )}
-        </p>
-        <p className="mt-1 text-[23px] leading-[1.4] font-semibold">
+        </div>
+        <p className="story-lead">
           <span className="sr-only">{line.text}</span>
           <span aria-hidden="true">
             {words.map((word, w) => (
@@ -1295,7 +1303,7 @@ function Teleprompter({
       </div>
       <span
         aria-hidden="true"
-        className="bg-nat-gold block h-1 origin-left animate-[tele-line_1s_linear_both]"
+        className="block h-1 origin-left animate-[tele-line_1s_linear_both] bg-(--candle-500)"
         style={{
           animationDuration: `${total}ms`,
           animationPlayState: playState,
@@ -1311,11 +1319,11 @@ function Teleprompter({
 /** Pause, skip and pace for the teleprompter, in thumb reach. */
 function ReadingControls({ reading }: { reading: Reading }) {
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex gap-2">
-        <button
-          type="button"
-          className={`${reading.paused ? goldBtn : ghostBtn} h-14 flex-1 gap-2`}
+    <div className="flex flex-col gap-(--space-2)">
+      <div className="flex gap-(--space-2)">
+        <Button
+          variant={reading.paused ? "primary" : "secondary"}
+          className="flex-1"
           aria-pressed={reading.paused}
           onClick={reading.onPause}
         >
@@ -1324,32 +1332,25 @@ function ReadingControls({ reading }: { reading: Reading }) {
             size={18}
           />
           {reading.paused ? "Keep reading" : "Pause"}
-        </button>
-        <button
-          type="button"
-          className={`${ghostBtn} h-14 w-auto! gap-1.5 px-4`}
-          onClick={reading.onSkip}
-        >
+        </Button>
+        <Button variant="secondary" onClick={reading.onSkip}>
           Skip line
           <Icon d="M6 5l8 7-8 7M18 5v14" size={18} />
-        </button>
+        </Button>
       </div>
-      <fieldset className="flex items-center gap-2">
+      <fieldset className="flex items-center gap-(--space-2)">
         <legend className="sr-only">Reading pace</legend>
-        <span
-          className="text-nat-muted text-[13px] font-extrabold tracking-[0.12em] uppercase"
-          aria-hidden="true"
-        >
+        <span className="tag text-(--cream-muted) uppercase" aria-hidden="true">
           Pace
         </span>
-        <div className="grid flex-1 grid-cols-3 gap-1.5">
+        <div className="grid flex-1 grid-cols-3 gap-(--space-2)">
           {(Object.keys(PACES) as Pace[]).map((p) => (
             <label
               key={p}
-              className={`has-focus-visible:outline-nat-gold flex h-11 cursor-pointer items-center justify-center rounded-xl border-2 text-sm font-bold capitalize has-focus-visible:outline-3 ${
+              className={`caption flex h-11 cursor-pointer items-center justify-center rounded-(--radius-md) border-2 capitalize has-focus-visible:outline-3 has-focus-visible:outline-offset-3 has-focus-visible:outline-(--focus) ${
                 reading.pace === p
-                  ? "border-nat-gold bg-nat-panel text-nat-text"
-                  : "border-nat-line text-nat-muted"
+                  ? "border-(--candle-500) bg-(--oak-700) text-(--cream)"
+                  : "border-(--edge) text-(--cream-muted)"
               }`}
             >
               <input
@@ -1368,6 +1369,9 @@ function ReadingControls({ reading }: { reading: Reading }) {
   );
 }
 
+/** How long the die tumbles before it lands. */
+const TUMBLE_MS = 700;
+
 function DiceRoll({
   hero,
   choice,
@@ -1385,16 +1389,20 @@ function DiceRoll({
 
   // The die tumbles through random faces, then lands on the real roll.
   useEffect(() => {
+    const quick = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const id = setInterval(
       () => setFace(1 + Math.floor(Math.random() * 20)),
       70,
     );
-    const stop = setTimeout(() => {
-      clearInterval(id);
-      setFace(roll.die);
-      setLanded(true);
-      navigator.vibrate?.(roll.die === 20 ? [60, 40, 60, 40, 120] : 50);
-    }, 1100);
+    const stop = setTimeout(
+      () => {
+        clearInterval(id);
+        setFace(roll.die);
+        setLanded(true);
+        navigator.vibrate?.(roll.die === 20 ? [60, 40, 60, 40, 120] : 50);
+      },
+      quick ? 0 : TUMBLE_MS,
+    );
     return () => {
       clearInterval(id);
       clearTimeout(stop);
@@ -1405,75 +1413,149 @@ function DiceRoll({
     if (landed) button.current?.focus();
   }, [landed]);
 
-  const big =
-    roll.die === 20 ? "NAT 20!" : roll.die === 1 ? "Critical fail!" : null;
+  const nat20 = landed && roll.die === 20;
+  const nat1 = landed && roll.die === 1;
 
   return (
     <div
-      className="fixed inset-0 z-60 flex animate-[noggin-fade_0.15s_ease-out] flex-col items-center justify-center bg-[#0d0a12]/90 px-6 text-center backdrop-blur-sm"
+      className="fixed inset-0 z-60 flex animate-[noggin-fade_0.15s_ease-out] flex-col items-center justify-center bg-black/70 px-(--space-4) backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="nat-roll-title"
     >
-      <p className="text-nat-muted text-sm font-extrabold tracking-[0.12em] uppercase">
-        {hero.name} · {choice.stat} check
-      </p>
-      <h2
-        id="nat-roll-title"
-        className="mt-1 max-w-80 text-xl leading-snug font-bold"
-      >
-        {choice.label}
-      </h2>
-
       <div
-        className={`relative mt-6 flex h-44 w-44 items-center justify-center ${landed ? "" : "animate-[nat-tumble_1.1s_ease-out]"}`}
+        className={`relative flex w-full max-w-(--screen-max) flex-col items-center gap-(--space-4) overflow-hidden rounded-(--radius-lg) bg-(--oak-800) px-(--space-4) pt-(--space-6) pb-(--space-4) text-center ${nat20 ? "shadow-(--shadow-glow)" : ""}`}
       >
-        <D20
-          className={`absolute inset-0 h-full w-full ${landed ? (roll.success ? "text-nat-emerald" : "text-nat-ember") : "text-nat-gold"}`}
+        {nat20 && <Rays />}
+        <div className="relative flex flex-col items-center gap-(--space-1)">
+          <p className="tag text-(--cream-muted) uppercase">
+            {hero.name} · {choice.stat} · DC {choice.dc}
+          </p>
+          <h2 id="nat-roll-title" className="body text-(--cream)">
+            {choice.label}
+          </h2>
+        </div>
+
+        <Die
+          value={face}
+          tone={nat20 ? "gold" : nat1 ? "wax" : "parchment"}
+          tumbling={!landed}
         />
-        <span
-          className={`${display} relative text-[56px] leading-none font-black tabular-nums`}
+
+        <div
+          className={`relative flex min-h-36 flex-col items-center gap-(--space-3) ${landed ? "" : "invisible"}`}
           aria-live="assertive"
         >
-          {face}
-        </span>
-      </div>
-
-      <div
-        className={`mt-6 min-h-28 transition-opacity ${landed ? "opacity-100" : "opacity-0"}`}
-      >
-        {big && (
-          <p
-            className={`${display} text-[34px] leading-none font-black ${roll.die === 20 ? "text-nat-gold animate-[noggin-pop_0.4s_ease-out]" : "text-nat-ember"}`}
-          >
-            {big}
+          {(nat20 || nat1) && (
+            <p
+              className={`title-xl ${nat20 ? "animate-[noggin-pop_0.4s_ease-out] text-(--candle-500)" : "text-(--wax-400)"}`}
+            >
+              {nat20 ? "Natural 20!" : "Natural 1"}
+            </p>
+          )}
+          <p className="text-[18px] leading-6 font-extrabold text-(--cream) tabular-nums">
+            {roll.die}
+            {roll.bonus ? ` + ${roll.bonus}` : ""} = {roll.total}
+            <span className="font-bold text-(--cream-muted)">
+              {" "}
+              vs DC {roll.dc}
+            </span>
           </p>
-        )}
-        <p className="text-nat-muted mt-2 text-base font-semibold">
-          {roll.die}
-          {roll.bonus
-            ? ` + ${roll.bonus} ${CLASSES[hero.cls].name} bonus`
-            : ""}{" "}
-          = <span className="text-nat-text font-extrabold">{roll.total}</span>{" "}
-          vs DC {roll.dc}
-        </p>
-        <p
-          className={`${display} mt-1 text-3xl font-black ${roll.success ? "text-nat-emerald" : "text-nat-ember"}`}
-        >
-          {roll.success ? "Success!" : "Failure!"}
-        </p>
-      </div>
+          <Verdict roll={roll} />
+          {(nat20 || nat1) && (
+            <p className="body text-(--cream-muted)">
+              {nat20
+                ? "Always a success. Everybody cheer!"
+                : "Always a miss. It happens to the best of us."}
+            </p>
+          )}
+        </div>
 
-      <button
-        ref={button}
-        type="button"
-        className={`${goldBtn} mt-4 max-w-80`}
-        disabled={!landed}
-        onClick={onDone}
-      >
-        Continue the story
-      </button>
+        <Button
+          ref={button}
+          size="lg"
+          block
+          className="relative"
+          disabled={!landed}
+          onClick={onDone}
+        >
+          Keep going
+        </Button>
+      </div>
     </div>
+  );
+}
+
+/** The d20 on the roll sheet: parchment, candle gold on a 20, red wax on a 1. */
+function Die({
+  value,
+  tone,
+  tumbling,
+}: {
+  value: number;
+  tone: "parchment" | "gold" | "wax";
+  tumbling: boolean;
+}) {
+  const fill = {
+    parchment: "fill-(--parchment-100) stroke-(--ink)",
+    gold: "fill-(--candle-500) stroke-(--ink)",
+    wax: "fill-(--wax-600) stroke-(--oak-900)",
+  }[tone];
+  const edge = {
+    parchment: "stroke-(--parchment-300)",
+    gold: "stroke-(--candle-300)",
+    wax: "stroke-(--wax-400)",
+  }[tone];
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      className={`relative h-33 w-33 ${tumbling ? "animate-[nat-tumble_0.7s_cubic-bezier(.3,.7,.4,1)_infinite]" : ""}`}
+      role="img"
+      aria-label={`d20 showing ${value}`}
+    >
+      <polygon
+        className={`${fill} [stroke-width:2.5] [stroke-linejoin:round]`}
+        points="50,4 90,27 90,73 50,96 10,73 10,27"
+      />
+      <g
+        className={`${edge} fill-none [stroke-width:2] [stroke-linejoin:round]`}
+      >
+        <polygon points="50,24 76,68 24,68" />
+        <path d="M50,4 L50,24 M90,27 L76,68 M90,73 L76,68 M50,96 L76,68 M50,96 L24,68 M10,73 L24,68 M10,27 L24,68 M10,27 L50,24 M90,27 L50,24" />
+      </g>
+      <text
+        x="50"
+        y="61"
+        textAnchor="middle"
+        className={`font-(family-name:--font-display) text-[34px] tabular-nums ${tone === "wax" ? "fill-(--on-wax)" : "fill-(--ink)"}`}
+      >
+        {value}
+      </text>
+    </svg>
+  );
+}
+
+/** Candle rays turning behind a Natural 20 (they hold still under reduced motion). */
+function Rays() {
+  return (
+    <svg
+      viewBox="0 0 320 320"
+      aria-hidden="true"
+      className="pointer-events-none absolute top-(--space-7) left-1/2 h-80 w-80 -translate-x-1/2 animate-[nat-spin_6s_linear_infinite] stroke-(--candle-300) [stroke-width:6] [stroke-linecap:round]"
+    >
+      {Array.from({ length: 12 }, (_, i) => {
+        const a = (i * Math.PI) / 6;
+        return (
+          <line
+            key={i}
+            x1={160 + Math.cos(a) * 80}
+            y1={160 + Math.sin(a) * 80}
+            x2={160 + Math.cos(a) * 120}
+            y2={160 + Math.sin(a) * 120}
+          />
+        );
+      })}
+    </svg>
   );
 }
 
@@ -1488,45 +1570,54 @@ function Ending({
   onNewQuest: () => void;
   onChangeParty: () => void;
 }) {
-  const loot = heroes.flatMap((h) =>
-    h.items.map((item) => ({ hero: h, item })),
-  );
+  const victory = ending === "victory";
   return (
     <section
       aria-labelledby="nat-ending"
-      className="border-nat-gold bg-nat-panel mx-5 mb-5 animate-[noggin-pop_0.45s_ease-out] rounded-[22px] border-2 px-5 pt-5 pb-5 text-center"
+      className="flex animate-[noggin-pop_0.45s_ease-out] flex-col items-center gap-(--space-5) px-(--space-4) pt-(--space-5) pb-[max(var(--space-4),env(safe-area-inset-bottom))] text-center"
     >
-      <D20 className="text-nat-gold mx-auto h-12 w-12" />
-      <h2
-        id="nat-ending"
-        className={`${display} text-nat-gold mt-2 text-[30px] leading-none font-black`}
+      <div
+        className={`rounded-(--radius-lg) px-(--space-6) py-(--space-3) ${
+          victory
+            ? "bg-(--candle-500) text-(--on-candle) shadow-(--shadow-glow)"
+            : "bg-(--wax-600) text-(--on-wax)"
+        }`}
       >
-        {ending === "victory" ? "Quest complete!" : "The party has fallen"}
-      </h2>
-      <p className="text-nat-muted mt-2 text-[15px]">
-        {ending === "victory"
-          ? "Songs will be sung about this one."
-          : "A legendary failure. Roll up and try again!"}
+        <h2 id="nat-ending" className="title-xl">
+          {victory ? "Victory!" : "Defeat"}
+        </h2>
+      </div>
+      <p className="body text-(--cream-muted)">
+        {victory
+          ? "The tavern roars. Drinks are on the house."
+          : "The party is out cold. The tavern saves your seats."}
       </p>
-      {loot.length > 0 && (
-        <ul className="mt-4 flex flex-wrap justify-center gap-1.5">
-          {loot.map(({ hero, item }, i) => (
-            <li
-              key={i}
-              className="bg-nat-gold/15 text-nat-gold rounded-full px-2.5 py-0.5 text-[13px] font-extrabold"
-            >
-              {hero.name}: {item}
-            </li>
-          ))}
-        </ul>
-      )}
-      <div className="mt-5 flex flex-col gap-2.5">
-        <button type="button" className={goldBtn} onClick={onNewQuest}>
-          New quest, same party
-        </button>
-        <button type="button" className={ghostBtn} onClick={onChangeParty}>
-          Change the party
-        </button>
+      <ul
+        className={`${parchment} story-small flex w-full flex-col gap-(--space-2) p-(--space-4) text-left`}
+        aria-label="How the party fared"
+      >
+        {heroes.map((h) => (
+          <li key={h.name} className="flex items-start gap-(--space-2)">
+            <span
+              className={`${CLASS_VARS[h.cls]} mt-2 inline-block h-2.5 w-2.5 shrink-0 rounded-(--radius-pill) bg-(--cls)`}
+              aria-hidden="true"
+            />
+            <span>
+              <strong className="font-bold">{h.name}</strong> the{" "}
+              {CLASSES[h.cls].name}
+              {h.hp === 0 ? ", knocked out" : `, ${h.hp}/${MAX_HP} HP`}
+              {h.items.length > 0 && `, carrying ${listNames(h.items)}`}.
+            </span>
+          </li>
+        ))}
+      </ul>
+      <div className="flex w-full flex-col gap-(--space-3)">
+        <Button size="lg" block onClick={onNewQuest}>
+          {victory ? "New quest" : "Try again"}
+        </Button>
+        <Button variant="secondary" block onClick={onChangeParty}>
+          New party
+        </Button>
       </div>
     </section>
   );
@@ -1536,20 +1627,20 @@ function Ending({
 
 const STEPS: { title: string; body: string }[] = [
   {
-    title: "Build your party",
-    body: "Up to 4 heroes on one phone. Each picks a class: Warriors are strong, Rogues are quick, Mages are clever, Bards are charming.",
+    title: "Gather the party",
+    body: "Up to 4 heroes share one phone. Warriors are strong, Rogues are quick, Mages are clever and Bards are charming.",
   },
   {
     title: "Pick a quest",
-    body: "Anything you like, from “steal the moon” to “find the king's lost sock”. Claude writes the story.",
+    body: "Anything you like, from “steal the moon” to “find the king's lost sock”. Claude is your game master.",
   },
   {
     title: "Read the script aloud",
-    body: "Each scene is a script. The phone shows one line at a time and who reads it, with a hint like “whispering”. Ham it up, then tap Next line.",
+    body: "Each scene is a script. The phone shows one line at a time, who reads it, and a hint like “whispering”. Ham it up, and pause or change the pace anytime.",
   },
   {
     title: "Take your turn",
-    body: "When the scene ends, pick a choice or type anything you want to do. Risky moves need a d20 roll: beat the number to succeed. Your class adds +3 to its stat.",
+    body: "Pick a choice or type your own. Risky moves mean a roll for it: beat the DC to succeed. Your class adds +3 to its stat.",
   },
 ];
 
@@ -1578,7 +1669,7 @@ function HelpButton() {
       <button
         ref={openerRef}
         type="button"
-        className={`${iconBtn} text-xl font-extrabold`}
+        className={`${iconBtn} button`}
         aria-label="How to play"
         aria-haspopup="dialog"
         onClick={() => setOpen(true)}
@@ -1587,7 +1678,7 @@ function HelpButton() {
       </button>
 
       {open && (
-        <div className="text-nat-text fixed inset-0 z-60 flex flex-col justify-end">
+        <div className="fixed inset-0 z-60 flex flex-col justify-end text-(--cream)">
           <button
             type="button"
             tabIndex={-1}
@@ -1599,17 +1690,14 @@ function HelpButton() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="nat-how"
-            className="bg-nat-bg border-nat-line relative mx-auto w-full max-w-130 animate-[noggin-sheet_0.28s_cubic-bezier(0.2,0.9,0.3,1.1)] rounded-t-[28px] border-2 border-b-0 px-6 pt-3 pb-[max(1.75rem,env(safe-area-inset-bottom))]"
+            className="relative mx-auto w-full max-w-(--screen-max) animate-[noggin-sheet_0.28s_cubic-bezier(0.2,0.9,0.3,1.1)] rounded-t-(--radius-lg) bg-(--oak-800) px-(--space-4) pt-(--space-3) pb-[max(var(--space-4),env(safe-area-inset-bottom))]"
           >
             <span
-              className="bg-nat-line mx-auto mb-3.5 block h-1.25 w-11 rounded"
+              className="mx-auto mb-(--space-3) block h-1.25 w-11 rounded-(--radius-pill) bg-(--oak-600)"
               aria-hidden="true"
             />
             <div className="flex items-center justify-between">
-              <h2
-                id="nat-how"
-                className={`${display} text-nat-gold text-2xl font-black`}
-              >
+              <h2 id="nat-how" className="title-lg">
                 How to play
               </h2>
               <button
@@ -1622,27 +1710,30 @@ function HelpButton() {
                 <Icon d="M6 6l12 12M18 6L6 18" size={16} />
               </button>
             </div>
-            <ol className="mt-5 space-y-4">
+            <ol className="mt-(--space-4) flex flex-col gap-(--space-4)">
               {STEPS.map((step, i) => (
-                <li key={step.title} className="flex items-start gap-3.5">
+                <li
+                  key={step.title}
+                  className="flex items-start gap-(--space-3)"
+                >
                   <span
-                    className={`${display} bg-nat-gold text-nat-bg flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg font-black`}
+                    className="title-md flex h-10 w-10 shrink-0 items-center justify-center rounded-(--radius-pill) bg-(--candle-500) text-(--on-candle)"
                     aria-hidden="true"
                   >
                     {i + 1}
                   </span>
                   <div>
-                    <p className="text-lg font-extrabold">{step.title}</p>
-                    <p className="text-nat-muted mt-0.5 text-[15px] leading-snug">
+                    <p className="label">{step.title}</p>
+                    <p className="body mt-(--space-1) text-(--cream-muted)">
                       {step.body}
                     </p>
                   </div>
                 </li>
               ))}
             </ol>
-            <button type="button" className={`${goldBtn} mt-6`} onClick={close}>
+            <Button size="lg" block className="mt-(--space-5)" onClick={close}>
               Got it
-            </button>
+            </Button>
           </section>
         </div>
       )}
@@ -1652,37 +1743,7 @@ function HelpButton() {
 
 // ---- Pieces ----
 
-function HeroBadge({ cls, small }: { cls: ClassId; small?: boolean }) {
-  return (
-    <span
-      className={`${CLASS_STYLE[cls].bg} text-nat-bg flex shrink-0 items-center justify-center rounded-full ${small ? "h-5 w-5" : "h-7 w-7"}`}
-      aria-hidden="true"
-    >
-      <ClassIcon cls={cls} className={small ? "h-3 w-3" : "h-4 w-4"} />
-    </span>
-  );
-}
-
-/** Simple class symbols: sword, dagger, star, music note. */
-function ClassIcon({ cls, className }: { cls: ClassId; className?: string }) {
-  const d = {
-    warrior: "M14.5 3.5l6 0 0 6-9 9-3-3 9-9zM7 14l3 3-3.5 3.5-3-3z",
-    rogue: "M19 3l2 2-10.5 10.5-2-2zM8.5 13.5l2 2-2.5 4.5-4-4z",
-    mage: "M12 2l2.6 6.4L21 9.3l-5 4.4 1.5 6.8L12 17l-5.5 3.5L8 13.7 3 9.3l6.4-.9z",
-    bard: "M9 18a3 3 0 11-2-2.8V4l12-2v13a3 3 0 11-2-2.8V5.3L9 6.6z",
-  }[cls];
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={`${className} fill-current`}
-      aria-hidden="true"
-    >
-      <path d={d} />
-    </svg>
-  );
-}
-
-/** A twenty-sided die, as a flat gem shape. */
+/** The d20 as a simple line shape, for the "writing" spinner. */
 function D20({ className }: { className?: string }) {
   return (
     <svg
@@ -1699,14 +1760,6 @@ function D20({ className }: { className?: string }) {
         d="M24 3l-10 18h20zM14 21L5 34M34 21l9 13M14 21l10 24 10-24M5 14l9 7M43 14l-9 7"
         opacity="0.55"
       />
-    </svg>
-  );
-}
-
-function Sparkle({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-      <path d="M10 2l1.8 6.2L18 10l-6.2 1.8L10 18l-1.8-6.2L2 10l6.2-1.8zM19 14l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9z" />
     </svg>
   );
 }
