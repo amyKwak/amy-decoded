@@ -1,5 +1,5 @@
 @import "tailwindcss";
-/* The Lucky Goose (/projects/nat20) design tokens and type classes. */
+/* The Lucky Goose (/projects/lucky-goose) design tokens and type classes. */
 @import "../../design-system/tokens.css";
 
 @theme {
@@ -161,7 +161,7 @@ a {
 }
 
 /* The Lucky Goose: the die tumbling, and the rays behind a Natural 20. */
-@keyframes nat-tumble {
+@keyframes goose-tumble {
   0% {
     transform: rotate(0deg) scale(1);
   }
@@ -173,7 +173,7 @@ a {
   }
 }
 
-@keyframes nat-spin {
+@keyframes goose-spin {
   to {
     transform: rotate(360deg);
   }
@@ -181,7 +181,7 @@ a {
 
 /* The Lucky Goose teleprompter: words light up as they are read, a bar fills while the
    line is held, and the "Pass the phone" tag shows during the handoff. Named
-   outside the nat- prefix so they keep running under reduced motion: they are
+   outside the goose- prefix so they keep running under reduced motion: they are
    the reading clock, and only fade or fill. */
 @keyframes tele-word {
   from {
@@ -222,7 +222,7 @@ a {
 @media (prefers-reduced-motion: reduce) {
   [class*="animate-[noggin-"],
   [class*="animate-[clue-"],
-  [class*="animate-[nat-"] {
+  [class*="animate-[goose-"] {
     animation: none;
   }
 }

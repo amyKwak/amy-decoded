@@ -1,4 +1,4 @@
-import { CLASSES, type ClassId } from "@/lib/nat20/game";
+import { CLASSES, type ClassId } from "@/lib/lucky-goose/game";
 import { CLASS_VARS } from "./ui";
 
 /** A hero's mark: the first letter of their name in their class colour. */

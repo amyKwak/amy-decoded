@@ -1,5 +1,5 @@
 import { useRef, type KeyboardEvent } from "react";
-import { CLASS_BONUS, CLASSES, type ClassId } from "@/lib/nat20/game";
+import { CLASS_BONUS, CLASSES, type ClassId } from "@/lib/lucky-goose/game";
 import { Monogram } from "./ClassBadge";
 import { CLASS_BLURB, CLASS_VARS, focusRing } from "./ui";
 

@@ -151,7 +151,7 @@ export function addGuestHero(
   };
 }
 
-export class NatRoom {
+export class GooseRoom {
   private snapshot: RoomSnapshot;
   private listeners = new Set<() => void>();
   private peer: Peer | null = null;
@@ -177,15 +177,15 @@ export class NatRoom {
     };
   }
 
-  static host(heroes: Hero[]): NatRoom {
-    const room = new NatRoom("host", makeRoomCode());
+  static host(heroes: Hero[]): GooseRoom {
+    const room = new GooseRoom("host", makeRoomCode());
     room.snapshot.table = { heroes, claims: {}, play: null };
     void room.startHost(0);
     return room;
   }
 
-  static join(code: string): NatRoom {
-    const room = new NatRoom("guest", code);
+  static join(code: string): GooseRoom {
+    const room = new GooseRoom("guest", code);
     void room.startGuest();
     return room;
   }

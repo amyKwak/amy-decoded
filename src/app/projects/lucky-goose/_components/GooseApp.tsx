@@ -30,9 +30,9 @@ import {
   type Roll,
   type ScriptLine,
   type Stat,
-} from "@/lib/nat20/game";
+} from "@/lib/lucky-goose/game";
 import {
-  NatRoom,
+  GooseRoom,
   normalizeRoomCode,
   PACES,
   type Act,
@@ -42,7 +42,7 @@ import {
   type RoomSnapshot,
   type Status,
   type Table,
-} from "@/lib/nat20/room";
+} from "@/lib/lucky-goose/room";
 import { Button } from "./Button";
 import { Monogram } from "./ClassBadge";
 import { ClassPicker } from "./ClassPicker";
@@ -63,9 +63,20 @@ const bottomBar =
 const parchment =
   "rounded-(--radius-md) bg-(--parchment-100) text-(--ink) shadow-(--shadow-card)";
 
-const PARTY_KEY = "nat20:party";
-const PACE_KEY = "nat20:pace";
-const QUEST_KEY = "nat20:quest";
+const PARTY_KEY = "lucky-goose:party";
+const PACE_KEY = "lucky-goose:pace";
+const QUEST_KEY = "lucky-goose:quest";
+/** Where saves lived before the game was renamed, so returning players keep theirs. */
+const LEGACY_KEYS: Record<string, string> = {
+  [PARTY_KEY]: "nat20:party",
+  [PACE_KEY]: "nat20:pace",
+  [QUEST_KEY]: "nat20:quest",
+};
+
+/** Reads a save, falling back to its pre-rename key. */
+function readSave(key: string): string | null {
+  return localStorage.getItem(key) ?? localStorage.getItem(LEGACY_KEYS[key]);
+}
 /** The longest action a player can type. */
 const CUSTOM_MAX = 120;
 
@@ -93,7 +104,7 @@ const noopSubscribe = () => () => {};
 const noSnapshot = () => null;
 
 /** A room's snapshot, or null when this phone plays alone. */
-function useRoom(room: NatRoom | null): RoomSnapshot | null {
+function useRoom(room: GooseRoom | null): RoomSnapshot | null {
   return useSyncExternalStore(
     room?.subscribe ?? noopSubscribe,
     room?.getSnapshot ?? noSnapshot,
@@ -118,7 +129,7 @@ function lineTiming(text: string, pace: Pace, handoff: boolean) {
   };
 }
 
-export function NatApp() {
+export function GooseApp() {
   const hydrated = useSyncExternalStore(
     noopSubscribe,
     () => true,
@@ -140,15 +151,13 @@ function Game() {
   const [step, setStep] = useState<"party" | "quest" | "play">("party");
   const [party, setParty] = useState<Hero[]>(() => {
     try {
-      return loadSavedParty(
-        JSON.parse(localStorage.getItem(PARTY_KEY) ?? "null"),
-      );
+      return loadSavedParty(JSON.parse(readSave(PARTY_KEY) ?? "null"));
     } catch {}
     return [];
   });
   const [quest, setQuest] = useState(() => {
     try {
-      return localStorage.getItem(QUEST_KEY) ?? "";
+      return readSave(QUEST_KEY) ?? "";
     } catch {
       return "";
     }
@@ -161,9 +170,9 @@ function Game() {
   );
   const [joining, setJoining] = useState(joinCode.length === 4);
   /** Another phone's game that this phone joined. */
-  const [guestRoom, setGuestRoom] = useState<NatRoom | null>(null);
+  const [guestRoom, setGuestRoom] = useState<GooseRoom | null>(null);
   /** This phone's table, once the host invites other phones. */
-  const [room, setRoom] = useState<NatRoom | null>(null);
+  const [room, setRoom] = useState<GooseRoom | null>(null);
 
   useEffect(() => () => room?.destroy(), [room]);
   useEffect(() => () => guestRoom?.destroy(), [guestRoom]);
@@ -205,7 +214,7 @@ function Game() {
     return (
       <JoinScreen
         initialCode={joinCode}
-        onJoin={(code) => setGuestRoom(NatRoom.join(code))}
+        onJoin={(code) => setGuestRoom(GooseRoom.join(code))}
         onBack={() => {
           clearJoinLink();
           setJoining(false);
@@ -221,7 +230,7 @@ function Game() {
         onChange={setParty}
         onJoin={room ? undefined : () => setJoining(true)}
         room={room}
-        onInvite={() => setRoom(NatRoom.host(named))}
+        onInvite={() => setRoom(GooseRoom.host(named))}
         onCloseTable={() => setRoom(null)}
         onNext={(seated) => {
           try {
@@ -239,7 +248,7 @@ function Game() {
         quest={quest}
         party={named}
         room={room}
-        onInvite={() => setRoom(NatRoom.host(named))}
+        onInvite={() => setRoom(GooseRoom.host(named))}
         onCloseTable={() => setRoom(null)}
         onQuest={setQuest}
         onBack={() => setStep("party")}
@@ -276,7 +285,7 @@ function PartySetup({
 }: {
   party: Hero[];
   onChange: (party: Hero[]) => void;
-  room: NatRoom | null;
+  room: GooseRoom | null;
   onInvite: () => void;
   onCloseTable: () => void;
   /** Joins another phone's game instead (hidden while hosting one). */
@@ -331,7 +340,7 @@ function PartySetup({
 
         {composing ? (
           <form
-            id="nat-new-hero"
+            id="goose-new-hero"
             className="flex flex-col gap-(--space-3)"
             onSubmit={(e) => {
               e.preventDefault();
@@ -345,7 +354,7 @@ function PartySetup({
               </p>
             )}
             <TextField
-              id="nat-hero-name"
+              id="goose-hero-name"
               label={
                 party.length
                   ? "Who else is joining?"
@@ -423,7 +432,7 @@ function PartySetup({
             )}
             <Button
               type="submit"
-              form="nat-new-hero"
+              form="goose-new-hero"
               size="lg"
               className="flex-1"
               disabled={taken}
@@ -483,7 +492,7 @@ function QuestSetup({
 }: {
   quest: string;
   party: Hero[];
-  room: NatRoom | null;
+  room: GooseRoom | null;
   onInvite: () => void;
   onCloseTable: () => void;
   onQuest: (q: string) => void;
@@ -560,7 +569,7 @@ function QuestSetup({
 
           <div className="mt-(--space-2)">
             <TextField
-              id="nat-quest"
+              id="goose-quest"
               label="Or dream up your own quest"
               placeholder="Any adventure you like"
               value={picked ? "" : quest}
@@ -588,7 +597,7 @@ function Invite({
   onInvite,
   onClose,
 }: {
-  room: NatRoom | null;
+  room: GooseRoom | null;
   party: Hero[];
   onInvite: () => void;
   onClose: () => void;
@@ -606,7 +615,7 @@ function Invite({
   }
 
   const share = async () => {
-    const url = `${window.location.origin}/projects/nat20?join=${snap.code}`;
+    const url = `${window.location.origin}/projects/lucky-goose?join=${snap.code}`;
     try {
       if (navigator.share)
         await navigator.share({ title: "Join my Lucky Goose quest", url });
@@ -621,7 +630,7 @@ function Invite({
 
   return (
     <section
-      aria-labelledby="nat-invite"
+      aria-labelledby="goose-invite"
       className="flex flex-col gap-(--space-3) rounded-(--radius-md) bg-(--oak-800) p-(--space-4)"
     >
       {snap.status === "failed" ? (
@@ -638,7 +647,7 @@ function Invite({
           <div className="flex items-start justify-between gap-(--space-3)">
             <div>
               <h2
-                id="nat-invite"
+                id="goose-invite"
                 className="tag text-(--cream-muted) uppercase"
               >
                 Game code
@@ -740,7 +749,7 @@ function JoinScreen({
             </h1>
           </div>
           <TextField
-            id="nat-join-code"
+            id="goose-join-code"
             label="Game code"
             hint="The 4 letters on the host's phone."
             placeholder="ABCD"
@@ -762,7 +771,13 @@ function JoinScreen({
 }
 
 /** A phone that joined someone else's game: pick a hero, then play along. */
-function GuestGame({ room, onLeave }: { room: NatRoom; onLeave: () => void }) {
+function GuestGame({
+  room,
+  onLeave,
+}: {
+  room: GooseRoom;
+  onLeave: () => void;
+}) {
   const snap = useRoom(room)!;
   const table = snap.table;
 
@@ -874,7 +889,7 @@ function GuestGame({ room, onLeave }: { room: NatRoom; onLeave: () => void }) {
  * A guest makes their own hero (while the host is still setting up), or
  * picks one the host already made.
  */
-function GuestPick({ room, table }: { room: NatRoom; table: Table }) {
+function GuestPick({ room, table }: { room: GooseRoom; table: Table }) {
   const [name, setName] = useState("");
   const [cls, setCls] = useState<ClassId>(() => suggestClass(table.heroes));
   const canMake = !table.play && table.heroes.length < MAX_HEROES;
@@ -894,7 +909,7 @@ function GuestPick({ room, table }: { room: NatRoom; table: Table }) {
           }}
         >
           <TextField
-            id="nat-guest-name"
+            id="goose-guest-name"
             label="What's your hero called?"
             placeholder={PLACEHOLDER_NAMES[table.heroes.length % 4]}
             value={name}
@@ -981,7 +996,7 @@ function Adventure({
 }: {
   quest: string;
   startingParty: Hero[];
-  room: NatRoom | null;
+  room: GooseRoom | null;
   onNewQuest: () => void;
   onChangeParty: () => void;
 }) {
@@ -1005,7 +1020,7 @@ function Adventure({
   const [paused, setPaused] = useState(false);
   const [pace, setPace] = useState<Pace>(() => {
     try {
-      const saved = localStorage.getItem(PACE_KEY);
+      const saved = readSave(PACE_KEY);
       if (saved && saved in PACES) return saved as Pace;
     } catch {}
     return "normal";
@@ -1077,7 +1092,7 @@ function Adventure({
     };
 
     try {
-      const res = await fetch("/api/nat20/turn", {
+      const res = await fetch("/api/lucky-goose/turn", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1823,10 +1838,10 @@ function ActionPanel({
   // parchment cards are too tall to pin.
   return (
     <section
-      aria-labelledby="nat-turn"
+      aria-labelledby="goose-turn"
       className="flex flex-col gap-(--space-3) px-(--space-4) pt-(--space-2) pb-[max(var(--space-4),env(safe-area-inset-bottom))]"
     >
-      <h2 id="nat-turn" className="flex items-center gap-(--space-2)">
+      <h2 id="goose-turn" className="flex items-center gap-(--space-2)">
         <Monogram cls={hero.cls} name={hero.name} large />
         <span className="flex flex-col">
           <span className="title-md text-(--cream)">
@@ -1861,7 +1876,7 @@ function ActionPanel({
         >
           <div className="flex-1">
             <TextField
-              id="nat-custom"
+              id="goose-custom"
               label="What does your hero do?"
               placeholder="Juggle the goblin's keys"
               value={custom}
@@ -2070,7 +2085,7 @@ function ReadingControls({ reading }: { reading: Reading }) {
             >
               <input
                 type="radio"
-                name="nat-pace"
+                name="goose-pace"
                 className="sr-only"
                 checked={reading.pace === p}
                 onChange={() => reading.onPace(p)}
@@ -2131,32 +2146,32 @@ function DiceRoll({
     if (landed) button.current?.focus();
   }, [landed]);
 
-  const nat20 = landed && roll.die === 20;
-  const nat1 = landed && roll.die === 1;
+  const natural20 = landed && roll.die === 20;
+  const natural1 = landed && roll.die === 1;
 
   return (
     <div
       className="fixed inset-0 z-60 flex animate-[noggin-fade_0.15s_ease-out] flex-col items-center justify-center bg-black/70 px-(--space-4) backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="nat-roll-title"
+      aria-labelledby="goose-roll-title"
     >
       <div
-        className={`relative flex w-full max-w-(--screen-max) flex-col items-center gap-(--space-4) overflow-hidden rounded-(--radius-lg) bg-(--oak-800) px-(--space-4) pt-(--space-6) pb-(--space-4) text-center ${nat20 ? "shadow-(--shadow-glow)" : ""}`}
+        className={`relative flex w-full max-w-(--screen-max) flex-col items-center gap-(--space-4) overflow-hidden rounded-(--radius-lg) bg-(--oak-800) px-(--space-4) pt-(--space-6) pb-(--space-4) text-center ${natural20 ? "shadow-(--shadow-glow)" : ""}`}
       >
-        {nat20 && <Rays />}
+        {natural20 && <Rays />}
         <div className="relative flex flex-col items-center gap-(--space-1)">
           <p className="tag text-(--cream-muted) uppercase">
             {hero.name} · {choice.stat} · DC {choice.dc}
           </p>
-          <h2 id="nat-roll-title" className="body text-(--cream)">
+          <h2 id="goose-roll-title" className="body text-(--cream)">
             {choice.label}
           </h2>
         </div>
 
         <Die
           value={face}
-          tone={nat20 ? "gold" : nat1 ? "wax" : "parchment"}
+          tone={natural20 ? "gold" : natural1 ? "wax" : "parchment"}
           tumbling={!landed}
         />
 
@@ -2164,11 +2179,11 @@ function DiceRoll({
           className={`relative flex min-h-36 flex-col items-center gap-(--space-3) ${landed ? "" : "invisible"}`}
           aria-live="assertive"
         >
-          {(nat20 || nat1) && (
+          {(natural20 || natural1) && (
             <p
-              className={`title-xl ${nat20 ? "animate-[noggin-pop_0.4s_ease-out] text-(--candle-500)" : "text-(--wax-400)"}`}
+              className={`title-xl ${natural20 ? "animate-[noggin-pop_0.4s_ease-out] text-(--candle-500)" : "text-(--wax-400)"}`}
             >
-              {nat20 ? "Natural 20!" : "Natural 1"}
+              {natural20 ? "Natural 20!" : "Natural 1"}
             </p>
           )}
           <p className="text-[18px] leading-6 font-extrabold text-(--cream) tabular-nums">
@@ -2180,9 +2195,9 @@ function DiceRoll({
             </span>
           </p>
           <Verdict roll={roll} />
-          {(nat20 || nat1) && (
+          {(natural20 || natural1) && (
             <p className="body text-(--cream-muted)">
-              {nat20
+              {natural20
                 ? "Always a success. Everybody cheer!"
                 : "Always a miss. It happens to the best of us."}
             </p>
@@ -2233,7 +2248,7 @@ function Die({
   return (
     <svg
       viewBox="0 0 100 100"
-      className={`relative h-33 w-33 ${tumbling ? "animate-[nat-tumble_0.7s_cubic-bezier(.3,.7,.4,1)_infinite]" : ""}`}
+      className={`relative h-33 w-33 ${tumbling ? "animate-[goose-tumble_0.7s_cubic-bezier(.3,.7,.4,1)_infinite]" : ""}`}
       role="img"
       aria-label={`d20 showing ${value}`}
     >
@@ -2265,7 +2280,7 @@ function Rays() {
     <svg
       viewBox="0 0 320 320"
       aria-hidden="true"
-      className="pointer-events-none absolute top-(--space-7) left-1/2 h-80 w-80 -translate-x-1/2 animate-[nat-spin_6s_linear_infinite] stroke-(--candle-300) [stroke-width:6] [stroke-linecap:round]"
+      className="pointer-events-none absolute top-(--space-7) left-1/2 h-80 w-80 -translate-x-1/2 animate-[goose-spin_6s_linear_infinite] stroke-(--candle-300) [stroke-width:6] [stroke-linecap:round]"
     >
       {Array.from({ length: 12 }, (_, i) => {
         const a = (i * Math.PI) / 6;
@@ -2296,7 +2311,7 @@ function Ending({
   const victory = ending === "victory";
   return (
     <section
-      aria-labelledby="nat-ending"
+      aria-labelledby="goose-ending"
       className="flex animate-[noggin-pop_0.45s_ease-out] flex-col items-center gap-(--space-5) px-(--space-4) pt-(--space-5) pb-[max(var(--space-4),env(safe-area-inset-bottom))] text-center"
     >
       <div
@@ -2306,7 +2321,7 @@ function Ending({
             : "bg-(--wax-600) text-(--on-wax)"
         }`}
       >
-        <h2 id="nat-ending" className="title-xl">
+        <h2 id="goose-ending" className="title-xl">
           {victory ? "Victory!" : "Defeat"}
         </h2>
       </div>
@@ -2405,7 +2420,7 @@ function HelpButton() {
           <section
             role="dialog"
             aria-modal="true"
-            aria-labelledby="nat-how"
+            aria-labelledby="goose-how"
             className="relative mx-auto w-full max-w-(--screen-max) animate-[noggin-sheet_0.28s_cubic-bezier(0.2,0.9,0.3,1.1)] rounded-t-(--radius-lg) bg-(--oak-800) px-(--space-4) pt-(--space-3) pb-[max(var(--space-4),env(safe-area-inset-bottom))]"
           >
             <span
@@ -2413,7 +2428,7 @@ function HelpButton() {
               aria-hidden="true"
             />
             <div className="flex items-center justify-between">
-              <h2 id="nat-how" className="title-lg">
+              <h2 id="goose-how" className="title-lg">
                 How to play
               </h2>
               <button

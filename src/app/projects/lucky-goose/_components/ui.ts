@@ -1,4 +1,4 @@
-import type { ClassId } from "@/lib/nat20/game";
+import type { ClassId } from "@/lib/lucky-goose/game";
 
 // Shared styles for The Lucky Goose. Every value comes from
 // design-system/tokens.css; type styles use its classes (title-lg, button…).

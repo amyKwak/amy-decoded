@@ -8,7 +8,7 @@ import {
   gmMessages,
   QUEST_MAX,
   SET_SCENE_TOOL,
-} from "@/lib/nat20/game";
+} from "@/lib/lucky-goose/game";
 import { clientIp, createRateLimiter } from "@/lib/moody/rate-limit";
 
 const HOUR = 60 * 60 * 1000;
@@ -102,7 +102,8 @@ export async function POST(request: Request) {
           ),
         });
       } catch (error) {
-        if (!request.signal.aborted) console.error("nat20 turn failed", error);
+        if (!request.signal.aborted)
+          console.error("lucky goose turn failed", error);
       } finally {
         controller.close();
       }

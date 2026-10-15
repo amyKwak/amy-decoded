@@ -1,4 +1,4 @@
-import { CLASSES, type ClassId } from "@/lib/nat20/game";
+import { CLASSES, type ClassId } from "@/lib/lucky-goose/game";
 import { Monogram } from "./ClassBadge";
 import { CLASS_VARS, focusRing } from "./ui";
 

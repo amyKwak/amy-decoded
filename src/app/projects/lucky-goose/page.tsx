@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { Alegreya, Nunito, Pirata_One } from "next/font/google";
 import { SiteHeader } from "../../../components/SiteHeader";
-import { NatApp } from "./_components/NatApp";
+import { GooseApp } from "./_components/GooseApp";
 
 // The Lucky Goose's three faces (design-system/components/bundle.css).
 const pirata = Pirata_One({ subsets: ["latin"], weight: "400" });
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     "A pass-the-phone fantasy adventure run by an AI game master. Gather a party, pick any quest, and roll the dice as the story unfolds live.",
 };
 
-export default function Nat20Page() {
+export default function LuckyGoosePage() {
   return (
     <div className="flex min-h-dvh shrink-0 flex-col bg-(--oak-900)">
       {/* The site header is designed for a light page. */}
@@ -44,7 +44,7 @@ export default function Nat20Page() {
         style={fonts}
         className="flex flex-1 flex-col font-(family-name:--font-ui) text-(--cream)"
       >
-        <NatApp />
+        <GooseApp />
       </div>
     </div>
   );
