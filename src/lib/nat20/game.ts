@@ -21,7 +21,11 @@ export const CLASSES: Record<
   knight: { name: "Knight", stat: "STR", blurb: "Strong. Hits things." },
   thief: { name: "Thief", stat: "DEX", blurb: "Quick. Sneaks and steals." },
   wizard: { name: "Wizard", stat: "INT", blurb: "Clever. Casts spells." },
-  jester: { name: "Jester", stat: "CHA", blurb: "Charming. Talks their way out." },
+  jester: {
+    name: "Jester",
+    stat: "CHA",
+    blurb: "Charming. Talks their way out.",
+  },
 };
 /** Your class's stat gets this bonus on rolls. */
 export const CLASS_BONUS = 3;
@@ -332,6 +336,29 @@ export function cleanGmTurn(input: unknown): GmTurn {
 }
 
 /** Checks a party sent from the browser before it goes into a prompt. */
+/** Class names from before the rename, still in parties saved on phones. */
+const OLD_CLASSES: Record<string, ClassId> = {
+  warrior: "knight",
+  rogue: "thief",
+  mage: "wizard",
+  bard: "jester",
+};
+
+/**
+ * A party saved on this phone: old class names are renamed, and anything
+ * unreadable is dropped, so an old save can't break the game.
+ */
+export function loadSavedParty(input: unknown): Hero[] {
+  if (!Array.isArray(input)) return [];
+  return cleanHeroes(
+    input.map((h) =>
+      h && typeof h === "object" && typeof h.cls === "string"
+        ? { ...h, cls: OLD_CLASSES[h.cls] ?? h.cls }
+        : h,
+    ),
+  );
+}
+
 export function cleanHeroes(input: unknown): Hero[] {
   if (!Array.isArray(input)) return [];
   return input

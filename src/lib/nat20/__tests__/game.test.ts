@@ -7,6 +7,7 @@ import {
   cleanLog,
   describeRoll,
   gmMessages,
+  loadSavedParty,
   nextHero,
   parseScript,
   parseScriptLine,
@@ -201,5 +202,22 @@ describe("script", () => {
       "The candles flicker.",
       "Who go",
     ]);
+  });
+});
+
+describe("loadSavedParty", () => {
+  it("renames classes from before the rename", () => {
+    const party = loadSavedParty([
+      { name: "Mira", cls: "warrior", hp: 10, items: [] },
+      { name: "Pip", cls: "bard", hp: 10, items: [] },
+    ]);
+    expect(party.map((h) => h.cls)).toEqual(["knight", "jester"]);
+  });
+
+  it("drops heroes it can't read", () => {
+    expect(
+      loadSavedParty([{ name: "Gob", cls: "goblin" }, null, "Pip"]),
+    ).toEqual([]);
+    expect(loadSavedParty({ not: "a party" })).toEqual([]);
   });
 });

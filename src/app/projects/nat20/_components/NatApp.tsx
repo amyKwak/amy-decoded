@@ -14,6 +14,7 @@ import {
   CLASS_BONUS,
   CLASSES,
   describeRoll,
+  loadSavedParty,
   MAX_HEROES,
   MAX_HP,
   NAME_MAX,
@@ -138,12 +139,9 @@ function Game() {
   const [step, setStep] = useState<"party" | "quest" | "play">("party");
   const [party, setParty] = useState<Hero[]>(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem(PARTY_KEY) ?? "null");
-      if (Array.isArray(saved) && saved.length)
-        return (saved as Hero[]).map((h, i) => ({
-          ...h,
-          name: h.name.trim() || `Hero ${i + 1}`,
-        }));
+      return loadSavedParty(
+        JSON.parse(localStorage.getItem(PARTY_KEY) ?? "null"),
+      );
     } catch {}
     return [];
   });
