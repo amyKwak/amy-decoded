@@ -18,6 +18,8 @@ export type Game = {
   summary: string;
   /** The page to play it on, once it's built. */
   href?: string;
+  /** Card art for the lobby, for games that are built. */
+  image?: string;
 };
 
 export const GAMES: Game[] = [
@@ -44,7 +46,7 @@ export const GAMES: Game[] = [
   { slug: "gradation", name: "Gradation", season: 3, day: "Day 6", type: "Sanctuary", players: { min: 2, max: 3 }, summary: "Hide seven numbers in a row of shaded boxes, then duel one box at a time." },
   { slug: "card-janggi", name: "Card Janggi", season: 3, day: "Final", type: "Ascension", players: { min: 2, max: 2 }, summary: "Lay five move cards face down in secret order, then race your piece across the board." },
   { slug: "color-link", name: "Color Link", season: 3, day: "Final", type: "Ascension", players: { min: 2, max: 2 }, summary: "Place colored pairs so every pair can still connect. Call \"impossible\" when your rival breaks it." },
-  { slug: "equation-traffic-light", name: "Equation Traffic Light", season: 3, day: "Final", type: "Ascension", players: { min: 1, max: 2 }, summary: "Hide a nine-cell equation, then crack your rival's from the green, yellow and red lights on each guess.", href: "/projects/gods-plan/equation-traffic-light" },
+  { slug: "equation-traffic-light", name: "Equation Traffic Light", season: 3, day: "Final", type: "Ascension", players: { min: 1, max: 2 }, summary: "Hide a nine-cell equation, then crack your rival's from the green, yellow and red lights on each guess.", href: "/projects/gods-plan/equation-traffic-light", image: "/projects/gods-plan/equation-traffic-light.svg" },
 ];
 
 export const SEASONS = [...new Set(GAMES.map((g) => g.season))].sort((a, b) => b - a);
@@ -56,18 +58,22 @@ export type GameFilter = {
   players?: { min: number; max: number };
   type?: MatchType;
   playableOnly?: boolean;
+  /** Free text matched against the name and summary. */
+  query?: string;
 };
 
 /** Games that fit the filter, ones you can play now first. */
 export function filterGames(games: Game[], filter: GameFilter): Game[] {
   const { players } = filter;
+  const query = filter.query?.trim().toLowerCase() ?? "";
   return games
     .filter(
       (g) =>
         (filter.season === undefined || g.season === filter.season) &&
         (players === undefined || (g.players.min <= players.max && players.min <= g.players.max)) &&
         (filter.type === undefined || g.type === filter.type) &&
-        (!filter.playableOnly || g.href !== undefined),
+        (!filter.playableOnly || g.href !== undefined) &&
+        (query === "" || `${g.name} ${g.summary}`.toLowerCase().includes(query)),
     )
     .sort((a, b) => Number(b.href !== undefined) - Number(a.href !== undefined));
 }

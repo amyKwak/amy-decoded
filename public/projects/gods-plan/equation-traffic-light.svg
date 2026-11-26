@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#bfd6ff"/><stop offset=".35" stop-color="#d6c3ff"/><stop offset=".68" stop-color="#ffc6e4"/><stop offset="1" stop-color="#c6f0ec"/></linearGradient>
+<filter id="sh" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#2b1e66" flood-opacity=".18"/></filter></defs>
+<rect width="800" height="600" fill="url(#bg)"/>
+<circle cx="640" cy="110" r="160" fill="#fff" opacity=".28"/><circle cx="120" cy="520" r="200" fill="#fff" opacity=".22"/>
+<rect x="36" y="150" width="72" height="72" rx="14" fill="#17643f" filter="url(#sh)"/>
+<text x="72.0" y="198.0" text-anchor="middle" font-family="DM Sans, Helvetica, Arial, sans-serif" font-size="36" font-weight="700" fill="#fff">3</text>
+<rect x="118" y="150" width="72" height="72" rx="14" fill="#ffd95a" filter="url(#sh)"/>
+<text x="154.0" y="198.0" text-anchor="middle" font-family="DM Sans, Helvetica, Arial, sans-serif" font-size="36" font-weight="700" fill="#221a4a">8</text>
+<rect x="200" y="150" width="72" height="72" rx="14" fill="#17643f" filter="url(#sh)"/>
+<text x="236.0" y="198.0" text-anchor="middle" font-family="DM Sans, Helvetica, Arial, sans-serif" font-size="36" font-weight="700" fill="#fff">÷</text>
+<rect x="282" y="150" width="72" height="72" rx="14" fill="#cc3340" filter="url(#sh)"/>
+<text x="318.0" y="198.0" text-anchor="middle" font-family="DM Sans, Helvetica, Arial, sans-serif" font-size="36" font-weight="700" fill="#fff">2</text>
+<rect x="364" y="150" width="72" height="72" rx="14" fill="#17643f" filter="url(#sh)"/>
+<text x="400.0" y="198.0" text-anchor="middle" font-family="DM Sans, Helvetica, Arial, sans-serif" font-size="36" font-weight="700" fill="#fff">+</text>
+<rect x="446" y="150" width="72" height="72" rx="14" fill="#ffd95a" filter="url(#sh)"/>
+<text x="482.0" y="198.0" text-anchor="middle" font-family="DM Sans, Helvetica, Arial, sans-serif" font-size="36" font-weight="700" fill="#221a4a">7</text>
+<rect x="528" y="150" width="72" height="72" rx="14" fill="#17643f" filter="url(#sh)"/>
+<text x="564.0" y="198.0" text-anchor="middle" font-family="DM Sans, Helvetica, Arial, sans-serif" font-size="36" font-weight="700" fill="#fff">=</text>
+<rect x="610" y="150" width="72" height="72" rx="14" fill="#cc3340" filter="url(#sh)"/>
+<text x="646.0" y="198.0" text-anchor="middle" font-family="DM Sans, Helvetica, Arial, sans-serif" font-size="36" font-weight="700" fill="#fff">2</text>
+<rect x="692" y="150" width="72" height="72" rx="14" fill="#ffd95a" filter="url(#sh)"/>
+<text x="728.0" y="198.0" text-anchor="middle" font-family="DM Sans, Helvetica, Arial, sans-serif" font-size="36" font-weight="700" fill="#221a4a">6</text>
+<rect x="36" y="252" width="72" height="72" rx="14" fill="#17643f" filter="url(#sh)"/>
+<text x="72.0" y="300.0" text-anchor="middle" font-family="DM Sans, Helvetica, Arial, sans-serif" font-size="36" font-weight="700" fill="#fff">3</text>
+<rect x="118" y="252" width="72" height="72" rx="14" fill="#17643f" filter="url(#sh)"/>
+<text x="154.0" y="300.0" text-anchor="middle" font-family="DM Sans, Helvetica, Arial, sans-serif" font-size="36" font-weight="700" fill="#fff">6</text>
+<rect x="200" y="252" width="72" height="72" rx="14" fill="#17643f" filter="url(#sh)"/>
+<text x="236.0" y="300.0" text-anchor="middle" font-family="DM Sans, Helvetica, Arial, sans-serif" font-size="36" font-weight="700" fill="#fff">÷</text>
+<rect x="282" y="252" width="72" height="72" rx="14" fill="#17643f" filter="url(#sh)"/>
+<text x="318.0" y="300.0" text-anchor="middle" font-family="DM Sans, Helvetica, Arial, sans-serif" font-size="36" font-weight="700" fill="#fff">4</text>
+<rect x="364" y="252" width="72" height="72" rx="14" fill="#17643f" filter="url(#sh)"/>
+<text x="400.0" y="300.0" text-anchor="middle" font-family="DM Sans, Helvetica, Arial, sans-serif" font-size="36" font-weight="700" fill="#fff">+</text>
+<rect x="446" y="252" width="72" height="72" rx="14" fill="#17643f" filter="url(#sh)"/>
+<text x="482.0" y="300.0" text-anchor="middle" font-family="DM Sans, Helvetica, Arial, sans-serif" font-size="36" font-weight="700" fill="#fff">8</text>
+<rect x="528" y="252" width="72" height="72" rx="14" fill="#17643f" filter="url(#sh)"/>
+<text x="564.0" y="300.0" text-anchor="middle" font-family="DM Sans, Helvetica, Arial, sans-serif" font-size="36" font-weight="700" fill="#fff">=</text>
+<rect x="610" y="252" width="72" height="72" rx="14" fill="#17643f" filter="url(#sh)"/>
+<text x="646.0" y="300.0" text-anchor="middle" font-family="DM Sans, Helvetica, Arial, sans-serif" font-size="36" font-weight="700" fill="#fff">1</text>
+<rect x="692" y="252" width="72" height="72" rx="14" fill="#17643f" filter="url(#sh)"/>
+<text x="728.0" y="300.0" text-anchor="middle" font-family="DM Sans, Helvetica, Arial, sans-serif" font-size="36" font-weight="700" fill="#fff">7</text>
+<rect x="36" y="354" width="72" height="72" rx="14" fill="#ffffff" filter="url(#sh)" opacity=".55"/>
+<rect x="118" y="354" width="72" height="72" rx="14" fill="#ffffff" filter="url(#sh)" opacity=".55"/>
+<rect x="200" y="354" width="72" height="72" rx="14" fill="#ffffff" filter="url(#sh)" opacity=".55"/>
+<rect x="282" y="354" width="72" height="72" rx="14" fill="#ffffff" filter="url(#sh)" opacity=".55"/>
+<rect x="364" y="354" width="72" height="72" rx="14" fill="#ffffff" filter="url(#sh)" opacity=".55"/>
+<rect x="446" y="354" width="72" height="72" rx="14" fill="#ffffff" filter="url(#sh)" opacity=".55"/>
+<rect x="528" y="354" width="72" height="72" rx="14" fill="#ffffff" filter="url(#sh)" opacity=".55"/>
+<rect x="610" y="354" width="72" height="72" rx="14" fill="#ffffff" filter="url(#sh)" opacity=".55"/>
+<rect x="692" y="354" width="72" height="72" rx="14" fill="#ffffff" filter="url(#sh)" opacity=".55"/>
+</svg>

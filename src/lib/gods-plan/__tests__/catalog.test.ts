@@ -25,6 +25,12 @@ describe("filterGames", () => {
     expect(names({ players: { min: 3, max: 6 } })).not.toContain("Card Janggi");
   });
 
+  it("searches names and summaries, ignoring case", () => {
+    expect(names({ query: "  EQUATION " })).toContain("Equation Traffic Light");
+    expect(names({ query: "cubes" })).toEqual(["Count the Cubes"]);
+    expect(names({ query: "zzz" })).toEqual([]);
+  });
+
   it("lists playable games first", () => {
     expect(filterGames(GAMES, {})[0].name).toBe("Equation Traffic Light");
   });
