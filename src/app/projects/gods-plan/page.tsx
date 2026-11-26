@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { IkigaiMark } from "../../../components/IkigaiMark";
 import { GameLobby } from "./_components/GameLobby";
+import { GodsPlanLogo } from "./_components/GodsPlanLogo";
 import { focusRing } from "./_components/ui";
 
 export const metadata: Metadata = {
@@ -21,7 +22,9 @@ export default function GodsPlanPage() {
       >
         <IkigaiMark className="size-7" />
       </Link>
-      <h1 className="sr-only">God&apos;s Plan games</h1>
+      <h1 className="pt-3 pb-5">
+        <GodsPlanLogo />
+      </h1>
       <GameLobby />
     </main>
   );
