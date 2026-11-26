@@ -112,17 +112,17 @@ export function GameLobby() {
             <li key={game.slug} className="flex">
               <a
                 href={game.href}
-                className={`border-gp-line group flex flex-1 flex-col overflow-hidden rounded-3xl border bg-white/80 transition hover:-translate-y-0.5 hover:shadow-[0_14px_30px_-18px_rgba(43,30,102,0.4)] ${focusRing}`}
+                className={`border-gp-line group flex flex-1 flex-col overflow-hidden bg-gp-key rounded-3xl border transition hover:-translate-y-0.5 hover:shadow-[0_14px_30px_-18px_rgba(43,30,102,0.4)] ${focusRing}`}
               >
                 {game.image ? (
                   // eslint-disable-next-line @next/next/no-img-element -- static SVG art
-                  <img src={game.image} alt="" className="aspect-4/3 w-full object-cover" />
+                  <img src={game.image} alt="" className="border-gp-line-strong aspect-4/3 w-full border-b object-cover" />
                 ) : (
                   <div aria-hidden="true" className="gp-sheen aspect-4/3 w-full" />
                 )}
                 <div className="flex flex-col gap-0.5 px-5 pt-4 pb-5">
-                  <h2 className={`${serif} text-[26px] leading-tight`}>{game.name}</h2>
-                  <p className="text-gp-dusk text-[15px] font-semibold">
+                  <h2 className={`${serif} text-[20px] leading-tight`}>{game.name}</h2>
+                  <p className={`${serif} text-gp-dusk text-[20px] leading-tight`}>
                     {playerLabel(game.players)} {game.players.max === 1 ? "player" : "players"}
                   </p>
                 </div>
