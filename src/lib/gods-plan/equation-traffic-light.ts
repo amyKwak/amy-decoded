@@ -1,5 +1,6 @@
 /**
- * Equation Traffic Light, the third game of The Devil's Plan S3 final.
+ * Equation Traffic Light, the third game of the S3 final of The Devil's Plan,
+ * the show God's Plan is inspired by.
  *
  * Each player hides a nine-cell equation. Players take turns guessing the
  * other's, and every cell of a guess lights up: green if it's in the right

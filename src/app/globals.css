@@ -90,6 +90,39 @@
   --color-clue-mint: #1fc58e;
   --color-clue-tangerine: #ff8a3d;
   --color-clue-lemon: #ffe45c;
+
+  /* God's Plan (/projects/gods-plan): pearl ground, iridescent glows, ink text.
+     Text contrast on pearl: ink 14.8:1, dusk 7.8:1, seafoam-ink 5.8:1. */
+  --color-gp-pearl: #f8f5fd;
+  --color-gp-ink: #221a4a;
+  --color-gp-dusk: #4e4775;
+  --color-gp-royal: #2b1e66;
+  --color-gp-amethyst: #5b3fd1;
+  --color-gp-line: #e2d9f3;
+  --color-gp-line-strong: #cfc3ea;
+  --color-gp-key: #f1ecfa;
+  --color-gp-iris: #bfd6ff;
+  --color-gp-lilac: #d6c3ff;
+  --color-gp-rose: #ffc6e4;
+  --color-gp-seafoam: #c6f0ec;
+  --color-gp-seafoam-ink: #1d6b63;
+  /* Clue lights: the only saturated colors in a game. */
+  --color-gp-green: #17643f;
+  --color-gp-sun: #ffd95a;
+  --color-gp-red: #cc3340;
+}
+
+/* God's Plan: the soft iridescent glow behind the page, and the pearl sheen. */
+.gp-aurora {
+  background:
+    radial-gradient(50% 40% at 10% 0%, #d9e6ff 0%, transparent 70%),
+    radial-gradient(40% 35% at 70% 0%, #ffddef 0%, transparent 70%),
+    radial-gradient(45% 45% at 35% 30%, #ece0ff 0%, transparent 70%),
+    var(--color-gp-pearl);
+}
+
+.gp-sheen {
+  background: linear-gradient(120deg, #bfd6ff 0%, #d6c3ff 34%, #ffc6e4 66%, #c6f0ec 100%);
 }
 
 html,
