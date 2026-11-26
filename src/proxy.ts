@@ -33,10 +33,12 @@ export const config = {
     "/projects/clueless/:path*",
     "/projects/noggin/:path*",
     "/projects/moody/:path*",
+    "/projects/second-thought/:path*",
     "/api/meme/:path*",
     "/api/lucky-goose/:path*",
     "/api/clueless/:path*",
     "/api/noggin/:path*",
     "/api/moody/:path*",
+    "/api/second-thought/:path*",
   ],
 };

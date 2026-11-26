@@ -44,6 +44,25 @@
   --color-moody-coral: #f3a898;
   --color-moody-sky: #9ccbf0;
 
+  /* Second Thought (/projects/second-thought): lilac paper, violet accent */
+  --color-st-bg: #f7f5fb;
+  --color-st-ink: #24213a;
+  --color-st-muted: #5e5a73;
+  --color-st-field: #fcfbfe;
+  --color-st-line: #e3dff0;
+  --color-st-line-strong: #cfc8e4;
+  --color-st-track: #ece8f6;
+  --color-st-accent: #5a49c4;
+  --color-st-accent-hover: #4a3aac;
+  --color-st-accent-soft: #e9e5fb;
+  --color-st-peach: #ffd9c2;
+  --color-st-peach-pale: #fff0e6;
+  --color-st-mint: #bfe8d2;
+  --color-st-mint-pale: #e8f6ee;
+  --color-st-mint-ink: #22694a;
+  --color-st-butter: #fff3cc;
+  --color-st-sky-pale: #e5f1fc;
+
   /* Noggin (/projects/noggin) */
   --color-noggin-bg: #fff7ea;
   --color-noggin-ink: #1a1712;

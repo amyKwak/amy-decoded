@@ -1,0 +1,265 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//amy//recruiting-week//EN
+CALSCALE:GREGORIAN
+BEGIN:VTIMEZONE
+TZID:America/Los_Angeles
+BEGIN:DAYLIGHT
+TZOFFSETFROM:-0800
+TZOFFSETTO:-0700
+TZNAME:PDT
+DTSTART:19700308T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:-0700
+TZOFFSETTO:-0800
+TZNAME:PST
+DTSTART:19701101T020000
+RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:recruit-20261020-1000@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261020T100000
+DTEND;TZID=America/Los_Angeles:20261020T113000
+SUMMARY:Resume fix (90 min cap)
+DESCRIPTION:Add 'AI Engineering\, independent\, Mar 2025-Present' entry (S
+ econd Thought + Job Scout). Save Frontend/E-commerce and AI Product Engin
+ eer versions. LinkedIn headline\, Open to Work (recruiters only)\, featur
+ e amy-decoded.com.
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261020-1130@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261020T113000
+DTEND;TZID=America/Los_Angeles:20261020T123000
+SUMMARY:Build this week's 40-job list
+DESCRIPTION:Skim the ~295 unscored Job Scout backlog roles (sqlite query) 
+ and pick the best fits\, plus the 55+ alerts you already have. Top up fro
+ m LinkedIn (Past week + In my network filters)\, HN Who is Hiring (Oct)\,
+  Built In Seattle. Mark roles where you know someone as Tier A.
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261020-1230@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261020T123000
+DTEND;TZID=America/Los_Angeles:20261020T140000
+SUMMARY:Apply: 8 roles
+DESCRIPTION:Top of the 40-job list. Use the Job Scout kit (npm run alert /
+  apply) to tailor. Referral ask first for Tier A.
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261020-1400@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261020T140000
+DTEND;TZID=America/Los_Angeles:20261020T150000
+SUMMARY:Lunch + walk
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261020-1500@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261020T150000
+DTEND;TZID=America/Los_Angeles:20261020T163000
+SUMMARY:Outreach: 15 referral asks
+DESCRIPTION:Tier A contacts: KiwiCo\, Hack Reactor/Galvanize\, UCSD alumni
+ . npm run referral -- N for anyone you don't know.
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261020-1630@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261020T163000
+DTEND;TZID=America/Los_Angeles:20261020T180000
+SUMMARY:Coding: arrays\, hashing\, two pointers
+DESCRIPTION:3 problems\, 25 min each\, timed\, no AI. Log missed patterns.
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261020-1800@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261020T180000
+DTEND;TZID=America/Los_Angeles:20261020T190000
+SUMMARY:Write 7 STAR stories
+DESCRIPTION:Subscription flow\, CMS platform\, 6-surface redesign\, search
+  + Mixpanel\, peak-traffic A/B\, Galvanize mentoring\, gap since Mar 2025
+ .
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261020-1900@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261020T190000
+DTEND;TZID=America/Los_Angeles:20261020T193000
+SUMMARY:Tracker + pick tomorrow's 10 roles
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261021-1000@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261021T100000
+DTEND;TZID=America/Los_Angeles:20261021T120000
+SUMMARY:Coding: sliding window\, stacks\, binary search
+DESCRIPTION:4 problems\, timed\, no AI.
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261021-1200@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261021T120000
+DTEND;TZID=America/Los_Angeles:20261021T131500
+SUMMARY:Frontend build: React typeahead
+DESCRIPTION:60 min\, no AI. Debounce\, keyboard nav\, caching\, a11y.
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261021-1315@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261021T131500
+DTEND;TZID=America/Los_Angeles:20261021T143000
+SUMMARY:Apply: 10 roles
+DESCRIPTION:10 min sourcing first: new Job Scout pings + LinkedIn Past 24 
+ hours. Then the 40-job list.
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261021-1430@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261021T143000
+DTEND;TZID=America/Los_Angeles:20261021T153000
+SUMMARY:Lunch
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261021-1530@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261021T153000
+DTEND;TZID=America/Los_Angeles:20261021T164500
+SUMMARY:Outreach: 15 + follow-ups
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261021-1645@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261021T164500
+DTEND;TZID=America/Los_Angeles:20261021T180000
+SUMMARY:JS fundamentals
+DESCRIPTION:debounce\, throttle\, Promise.all\, event emitter\, deep clone
+ \, curry from scratch.
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261021-1800@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261021T180000
+DTEND;TZID=America/Los_Angeles:20261021T190000
+SUMMARY:Frontend system design: e-commerce PDP + checkout
+DESCRIPTION:State\, data fetching\, performance\, A/B testing.
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261021-1900@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261021T190000
+DTEND;TZID=America/Los_Angeles:20261021T193000
+SUMMARY:Tracker + plan tomorrow
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261022-1000@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261022T100000
+DTEND;TZID=America/Los_Angeles:20261022T120000
+SUMMARY:Coding: trees\, BFS/DFS\, heaps
+DESCRIPTION:4 problems\, timed\, no AI.
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261022-1200@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261022T120000
+DTEND;TZID=America/Los_Angeles:20261022T131500
+SUMMARY:Frontend build: data table or infinite scroll
+DESCRIPTION:Sort\, filter\, pagination.
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261022-1315@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261022T131500
+DTEND;TZID=America/Los_Angeles:20261022T143000
+SUMMARY:Apply: 10 roles
+DESCRIPTION:10 min sourcing first: new Job Scout pings + LinkedIn Past 24 
+ hours. Then the 40-job list.
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261022-1430@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261022T143000
+DTEND;TZID=America/Los_Angeles:20261022T153000
+SUMMARY:Lunch
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261022-1530@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261022T153000
+DTEND;TZID=America/Los_Angeles:20261022T164500
+SUMMARY:Outreach: 15 + recruiter replies
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261022-1645@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261022T164500
+DTEND;TZID=America/Los_Angeles:20261022T180000
+SUMMARY:System design: autocomplete\, then news feed
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261022-1800@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261022T180000
+DTEND;TZID=America/Los_Angeles:20261022T190000
+SUMMARY:Record: intro\, gap answer\, 3 stories
+DESCRIPTION:90-second tell-me-about-yourself. Re-record until natural.
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261022-1900@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261022T190000
+DTEND;TZID=America/Los_Angeles:20261022T193000
+SUMMARY:Tracker update
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261023-1000@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261023T100000
+DTEND;TZID=America/Los_Angeles:20261023T113000
+SUMMARY:Mock coding interview
+DESCRIPTION:2 problems in 45 min\, out loud (Pramp\, interviewing.io\, or 
+ a friend).
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261023-1130@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261023T113000
+DTEND;TZID=America/Los_Angeles:20261023T123000
+SUMMARY:Redo every missed problem
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261023-1230@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261023T123000
+DTEND;TZID=America/Los_Angeles:20261023T140000
+SUMMARY:Apply: 10 roles + referral follow-ups
+DESCRIPTION:Bump Tuesday's referral asks.
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261023-1400@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261023T140000
+DTEND;TZID=America/Los_Angeles:20261023T150000
+SUMMARY:Lunch
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261023-1500@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261023T150000
+DTEND;TZID=America/Los_Angeles:20261023T163000
+SUMMARY:Mock behavioral + frontend mock
+END:VEVENT
+BEGIN:VEVENT
+UID:recruit-20261023-1630@amy-decoded
+DTSTAMP:20261019T120000Z
+DTSTART;TZID=America/Los_Angeles:20261023T163000
+DTEND;TZID=America/Los_Angeles:20261023T173000
+SUMMARY:Weekly review
+DESCRIPTION:Response rate by resume version and channel. Build next week's
+  list. Under 2 replies: shift time from applying to outreach.
+END:VEVENT
+END:VCALENDAR

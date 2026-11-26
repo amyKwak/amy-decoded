@@ -42,6 +42,14 @@ const PROJECTS = [
     alt: "Moody wordmark beside a soft four-color mood grid",
   },
   {
+    name: "Second Thought",
+    description:
+      "A guided CBT thought record. Write down a thought that stings, and Claude asks Socratic questions and spots possible thinking traps while you find a more balanced view.",
+    url: "/projects/second-thought",
+    image: "/projects/second-thought-card.svg",
+    alt: "Second Thought wordmark beside two overlapping speech bubbles, one with a check mark",
+  },
+  {
     name: "Thyme",
     description:
       "A recipe keeper for fuss-free cooking. Import recipes from a link, pasted text, or a photo, then cook them one step at a time.",

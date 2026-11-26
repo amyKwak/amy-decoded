@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 380" role="img" aria-label="Second Thought">
+  <rect width="640" height="380" fill="#efeaf9"/>
+  <g transform="translate(76 140) scale(0.55)">
+    <path d="M18 0h120a18 18 0 0 1 18 18v66a18 18 0 0 1-18 18H62l-30 26v-26H18A18 18 0 0 1 0 84V18A18 18 0 0 1 18 0z" fill="#ffd9c2"/>
+    <text x="78" y="62" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-style="italic" font-size="22" fill="#24213a" opacity="0.55">I always…</text>
+    <path d="M86 58h126a18 18 0 0 1 18 18v66a18 18 0 0 1-18 18h-6v26l-30-26H86a18 18 0 0 1-18-18V76a18 18 0 0 1 18-18z" fill="#5a49c4"/>
+    <path d="M128 110l14 14 30-30" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="222" y="198" font-family="Fraunces, Georgia, serif" font-weight="600" font-size="42" fill="#24213a">Second Thought</text>
+  <text x="224" y="230" font-family="'Nunito Sans', Arial, sans-serif" font-weight="600" font-size="18" fill="#5e5a73">a guided thought record</text>
+</svg>

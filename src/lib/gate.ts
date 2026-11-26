@@ -15,6 +15,7 @@ export const GATED_PROJECTS = [
   { name: "Clueless", page: "/projects/clueless", api: "/api/clueless" },
   { name: "Noggin", page: "/projects/noggin", api: "/api/noggin" },
   { name: "Moody", page: "/projects/moody", api: "/api/moody" },
+  { name: "Second Thought", page: "/projects/second-thought", api: "/api/second-thought" },
 ];
 
 const under = (pathname: string, base: string) =>
